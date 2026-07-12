@@ -44,3 +44,12 @@ Demo login:
 - Use the logout icon on the home screen to clear the session.
 
 No SMS is sent and no backend, access token, medical data, map, payment, or push provider is connected. The next stage should define the REST/authentication contract and secure token storage before integrating a real OTP provider.
+
+
+## Stage 3
+
+The Patient App now has API-ready PatientApi, ApiResult, PatientRepository and PatientViewModel boundaries. LocalPatientRepository provides the offline implementation and persists encoded appointments in private SharedPreferences.
+
+A confirmed booking now creates a unique booking ID, stores doctor/clinic/date/session data, generates a token, updates the active appointment, and survives process restarts. Home and confirmation screens read the active persisted booking rather than relying only on fixed token data.
+
+The next stage should introduce an HTTPS backend implementation of the existing contracts, environment-specific base URLs, and secure server-issued token storage. No real patient medical data should be stored until that security layer is complete.
