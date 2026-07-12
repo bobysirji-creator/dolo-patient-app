@@ -3,59 +3,104 @@ package com.dolo.patient.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dolo.patient.ui.theme.DoloSurfaceAlt
+import com.dolo.patient.ui.theme.*
+
+private val gradient = Brush.horizontalGradient(listOf(DoloTeal, Color(0xFF03B3A8)))
 
 @Composable
-fun ScreenTitle(title: String, onBack: (() -> Unit)? = null) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-        if (onBack != null) IconButton(onClick = onBack) { Icon(Icons.Outlined.ArrowBack, "Back") }
-        Text(title, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+fun BrandLogo(modifier: Modifier = Modifier) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+        Text("DO-", color = DoloNavy, fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
+        Text("LO", color = DoloTeal, fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
+        Text("+", color = DoloTeal, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, modifier = Modifier.align(Alignment.Top))
     }
 }
 
 @Composable
-fun SearchBar(text: String = "Search doctor or specialty", onClick: () -> Unit) {
-    Surface(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
-        shape = RoundedCornerShape(18.dp), color = Color.White, tonalElevation = 2.dp
-    ) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Outlined.Search, null, tint = MaterialTheme.colorScheme.primary)
-            Spacer(Modifier.width(10.dp))
-            Text(text, color = Color(0xFF72809A))
+fun ScreenTitle(title: String, onBack: (() -> Unit)? = null) {
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        if (onBack != null) {
+            Surface(modifier = Modifier.align(Alignment.CenterStart).shadow(6.dp, RoundedCornerShape(14.dp)), color = Color.White, shape = RoundedCornerShape(14.dp)) {
+                IconButton(onClick = onBack) { Icon(Icons.Outlined.ArrowBack, "Back", tint = DoloNavy) }
+            }
+        }
+        BrandLogo()
+        BadgedBox(badge = { Badge { Text("3") } }, modifier = Modifier.align(Alignment.CenterEnd)) {
+            Icon(Icons.Outlined.Notifications, "Notifications", tint = DoloNavy)
         }
     }
 }
 
 @Composable
-fun MetricCard(label: String, value: String, modifier: Modifier = Modifier) {
-    Surface(modifier, shape = RoundedCornerShape(20.dp), color = DoloSurfaceAlt) {
-        Column(Modifier.padding(16.dp)) {
-            Text(label, color = Color(0xFF63718A), fontSize = 13.sp)
-            Spacer(Modifier.height(8.dp))
-            Text(value, fontSize = 26.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+fun SearchBar(text: String = "Search doctors, clinics, specialties...", onClick: () -> Unit) {
+    Surface(modifier = Modifier.fillMaxWidth().shadow(8.dp, RoundedCornerShape(22.dp)).clickable(onClick = onClick), shape = RoundedCornerShape(22.dp), color = Color.White) {
+        Row(Modifier.padding(horizontal = 18.dp, vertical = 17.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Outlined.Search, null, tint = DoloMuted, modifier = Modifier.size(28.dp))
+            Spacer(Modifier.width(13.dp))
+            Text(text, color = DoloMuted, fontSize = 15.sp)
+        }
+    }
+}
+
+@Composable
+fun MetricCard(label: String, value: String, modifier: Modifier = Modifier, accent: Color = DoloTeal) {
+    Surface(modifier.shadow(8.dp, RoundedCornerShape(22.dp)), shape = RoundedCornerShape(22.dp), color = Color.White) {
+        Column(Modifier.padding(18.dp)) {
+            Text(label.uppercase(), color = accent, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(9.dp))
+            Text("Token Number", color = DoloMuted, fontSize = 13.sp)
+            Text(value, fontSize = 44.sp, fontWeight = FontWeight.ExtraBold, color = accent)
         }
     }
 }
 
 @Composable
 fun PrimaryButton(label: String, onClick: () -> Unit, enabled: Boolean = true) {
-    Button(
-        onClick = onClick, enabled = enabled,
-        modifier = Modifier.fillMaxWidth().height(54.dp),
-        shape = RoundedCornerShape(16.dp)
-    ) { Text(label, fontWeight = FontWeight.SemiBold) }
+    Box(
+        Modifier.fillMaxWidth().height(58.dp).shadow(8.dp, RoundedCornerShape(22.dp))
+            .background(if (enabled) gradient else Brush.horizontalGradient(listOf(Color.LightGray, Color.LightGray)), RoundedCornerShape(22.dp))
+            .clickable(enabled = enabled, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(label, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+            Spacer(Modifier.width(16.dp))
+            Icon(Icons.Outlined.ArrowForward, null, tint = Color.White)
+        }
+    }
 }
 
+@Composable
+fun DoloBottomBar() {
+    Surface(shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp), color = Color.White, shadowElevation = 12.dp) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            BottomItem(Icons.Outlined.Home, "Home", true)
+            BottomItem(Icons.Outlined.CalendarMonth, "Appointments", false)
+            Surface(shape = CircleShape, color = DoloTeal, shadowElevation = 8.dp) { Icon(Icons.Outlined.Add, "Book", tint = Color.White, modifier = Modifier.padding(15.dp).size(28.dp)) }
+            BottomItem(Icons.Outlined.ReceiptLong, "History", false)
+            BottomItem(Icons.Outlined.Person, "Profile", false)
+        }
+    }
+}
+
+@Composable
+private fun BottomItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, selected: Boolean) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Icon(icon, null, tint = if (selected) DoloTeal else DoloMuted)
+        Text(label, fontSize = 10.sp, color = if (selected) DoloTeal else DoloMuted)
+    }
+}
