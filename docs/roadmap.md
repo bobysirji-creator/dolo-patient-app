@@ -7,7 +7,7 @@ Only the dedicated Patient App is in development. Doctor App and Admin App are i
 ## Stages
 
 - [x] Stage 1 — Lean Android project, Compose theme, navigation skeleton, placeholder screens, reusable components, dummy models, documentation
-- [ ] Stage 2 — Local state architecture, validation, OTP contract and authentication repository
+- [x] Stage 2 — Local state architecture, validation, fake OTP contract, persisted session and authentication repository
 - [ ] Stage 3 — REST client, secure token storage, environments, backend contract tests
 - [ ] Stage 4 — Doctor search, filters, profiles, clinics and availability
 - [ ] Stage 5 — Walk-in booking, concurrency-safe token allocation and appointment history
@@ -26,3 +26,15 @@ Only the dedicated Patient App is in development. Doctor App and Admin App are i
 - Token confirmation placeholder: complete
 - Build/device verification: pending on a machine with Android SDK and Gradle dependencies available
 
+
+
+## Stage 2 acceptance status
+
+- Mobile validation and normalized phone input: complete
+- Fake OTP request/verify flow using 123456: complete
+- Persisted offline patient session and logout: complete
+- ViewModel and repository boundaries: complete
+- Loading, error and retry-friendly UI states: complete
+- Phone validation unit tests: complete
+- Real backend and SMS provider: intentionally deferred
+- Remote APK validation: pending current GitHub Actions run
