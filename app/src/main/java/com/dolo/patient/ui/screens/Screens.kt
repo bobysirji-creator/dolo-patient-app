@@ -125,7 +125,7 @@ fun BookingScreen(doctorId: String, onBack: () -> Unit, onConfirm: (String, Sess
             Session.entries.forEach { item -> FilterChip(selected = session == item, onClick = { session = item }, label = { Text(if (item == Session.MORNING) "Morning" else "Evening") }, modifier = Modifier.weight(1f)) }
         }
         Spacer(Modifier.height(20.dp)); Surface(shape = RoundedCornerShape(18.dp), color = Color.White) { Column(Modifier.fillMaxWidth().padding(18.dp)) { Text("Today", fontWeight = FontWeight.Bold); Text(if (session == Session.MORNING) "9:00 AM – 1:00 PM" else "5:00 PM – 9:00 PM"); Text("Estimated next token: A-18", color = MaterialTheme.colorScheme.primary) } }
-        Spacer(Modifier.weight(1f)); PrimaryButton("Confirm booking") { onConfirm(doctor.id, session) }
+        Spacer(Modifier.weight(1f)); PrimaryButton("Confirm booking", onClick = { onConfirm(doctor.id, session) })
     }
 }
 
