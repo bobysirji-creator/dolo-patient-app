@@ -29,7 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dolo.patient.auth.AuthStep
 import com.dolo.patient.auth.AuthViewModel
-import com.dolo.patient.data.Appointment\nimport com.dolo.patient.data.DummyData
+import com.dolo.patient.data.Appointment
+import com.dolo.patient.data.DummyData
 import com.dolo.patient.data.model.Doctor
 import com.dolo.patient.data.model.Session
 import com.dolo.patient.ui.components.*
