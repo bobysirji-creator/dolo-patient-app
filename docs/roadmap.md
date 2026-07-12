@@ -51,3 +51,13 @@ Only the dedicated Patient App is in development. Doctor App and Admin App are i
 - Repository codec and token tests: complete
 - Unit tests and debug APK build: passed
 - Real backend and secure server access tokens: intentionally deferred
+
+
+## Stage 4 — Patient discovery and engagement (complete)
+
+- Doctor search by name, specialty, and clinic is connected to PatientViewModel.
+- Category filtering and empty search states are implemented.
+- Doctor details provide clinic, session, fee, rating, and booking entry point.
+- Favourite doctors persist locally and appear on Home and the dedicated Favourites screen.
+- Appointment History reads persisted bookings.
+- GitHub Actions tests and debug APK assembly passed in run 29201170208.
