@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dolo.patient.auth.AuthStep
 import com.dolo.patient.auth.AuthViewModel
-import com.dolo.patient.data.DummyData
+import com.dolo.patient.data.Appointment\nimport com.dolo.patient.data.DummyData
 import com.dolo.patient.data.model.Doctor
 import com.dolo.patient.data.model.Session
 import com.dolo.patient.ui.components.*
@@ -55,12 +55,12 @@ private val wash = Brush.linearGradient(listOf(Color(0xFFE9FAFA), Color.White))
  }
 }
 
-@Composable fun HomeScreen(onCategories:()->Unit,onDoctor:(String)->Unit,onLogout:()->Unit){
+@Composable fun HomeScreen(onCategories:()->Unit,onDoctor:(String)->Unit,onLogout:()->Unit,active:Appointment?=null){
  Scaffold(containerColor=DoloBackground,bottomBar={DoloBottomBar()}){pad->LazyColumn(Modifier.padding(pad).padding(horizontal=20.dp),verticalArrangement=Arrangement.spacedBy(18.dp)){
   item{Row(verticalAlignment=Alignment.CenterVertically){IconButton(onCategories){Icon(Icons.Outlined.Menu,"Menu")};Spacer(Modifier.weight(1f));BrandLogo();Spacer(Modifier.weight(1f));IconButton(onLogout){Icon(Icons.Outlined.Logout,"Log out")}}}
   item{Row(verticalAlignment=Alignment.Bottom){Column(Modifier.weight(1f)){Text("Welcome,",style=MaterialTheme.typography.titleLarge);Text("Rahul Sharma 👋",fontSize=28.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal)};CircleIcon(Icons.Outlined.Chair,82.dp)}}
   item{SearchBar(onClick=onCategories)}
-  item{Row(horizontalArrangement=Arrangement.spacedBy(12.dp)){MetricCard("Your token","18",Modifier.weight(1f));MetricCard("In process","12",Modifier.weight(1f),Color(0xFF1769D2))}}
+  item{Row(horizontalArrangement=Arrangement.spacedBy(12.dp)){MetricCard("Your token",(active?.token?:0).toString(),Modifier.weight(1f));MetricCard("In process","12",Modifier.weight(1f),Color(0xFF1769D2))}}
   item{WaitCard()}
   item{Row{Text("Your Favorite Doctors",style=MaterialTheme.typography.titleLarge);Spacer(Modifier.weight(1f));Text("View all",color=DoloTeal)}}
   items(DummyData.doctors){DoctorCard(it){onDoctor(it.id)}}
@@ -95,10 +95,10 @@ private val wash = Brush.linearGradient(listOf(Color(0xFFE9FAFA), Color.White))
  }
 }
 
-@Composable fun ConfirmationScreen(doctorId:String,session:String,onDone:()->Unit){
+@Composable fun ConfirmationScreen(doctorId:String,session:String,appointment:Appointment?=null,onDone:()->Unit){
  val doctor=DummyData.doctors.firstOrNull{it.id==doctorId}?:DummyData.doctors.first()
  LazyColumn(bg.background(wash).padding(horizontal=20.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(16.dp)){item{Spacer(Modifier.height(22.dp));BrandLogo();Spacer(Modifier.height(18.dp));Surface(shape=CircleShape,color=DoloMint,modifier=Modifier.size(86.dp)){Box(contentAlignment=Alignment.Center){Icon(Icons.Outlined.Check,null,tint=Color.White,modifier=Modifier.size(48.dp))}};Text("Booking Confirmed!",style=MaterialTheme.typography.headlineMedium);Text("Your walk-in appointment is successfully booked.",color=DoloMuted,textAlign=TextAlign.Center)}
- item{Surface(Modifier.fillMaxWidth().shadow(10.dp,RoundedCornerShape(26.dp)),shape=RoundedCornerShape(26.dp),color=Color.White){Column(horizontalAlignment=Alignment.CenterHorizontally){Box(Modifier.fillMaxWidth().background(DoloTeal).padding(13.dp),contentAlignment=Alignment.Center){Text("YOUR TOKEN NUMBER",color=Color.White,fontWeight=FontWeight.Bold)};Text("18",fontSize=90.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal);Text("Keep this number safe",color=DoloTeal);HorizontalDivider(Modifier.padding(14.dp));Detail(Icons.Outlined.CalendarMonth,"Date","19 May 2025, Monday");Detail(Icons.Outlined.Schedule,"Session",session.lowercase().replaceFirstChar(Char::uppercase)+" Session");Detail(Icons.Outlined.MedicalServices,"Doctor",doctor.name);Detail(Icons.Outlined.LocationOn,"Clinic",doctor.clinic)}}}
+ item{Surface(Modifier.fillMaxWidth().shadow(10.dp,RoundedCornerShape(26.dp)),shape=RoundedCornerShape(26.dp),color=Color.White){Column(horizontalAlignment=Alignment.CenterHorizontally){Box(Modifier.fillMaxWidth().background(DoloTeal).padding(13.dp),contentAlignment=Alignment.Center){Text("YOUR TOKEN NUMBER",color=Color.White,fontWeight=FontWeight.Bold)};Text((appointment?.token?:18).toString(),fontSize=90.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal);Text("Keep this number safe",color=DoloTeal);HorizontalDivider(Modifier.padding(14.dp));Detail(Icons.Outlined.CalendarMonth,"Date",appointment?.date?:"Today");Detail(Icons.Outlined.Schedule,"Session",session.lowercase().replaceFirstChar(Char::uppercase)+" Session");Detail(Icons.Outlined.MedicalServices,"Doctor",appointment?.doctorName?:doctor.name);Detail(Icons.Outlined.LocationOn,"Clinic",appointment?.clinic?:doctor.clinic)}}}
  item{WaitCard()}
  item{Surface(shape=RoundedCornerShape(20.dp),color=Color(0xFFFFF7E8)){Text("Important Instructions\n\n• Reach 10-15 minutes before your turn.\n• Your token may be skipped if absent.\n• One reschedule is allowed.",Modifier.fillMaxWidth().padding(18.dp),color=DoloNavy)}}
  item{PrimaryButton("Back to Home",onDone);Spacer(Modifier.height(24.dp))}
