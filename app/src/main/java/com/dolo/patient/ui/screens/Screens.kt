@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,6 +20,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dolo.patient.auth.AuthStep
+import com.dolo.patient.auth.AuthViewModel
 import com.dolo.patient.data.DummyData
 import com.dolo.patient.data.model.Doctor
 import com.dolo.patient.data.model.Session
@@ -42,27 +46,44 @@ fun SplashScreen(onContinue: () -> Unit) {
 }
 
 @Composable
-fun LoginScreen(onLogin: () -> Unit) {
-    var phone by remember { mutableStateOf("") }
+fun LoginScreen(auth: AuthViewModel, onLogin: () -> Unit) {
+    val state = auth.uiState
+    LaunchedEffect(state.step) { if (state.step == AuthStep.AUTHENTICATED) onLogin() }
     Column(page, verticalArrangement = Arrangement.Center) {
-        Text("Welcome to DO-LO", fontSize = 30.sp, fontWeight = FontWeight.Bold)
-        Text("Book from home and arrive near your turn.", color = Color(0xFF63718A))
+        Text(if (state.step == AuthStep.OTP) "Verify your number" else "Welcome to DO-LO", fontSize = 30.sp, fontWeight = FontWeight.Bold)
+        Text(if (state.step == AuthStep.OTP) "Enter the OTP sent to +91 ${state.phone}" else "Book from home and arrive near your turn.", color = Color(0xFF63718A))
         Spacer(Modifier.height(32.dp))
-        OutlinedTextField(
-            value = phone, onValueChange = { phone = it.filter(Char::isDigit).take(10) },
-            label = { Text("Mobile number") }, prefix = { Text("+91  ") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            singleLine = true, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)
-        )
-        Spacer(Modifier.height(16.dp)); PrimaryButton("Continue with OTP", onLogin, phone.length == 10)
-        Spacer(Modifier.height(12.dp)); Text("Stage 1 demo: OTP verification will be connected later.", fontSize = 12.sp, color = Color.Gray)
+        if (state.step == AuthStep.PHONE) {
+            OutlinedTextField(value = state.phone, onValueChange = auth::updatePhone, label = { Text("Mobile number") }, prefix = { Text("+91  ") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone), singleLine = true, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), isError = state.error != null)
+            Spacer(Modifier.height(16.dp))
+            PrimaryButton("Continue with OTP", auth::requestOtp, state.phone.length == 10 && !state.isLoading)
+        } else {
+            OutlinedTextField(value = state.otp, onValueChange = auth::updateOtp, label = { Text("6-digit OTP") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword), singleLine = true, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), isError = state.error != null)
+            Spacer(Modifier.height(10.dp))
+            Text("Demo OTP: 123456", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(16.dp))
+            PrimaryButton("Verify and continue", auth::verifyOtp, state.otp.length == 6 && !state.isLoading)
+            TextButton(onClick = auth::editPhone, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text("Change mobile number") }
+        }
+        state.error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 12.dp)) }
+        if (state.isLoading) LinearProgressIndicator(Modifier.fillMaxWidth().padding(top = 16.dp))
+        Spacer(Modifier.height(12.dp))
+        Text("Offline Stage 2 demo. Real SMS will be connected later.", fontSize = 12.sp, color = Color.Gray)
     }
 }
 
 @Composable
-fun HomeScreen(onCategories: () -> Unit, onDoctor: (String) -> Unit) {
+fun HomeScreen(onCategories: () -> Unit, onDoctor: (String) -> Unit, onLogout: () -> Unit) {
     LazyColumn(page, verticalArrangement = Arrangement.spacedBy(18.dp)) {
-        item { Text("Welcome, Patient", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold); Text("How can we help you today?", color = Color(0xFF63718A)) }
+        item {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("Welcome, Patient", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
+                    Text("How can we help you today?", color = Color(0xFF63718A))
+                }
+                IconButton(onClick = onLogout) { Icon(Icons.Outlined.Logout, contentDescription = "Log out") }
+            }
+        }
         item { SearchBar(onClick = onCategories) }
         item { Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) { MetricCard("Your token", "A-18", Modifier.weight(1f)); MetricCard("Now serving", "A-12", Modifier.weight(1f)) } }
         item { Surface(shape = RoundedCornerShape(20.dp), color = DoloMint.copy(alpha = .14f)) { Column(Modifier.fillMaxWidth().padding(18.dp)) { Text("Approximate time to your turn"); Text("~ 35 minutes", fontSize = 24.sp, fontWeight = FontWeight.Bold) } } }
