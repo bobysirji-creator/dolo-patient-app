@@ -53,3 +53,12 @@ The Patient App now has API-ready PatientApi, ApiResult, PatientRepository and P
 A confirmed booking now creates a unique booking ID, stores doctor/clinic/date/session data, generates a token, updates the active appointment, and survives process restarts. Home and confirmation screens read the active persisted booking rather than relying only on fixed token data.
 
 The next stage should introduce an HTTPS backend implementation of the existing contracts, environment-specific base URLs, and secure server-issued token storage. No real patient medical data should be stored until that security layer is complete.
+
+
+## Stage 4 handoff
+
+Stage 4 is complete. The Patient App now has search/category filtering, a doctor detail screen, persistent favourites, appointment history, and a view-details-before-booking flow. Data remains local through PatientRepository so a REST-backed implementation can replace it without redesigning screens.
+
+Validated build: https://github.com/bobysirji-creator/dolo-patient-app/actions/runs/29201170208
+
+Recommended next stage: live queue state and appointment lifecycle simulation, including patients ahead, estimated waiting time, refresh behavior, and reschedule eligibility.
