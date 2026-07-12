@@ -30,3 +30,17 @@ The repository does not include a generated Gradle wrapper JAR because it is a b
 
 Stage 2: introduce feature ViewModels/repositories, proper phone validation, OTP request/verify interfaces, session persistence, and unit tests—using a fake provider until the backend/API contract is agreed.
 
+
+
+## Stage 2
+
+The Patient App now uses an AuthViewModel and provider-neutral AuthRepository. A FakeAuthRepository simulates OTP verification locally and stores only the demo phone session in private SharedPreferences.
+
+Demo login:
+
+- Enter any valid 10-digit mobile number.
+- Use OTP 123456.
+- The session survives app restarts.
+- Use the logout icon on the home screen to clear the session.
+
+No SMS is sent and no backend, access token, medical data, map, payment, or push provider is connected. The next stage should define the REST/authentication contract and secure token storage before integrating a real OTP provider.
