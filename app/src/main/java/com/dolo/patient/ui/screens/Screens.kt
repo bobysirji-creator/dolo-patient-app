@@ -1,20 +1,27 @@
 package com.dolo.patient.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Logout
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -26,139 +33,82 @@ import com.dolo.patient.data.DummyData
 import com.dolo.patient.data.model.Doctor
 import com.dolo.patient.data.model.Session
 import com.dolo.patient.ui.components.*
-import com.dolo.patient.ui.theme.DoloBackground
-import com.dolo.patient.ui.theme.DoloMint
+import com.dolo.patient.ui.theme.*
 
-private val page = Modifier.fillMaxSize().background(DoloBackground).padding(20.dp)
+private val bg = Modifier.fillMaxSize().background(DoloBackground)
+private val wash = Brush.linearGradient(listOf(Color(0xFFE9FAFA), Color.White))
 
-@Composable
-fun SplashScreen(onContinue: () -> Unit) {
-    Box(page, contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(Modifier.size(96.dp).background(MaterialTheme.colorScheme.primary, CircleShape), contentAlignment = Alignment.Center) {
-                Text("D+", color = Color.White, fontSize = 38.sp, fontWeight = FontWeight.Bold)
-            }
-            Spacer(Modifier.height(20.dp)); Text("DO-LO", fontSize = 36.sp, fontWeight = FontWeight.ExtraBold)
-            Text("Your turn. Your time.", color = Color(0xFF63718A))
-            Spacer(Modifier.height(44.dp)); PrimaryButton("Get started", onContinue)
-        }
-    }
+@Composable fun SplashScreen(onContinue:()->Unit){Box(bg.background(wash).padding(28.dp)){Column(Modifier.align(Alignment.Center),horizontalAlignment=Alignment.CenterHorizontally){BrandLogo();Spacer(Modifier.height(30.dp));CircleIcon(Icons.Outlined.MedicalServices,150.dp);Spacer(Modifier.height(24.dp));Text("Book. Track. Visit.",style=MaterialTheme.typography.headlineMedium);Text("Worry less.",color=DoloTeal,fontSize=22.sp,fontWeight=FontWeight.Bold);Spacer(Modifier.height(42.dp));PrimaryButton("Get started",onContinue)}}}
+
+@Composable fun LoginScreen(auth:AuthViewModel,onLogin:()->Unit){
+ val state=auth.uiState;LaunchedEffect(state.step){if(state.step==AuthStep.AUTHENTICATED)onLogin()}
+ LazyColumn(bg.background(wash).padding(horizontal=24.dp),verticalArrangement=Arrangement.spacedBy(18.dp)){
+  item{Spacer(Modifier.height(32.dp));BrandLogo()}
+  item{Row(verticalAlignment=Alignment.CenterVertically){Column(Modifier.weight(1f)){Text(if(state.step==AuthStep.OTP)"Verify OTP" else "Welcome Back!",style=MaterialTheme.typography.headlineMedium);Text(if(state.step==AuthStep.OTP)"Code sent to +91 "+state.phone else "Login to continue your health journey",color=DoloMuted)};CircleIcon(Icons.Outlined.HealthAndSafety,112.dp)}}
+  item{Surface(Modifier.shadow(12.dp,RoundedCornerShape(28.dp)),shape=RoundedCornerShape(28.dp),color=Color.White){Column(Modifier.padding(24.dp)){
+   Text(if(state.step==AuthStep.OTP)"Enter verification code" else "Login with Mobile Number",style=MaterialTheme.typography.titleLarge);Spacer(Modifier.height(20.dp))
+   if(state.step==AuthStep.PHONE){OutlinedTextField(state.phone,auth::updatePhone,Modifier.fillMaxWidth(),label={Text("Enter mobile number")},leadingIcon={Icon(Icons.Outlined.Phone,null)},prefix={Text("+91  ")},singleLine=true,isError=state.error!=null,shape=RoundedCornerShape(18.dp),keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Phone));Spacer(Modifier.height(18.dp));PrimaryButton("Send OTP",auth::requestOtp,state.phone.length==10&&!state.isLoading)}
+   else{OutlinedTextField(state.otp,auth::updateOtp,Modifier.fillMaxWidth(),label={Text("6-digit OTP")},leadingIcon={Icon(Icons.Outlined.Lock,null)},singleLine=true,isError=state.error!=null,shape=RoundedCornerShape(18.dp),keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.NumberPassword));Text("Demo OTP: 123456",color=DoloTeal,fontWeight=FontWeight.Bold,modifier=Modifier.padding(vertical=12.dp));PrimaryButton("Verify & Continue",auth::verifyOtp,state.otp.length==6&&!state.isLoading);TextButton(auth::editPhone,Modifier.align(Alignment.CenterHorizontally)){Text("Change mobile number")}}
+   state.error?.let{Text(it,color=MaterialTheme.colorScheme.error,modifier=Modifier.padding(top=10.dp))};if(state.isLoading)LinearProgressIndicator(Modifier.fillMaxWidth().padding(top=12.dp));Spacer(Modifier.height(20.dp));Row(Modifier.align(Alignment.CenterHorizontally)){Icon(Icons.Outlined.VerifiedUser,null,tint=DoloTeal);Spacer(Modifier.width(8.dp));Text("Secure  •  Fast  •  Hassle-free",color=DoloMuted)}
+  }}}
+  item{Text("New to DO-LO?  Create an account",Modifier.fillMaxWidth().padding(18.dp),textAlign=TextAlign.Center,color=DoloTeal,fontWeight=FontWeight.Bold)}
+ }
 }
 
-@Composable
-fun LoginScreen(auth: AuthViewModel, onLogin: () -> Unit) {
-    val state = auth.uiState
-    LaunchedEffect(state.step) { if (state.step == AuthStep.AUTHENTICATED) onLogin() }
-    Column(page, verticalArrangement = Arrangement.Center) {
-        Text(if (state.step == AuthStep.OTP) "Verify your number" else "Welcome to DO-LO", fontSize = 30.sp, fontWeight = FontWeight.Bold)
-        Text(if (state.step == AuthStep.OTP) "Enter the OTP sent to +91 ${state.phone}" else "Book from home and arrive near your turn.", color = Color(0xFF63718A))
-        Spacer(Modifier.height(32.dp))
-        if (state.step == AuthStep.PHONE) {
-            OutlinedTextField(value = state.phone, onValueChange = auth::updatePhone, label = { Text("Mobile number") }, prefix = { Text("+91  ") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone), singleLine = true, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), isError = state.error != null)
-            Spacer(Modifier.height(16.dp))
-            PrimaryButton("Continue with OTP", auth::requestOtp, state.phone.length == 10 && !state.isLoading)
-        } else {
-            OutlinedTextField(value = state.otp, onValueChange = auth::updateOtp, label = { Text("6-digit OTP") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword), singleLine = true, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp), isError = state.error != null)
-            Spacer(Modifier.height(10.dp))
-            Text("Demo OTP: 123456", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
-            Spacer(Modifier.height(16.dp))
-            PrimaryButton("Verify and continue", auth::verifyOtp, state.otp.length == 6 && !state.isLoading)
-            TextButton(onClick = auth::editPhone, modifier = Modifier.align(Alignment.CenterHorizontally)) { Text("Change mobile number") }
-        }
-        state.error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 12.dp)) }
-        if (state.isLoading) LinearProgressIndicator(Modifier.fillMaxWidth().padding(top = 16.dp))
-        Spacer(Modifier.height(12.dp))
-        Text("Offline Stage 2 demo. Real SMS will be connected later.", fontSize = 12.sp, color = Color.Gray)
-    }
+@Composable fun HomeScreen(onCategories:()->Unit,onDoctor:(String)->Unit,onLogout:()->Unit){
+ Scaffold(containerColor=DoloBackground,bottomBar={DoloBottomBar()}){pad->LazyColumn(Modifier.padding(pad).padding(horizontal=20.dp),verticalArrangement=Arrangement.spacedBy(18.dp)){
+  item{Row(verticalAlignment=Alignment.CenterVertically){IconButton(onCategories){Icon(Icons.Outlined.Menu,"Menu")};Spacer(Modifier.weight(1f));BrandLogo();Spacer(Modifier.weight(1f));IconButton(onLogout){Icon(Icons.Outlined.Logout,"Log out")}}}
+  item{Row(verticalAlignment=Alignment.Bottom){Column(Modifier.weight(1f)){Text("Welcome,",style=MaterialTheme.typography.titleLarge);Text("Rahul Sharma 👋",fontSize=28.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal)};CircleIcon(Icons.Outlined.Chair,82.dp)}}
+  item{SearchBar(onClick=onCategories)}
+  item{Row(horizontalArrangement=Arrangement.spacedBy(12.dp)){MetricCard("Your token","18",Modifier.weight(1f));MetricCard("In process","12",Modifier.weight(1f),Color(0xFF1769D2))}}
+  item{WaitCard()}
+  item{Row{Text("Your Favorite Doctors",style=MaterialTheme.typography.titleLarge);Spacer(Modifier.weight(1f));Text("View all",color=DoloTeal)}}
+  items(DummyData.doctors){DoctorCard(it){onDoctor(it.id)}}
+ }}
 }
 
-@Composable
-fun HomeScreen(onCategories: () -> Unit, onDoctor: (String) -> Unit, onLogout: () -> Unit) {
-    LazyColumn(page, verticalArrangement = Arrangement.spacedBy(18.dp)) {
-        item {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text("Welcome, Patient", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold)
-                    Text("How can we help you today?", color = Color(0xFF63718A))
-                }
-                IconButton(onClick = onLogout) { Icon(Icons.Outlined.Logout, contentDescription = "Log out") }
-            }
-        }
-        item { SearchBar(onClick = onCategories) }
-        item { Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) { MetricCard("Your token", "A-18", Modifier.weight(1f)); MetricCard("Now serving", "A-12", Modifier.weight(1f)) } }
-        item { Surface(shape = RoundedCornerShape(20.dp), color = DoloMint.copy(alpha = .14f)) { Column(Modifier.fillMaxWidth().padding(18.dp)) { Text("Approximate time to your turn"); Text("~ 35 minutes", fontSize = 24.sp, fontWeight = FontWeight.Bold) } } }
-        item { Text("Favourite doctors", fontSize = 20.sp, fontWeight = FontWeight.Bold) }
-        items(DummyData.doctors.take(2)) { DoctorCard(it) { onDoctor(it.id) } }
-        item { TextButton(onClick = onCategories, modifier = Modifier.fillMaxWidth()) { Text("Browse all categories") } }
-    }
+@Composable fun CategoriesScreen(onBack:()->Unit,onSelect:(String)->Unit){
+ Scaffold(containerColor=DoloBackground,bottomBar={DoloBottomBar()}){pad->Column(Modifier.padding(pad).padding(horizontal=20.dp)){Spacer(Modifier.height(12.dp));ScreenTitle("Categories",onBack);Spacer(Modifier.height(22.dp));Text("Doctor Categories",style=MaterialTheme.typography.headlineMedium);Text("Find the right specialist for your health",color=DoloMuted);Spacer(Modifier.height(18.dp));SearchBar("Search category..."){};Spacer(Modifier.height(16.dp));LazyVerticalGrid(GridCells.Fixed(2),horizontalArrangement=Arrangement.spacedBy(12.dp),verticalArrangement=Arrangement.spacedBy(12.dp),contentPadding=PaddingValues(bottom=20.dp)){items(DummyData.categories){c->Surface(Modifier.height(160.dp).shadow(6.dp,RoundedCornerShape(24.dp)).clickable{onSelect(c.name)},shape=RoundedCornerShape(24.dp),color=Color.White){Column(Modifier.padding(14.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.SpaceBetween){Surface(shape=CircleShape,color=DoloSurfaceAlt,modifier=Modifier.size(70.dp)){Box(contentAlignment=Alignment.Center){Text(c.symbol,fontSize=32.sp,color=DoloTeal)}};Text(c.name,textAlign=TextAlign.Center,fontWeight=FontWeight.Bold);Text((40+c.name.length*3).toString()+" Doctors",color=DoloTeal,fontSize=12.sp)}}}}}}
 }
 
-@Composable
-fun CategoriesScreen(onBack: () -> Unit, onSelect: (String) -> Unit) {
-    LazyColumn(page, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item { ScreenTitle("Doctor categories", onBack); Text("Choose the care you need", color = Color(0xFF63718A)) }
-        items(DummyData.categories.chunked(2)) { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                row.forEach { category ->
-                    Surface(Modifier.weight(1f).height(140.dp).clickable { onSelect(category.name) }, shape = RoundedCornerShape(22.dp), color = Color.White) {
-                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.SpaceBetween) { Text(category.symbol, fontSize = 34.sp, color = MaterialTheme.colorScheme.primary); Text(category.name, fontWeight = FontWeight.SemiBold) }
-                    }
-                }
-                if (row.size == 1) Spacer(Modifier.weight(1f))
-            }
-        }
-    }
+@Composable fun DoctorListScreen(category:String,onBack:()->Unit,onBook:(String)->Unit){
+ val doctors=DummyData.doctors.filter{it.specialty==category}.ifEmpty{DummyData.doctors}
+ Scaffold(containerColor=DoloBackground,bottomBar={DoloBottomBar()}){pad->LazyColumn(Modifier.padding(pad).padding(horizontal=20.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){
+  item{Spacer(Modifier.height(12.dp));ScreenTitle(category,onBack);Spacer(Modifier.height(20.dp));Text(category,style=MaterialTheme.typography.headlineMedium);Text("Trusted specialists near you",color=DoloMuted)}
+  item{SearchBar("Search "+category.lowercase()+", clinics..."){}}
+  item{Row(horizontalArrangement=Arrangement.spacedBy(7.dp)){AssistChip({},label={Text("Sort")});AssistChip({},label={Text("Available")});AssistChip({},label={Text("Fees")})}}
+  items(doctors){DoctorCard(it){onBook(it.id)}};item{Spacer(Modifier.height(10.dp))}
+ }}
 }
 
-@Composable
-fun DoctorListScreen(category: String, onBack: () -> Unit, onBook: (String) -> Unit) {
-    val doctors = DummyData.doctors.filter { it.specialty == category }.ifEmpty { DummyData.doctors }
-    LazyColumn(page, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        item { ScreenTitle(category.ifBlank { "Doctors" }, onBack); SearchBar("Search in this category") {} }
-        items(doctors) { DoctorCard(it) { onBook(it.id) } }
-    }
+@Composable fun DoctorCard(doctor:Doctor,onBook:()->Unit){Surface(Modifier.fillMaxWidth().shadow(7.dp,RoundedCornerShape(24.dp)),shape=RoundedCornerShape(24.dp),color=Color.White){Column(Modifier.padding(17.dp)){Row(verticalAlignment=Alignment.CenterVertically){CircleIcon(Icons.Outlined.MedicalServices,74.dp);Spacer(Modifier.width(13.dp));Column(Modifier.weight(1f)){Text(doctor.name,style=MaterialTheme.typography.titleLarge);Text(doctor.specialty,color=DoloMuted);Text("★ "+doctor.rating+"  •  "+doctor.experienceYears+"+ Years",fontSize=12.sp);Text("⌖ "+doctor.clinic,color=DoloMuted,fontSize=12.sp)};Column(horizontalAlignment=Alignment.End){Text("Available",color=DoloTeal,fontSize=11.sp,fontWeight=FontWeight.Bold);Text("₹"+doctor.consultationFee,fontWeight=FontWeight.Bold,fontSize=18.sp)}};Spacer(Modifier.height(13.dp));PrimaryButton("Book Now",onBook)}}}
+
+@Composable fun BookingScreen(doctorId:String,onBack:()->Unit,onConfirm:(String,Session)->Unit){
+ val doctor=DummyData.doctors.firstOrNull{it.id==doctorId}?:DummyData.doctors.first();var session by remember{mutableStateOf(Session.MORNING)}
+ LazyColumn(bg.padding(horizontal=20.dp),verticalArrangement=Arrangement.spacedBy(17.dp)){item{Spacer(Modifier.height(12.dp));ScreenTitle("Book Appointment",onBack);Text("Book Appointment",style=MaterialTheme.typography.headlineMedium,modifier=Modifier.padding(top=18.dp))};item{DoctorCard(doctor){}}
+ item{Step("1","Select Clinic");SelectCard("Heart Care Clinic","Sector 45 • 2.3 km away")}
+ item{Step("2","Select Date");Row(horizontalArrangement=Arrangement.spacedBy(8.dp)){listOf("Mon\n19","Tue\n20","Wed\n21","Thu\n22").forEachIndexed{i,d->Surface(shape=RoundedCornerShape(15.dp),color=if(i==0)DoloTeal else Color.White,shadowElevation=3.dp){Text(d,Modifier.padding(14.dp),textAlign=TextAlign.Center,color=if(i==0)Color.White else DoloNavy,fontWeight=FontWeight.Bold)}}}}
+ item{Step("3","Select Session (Walk-in)");Text("Patients are seen in token order.",color=DoloMuted);Spacer(Modifier.height(10.dp));SessionCard("Morning Session","09:00 AM – 01:00 PM","30 Tokens Available",Icons.Outlined.LightMode,session==Session.MORNING){session=Session.MORNING};Spacer(Modifier.height(10.dp));SessionCard("Evening Session","05:00 PM – 09:00 PM","22 Tokens Available",Icons.Outlined.DarkMode,session==Session.EVENING){session=Session.EVENING}}
+ item{Step("4","Patient Details");SelectCard("Rahul Sharma","+91 98765 43210")}
+ item{Surface(shape=RoundedCornerShape(22.dp),color=DoloSurfaceAlt){Column(Modifier.fillMaxWidth().padding(18.dp)){Fee("Consultation Fee","₹"+doctor.consultationFee);Fee("DO-LO Service Charge","₹20");HorizontalDivider(Modifier.padding(vertical=9.dp));Fee("Total Payable","₹"+(doctor.consultationFee+20),true)}}}
+ item{PrimaryButton("Confirm Booking",onClick={onConfirm(doctor.id,session)});Spacer(Modifier.height(20.dp))}
+ }
 }
 
-@Composable
-fun DoctorCard(doctor: Doctor, onBook: () -> Unit) {
-    Surface(shape = RoundedCornerShape(22.dp), color = Color.White, tonalElevation = 1.dp) {
-        Column(Modifier.padding(18.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(Modifier.size(54.dp).background(MaterialTheme.colorScheme.primary.copy(alpha = .12f), CircleShape), contentAlignment = Alignment.Center) { Text("Dr", fontWeight = FontWeight.Bold) }
-                Spacer(Modifier.width(12.dp)); Column(Modifier.weight(1f)) { Text(doctor.name, fontWeight = FontWeight.Bold, fontSize = 17.sp); Text(doctor.specialty, color = MaterialTheme.colorScheme.primary); Text(doctor.clinic, fontSize = 13.sp, color = Color.Gray) }
-            }
-            Spacer(Modifier.height(14.dp)); Text("★ ${doctor.rating}  •  ${doctor.experienceYears} years  •  ₹${doctor.consultationFee}")
-            Spacer(Modifier.height(12.dp)); PrimaryButton("Book walk-in", onBook)
-        }
-    }
+@Composable fun ConfirmationScreen(doctorId:String,session:String,onDone:()->Unit){
+ val doctor=DummyData.doctors.firstOrNull{it.id==doctorId}?:DummyData.doctors.first()
+ LazyColumn(bg.background(wash).padding(horizontal=20.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(16.dp)){item{Spacer(Modifier.height(22.dp));BrandLogo();Spacer(Modifier.height(18.dp));Surface(shape=CircleShape,color=DoloMint,modifier=Modifier.size(86.dp)){Box(contentAlignment=Alignment.Center){Icon(Icons.Outlined.Check,null,tint=Color.White,modifier=Modifier.size(48.dp))}};Text("Booking Confirmed!",style=MaterialTheme.typography.headlineMedium);Text("Your walk-in appointment is successfully booked.",color=DoloMuted,textAlign=TextAlign.Center)}
+ item{Surface(Modifier.fillMaxWidth().shadow(10.dp,RoundedCornerShape(26.dp)),shape=RoundedCornerShape(26.dp),color=Color.White){Column(horizontalAlignment=Alignment.CenterHorizontally){Box(Modifier.fillMaxWidth().background(DoloTeal).padding(13.dp),contentAlignment=Alignment.Center){Text("YOUR TOKEN NUMBER",color=Color.White,fontWeight=FontWeight.Bold)};Text("18",fontSize=90.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal);Text("Keep this number safe",color=DoloTeal);HorizontalDivider(Modifier.padding(14.dp));Detail(Icons.Outlined.CalendarMonth,"Date","19 May 2025, Monday");Detail(Icons.Outlined.Schedule,"Session",session.lowercase().replaceFirstChar(Char::uppercase)+" Session");Detail(Icons.Outlined.MedicalServices,"Doctor",doctor.name);Detail(Icons.Outlined.LocationOn,"Clinic",doctor.clinic)}}}
+ item{WaitCard()}
+ item{Surface(shape=RoundedCornerShape(20.dp),color=Color(0xFFFFF7E8)){Text("Important Instructions\n\n• Reach 10-15 minutes before your turn.\n• Your token may be skipped if absent.\n• One reschedule is allowed.",Modifier.fillMaxWidth().padding(18.dp),color=DoloNavy)}}
+ item{PrimaryButton("Back to Home",onDone);Spacer(Modifier.height(24.dp))}
+ }
 }
 
-@Composable
-fun BookingScreen(doctorId: String, onBack: () -> Unit, onConfirm: (String, Session) -> Unit) {
-    val doctor = DummyData.doctors.firstOrNull { it.id == doctorId } ?: DummyData.doctors.first()
-    var session by remember { mutableStateOf(Session.MORNING) }
-    Column(page) {
-        ScreenTitle("Book walk-in", onBack); Spacer(Modifier.height(20.dp)); DoctorCard(doctor) {}
-        Spacer(Modifier.height(24.dp)); Text("Choose session", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-        Text("Tokens are called in queue order; this is not a fixed time slot.", color = Color.Gray, fontSize = 13.sp)
-        Spacer(Modifier.height(14.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Session.entries.forEach { item -> FilterChip(selected = session == item, onClick = { session = item }, label = { Text(if (item == Session.MORNING) "Morning" else "Evening") }, modifier = Modifier.weight(1f)) }
-        }
-        Spacer(Modifier.height(20.dp)); Surface(shape = RoundedCornerShape(18.dp), color = Color.White) { Column(Modifier.fillMaxWidth().padding(18.dp)) { Text("Today", fontWeight = FontWeight.Bold); Text(if (session == Session.MORNING) "9:00 AM – 1:00 PM" else "5:00 PM – 9:00 PM"); Text("Estimated next token: A-18", color = MaterialTheme.colorScheme.primary) } }
-        Spacer(Modifier.weight(1f)); PrimaryButton("Confirm booking", onClick = { onConfirm(doctor.id, session) })
-    }
-}
-
-@Composable
-fun ConfirmationScreen(doctorId: String, session: String, onDone: () -> Unit) {
-    val doctor = DummyData.doctors.firstOrNull { it.id == doctorId } ?: DummyData.doctors.first()
-    Column(page, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Box(Modifier.size(82.dp).background(DoloMint, CircleShape), contentAlignment = Alignment.Center) { Text("✓", color = Color.White, fontSize = 42.sp) }
-        Spacer(Modifier.height(20.dp)); Text("Booking confirmed", fontSize = 28.sp, fontWeight = FontWeight.Bold)
-        Text("Your walk-in token is allotted", color = Color.Gray)
-        Spacer(Modifier.height(24.dp)); Surface(shape = RoundedCornerShape(24.dp), color = Color.White) { Column(Modifier.padding(28.dp), horizontalAlignment = Alignment.CenterHorizontally) { Text("TOKEN NUMBER", fontSize = 12.sp, color = Color.Gray); Text("A-18", fontSize = 48.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary); HorizontalDivider(Modifier.padding(vertical = 16.dp)); Text(doctor.name, fontWeight = FontWeight.Bold); Text("${session.lowercase().replaceFirstChar(Char::uppercase)} session"); Text(doctor.clinic, textAlign = TextAlign.Center, color = Color.Gray) } }
-        Spacer(Modifier.height(28.dp)); PrimaryButton("Go to home", onDone)
-    }
-}
-
+@Composable private fun CircleIcon(icon:ImageVector,size:androidx.compose.ui.unit.Dp){Surface(shape=CircleShape,color=DoloSurfaceAlt,modifier=Modifier.size(size)){Box(contentAlignment=Alignment.Center){Icon(icon,null,tint=DoloTeal,modifier=Modifier.size(size/2))}}}
+@Composable private fun WaitCard(){Surface(Modifier.fillMaxWidth().shadow(7.dp,RoundedCornerShape(24.dp)),shape=RoundedCornerShape(24.dp),color=DoloSurfaceAlt){Row(Modifier.padding(18.dp),verticalAlignment=Alignment.CenterVertically){CircleIcon(Icons.Outlined.Schedule,72.dp);Spacer(Modifier.width(15.dp));Column{Text("Approx. Time for Your Turn");Text("35-40 mins",fontSize=27.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal);Text("5 patients ahead of you",color=DoloMuted)}}}}
+@Composable private fun Step(n:String,t:String){Row(verticalAlignment=Alignment.CenterVertically){Surface(shape=CircleShape,color=DoloTeal){Text(n,Modifier.padding(horizontal=11.dp,vertical=7.dp),color=Color.White,fontWeight=FontWeight.Bold)};Spacer(Modifier.width(11.dp));Text(t,style=MaterialTheme.typography.titleLarge)}}
+@Composable private fun SelectCard(t:String,s:String){Surface(Modifier.fillMaxWidth(),shape=RoundedCornerShape(20.dp),color=Color.White,border=BorderStroke(1.dp,DoloTeal)){Row(Modifier.padding(18.dp),verticalAlignment=Alignment.CenterVertically){Icon(Icons.Outlined.LocationOn,null,tint=DoloTeal);Spacer(Modifier.width(12.dp));Column(Modifier.weight(1f)){Text(t,fontWeight=FontWeight.Bold);Text(s,color=DoloMuted)};Icon(Icons.Outlined.CheckCircle,null,tint=DoloTeal)}}}
+@Composable private fun SessionCard(t:String,time:String,tokens:String,icon:ImageVector,selected:Boolean,onClick:()->Unit){Surface(Modifier.fillMaxWidth().clickable(onClick=onClick),shape=RoundedCornerShape(20.dp),color=if(selected)DoloSurfaceAlt else Color.White,border=BorderStroke(1.dp,if(selected)DoloTeal else DoloBorder)){Row(Modifier.padding(17.dp),verticalAlignment=Alignment.CenterVertically){Icon(icon,null,tint=DoloTeal,modifier=Modifier.size(40.dp));Spacer(Modifier.width(14.dp));Column(Modifier.weight(1f)){Text(t,fontWeight=FontWeight.Bold);Text(time,color=DoloMuted);Text(tokens,color=DoloTeal,fontSize=12.sp)};if(selected)Icon(Icons.Outlined.CheckCircle,null,tint=DoloTeal)}}}
+@Composable private fun Fee(l:String,v:String,bold:Boolean=false){Row{Text(l,fontWeight=if(bold)FontWeight.Bold else FontWeight.Normal);Spacer(Modifier.weight(1f));Text(v,color=if(bold)DoloTeal else DoloNavy,fontWeight=if(bold)FontWeight.ExtraBold else FontWeight.Normal,fontSize=if(bold)22.sp else 14.sp)}}
+@Composable private fun Detail(i:ImageVector,l:String,v:String){Row(Modifier.fillMaxWidth().padding(horizontal=18.dp,vertical=11.dp),verticalAlignment=Alignment.CenterVertically){CircleIcon(i,48.dp);Spacer(Modifier.width(12.dp));Column{Text(l,color=DoloMuted,fontSize=12.sp);Text(v,fontWeight=FontWeight.Bold)}}}
