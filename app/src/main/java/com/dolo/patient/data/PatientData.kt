@@ -23,7 +23,7 @@ sealed interface ApiResult<out T>{data class Success<T>(val value:T):ApiResult<T
 interface PatientApi{suspend fun doctors(query:String?):ApiResult<List<Doctor>>;suspend fun appointments():ApiResult<List<Appointment>>;suspend fun book(doctorId:String,date:String,session:Session):ApiResult<Appointment>}
 interface PatientRepository{
  fun doctors(query:String="",specialty:String?=null):List<Doctor>;fun appointments():List<Appointment>;fun activeAppointment():Appointment?
- fun book(doctorId:String,session:Session):Appointment;fun favouriteDoctorIds():Set<String>;fun toggleFavourite(doctorId:String):Set<String>
+ fun book(doctorId:String,date:String,session:Session):Appointment;fun favouriteDoctorIds():Set<String>;fun toggleFavourite(doctorId:String):Set<String>
  fun queue(appointmentId:String):QueueSnapshot?;fun advanceQueue(appointmentId:String):QueueSnapshot?;fun markMissed(appointmentId:String):Appointment?
  fun canReschedule(appointment:Appointment):Boolean;fun reschedule(appointmentId:String):Appointment?
 }
@@ -44,7 +44,7 @@ class LocalPatientRepository(private val preferences:SharedPreferences):PatientR
  override fun doctors(query:String,specialty:String?):List<Doctor>{val q=query.trim();return DummyData.doctors.filter{(specialty.isNullOrBlank()||it.specialty==specialty)&&(q.isBlank()||it.name.contains(q,true)||it.specialty.contains(q,true)||it.clinic.contains(q,true))}}
  override fun appointments()=preferences.getStringSet(KEY_APPOINTMENTS,emptySet()).orEmpty().mapNotNull(AppointmentCodec::decode).sortedByDescending{it.id}
  override fun activeAppointment()=appointments().firstOrNull{it.status in setOf(AppointmentStatus.BOOKED,AppointmentStatus.WAITING,AppointmentStatus.IN_CONSULTATION)}
- override fun book(doctorId:String,session:Session):Appointment{val d=DummyData.doctors.first{it.id==doctorId};val date=LocalDate.now().toString();val a=Appointment(System.currentTimeMillis().toString(),d.id,d.name,d.clinic,date,session,TokenGenerator.forBooking(d.id,date,appointments().size));save(a);return a}
+ override fun book(doctorId:String,date:String,session:Session):Appointment{val doctor=DummyData.doctors.first{it.id==doctorId};val selected=runCatching{LocalDate.parse(date)}.getOrDefault(LocalDate.now()).let{if(it.isBefore(LocalDate.now()))LocalDate.now() else it}.toString();val a=Appointment(System.currentTimeMillis().toString(),doctor.id,doctor.name,doctor.clinic,selected,session,TokenGenerator.forBooking(doctor.id,selected,appointments().size));save(a);return a}
  override fun favouriteDoctorIds()=preferences.getStringSet(KEY_FAVOURITES,emptySet()).orEmpty().toSet()
  override fun toggleFavourite(doctorId:String):Set<String>{val ids=favouriteDoctorIds().toMutableSet();if(!ids.add(doctorId))ids.remove(doctorId);preferences.edit().putStringSet(KEY_FAVOURITES,ids).apply();return ids}
  override fun queue(appointmentId:String):QueueSnapshot?{val a=appointments().firstOrNull{it.id==appointmentId}?:return null;val initial=(a.token-5).coerceAtLeast(1);return QueueCalculator.snapshot(a,preferences.getInt(queueKey(appointmentId),initial))}
@@ -61,7 +61,7 @@ class PatientViewModel(private val repository:PatientRepository):ViewModel(){
  var uiState by mutableStateOf(loadState());private set
  fun search(value:String,specialty:String?=uiState.specialty){uiState=uiState.copy(query=value,specialty=specialty,doctors=repository.doctors(value,specialty))}
  fun toggleFavourite(id:String){uiState=uiState.copy(favouriteIds=repository.toggleFavourite(id))}
- fun book(id:String,session:Session):Appointment{val a=repository.book(id,session);refresh(a.id);return a}
+ fun book(id:String,date:String,session:Session):Appointment{val a=repository.book(id,date,session);refresh(a.id);return a}
  fun refreshQueue(id:String)=refresh(id)
  fun advanceQueue(id:String){repository.advanceQueue(id);refresh(id)}
  fun markMissed(id:String){repository.markMissed(id);refresh(id)}
