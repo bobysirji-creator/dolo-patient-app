@@ -28,6 +28,7 @@ import com.dolo.patient.auth.AuthViewModel
 import com.dolo.patient.data.*
 import com.dolo.patient.data.model.Doctor
 import com.dolo.patient.data.model.Session
+import com.dolo.patient.integrations.*
 import com.dolo.patient.ui.components.*
 import com.dolo.patient.ui.theme.*
 import java.time.LocalDate
@@ -326,7 +327,10 @@ fun ReviewScreen(
 }
 
 @Composable
-fun SupportScreen(onBack: () -> Unit) {
+fun SupportScreen(
+    onBack: () -> Unit,
+    onIntegrations: () -> Unit
+) {
     LazyColumn(
         modifier = page.padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
@@ -347,13 +351,92 @@ fun SupportScreen(onBack: () -> Unit) {
         item {
             InfoCard(
                 "Need more help?",
-                "Complaint and chat integration placeholders are reserved for Stage 8."
+                "Complaint and chat provider hooks are reserved for a later stage."
             )
+        }
+        item {
+            OutlinedButton(
+                onClick = onIntegrations,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Outlined.Settings, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Integration readiness")
+            }
         }
         item {
             OutlinedButton(onClick = {}, modifier = Modifier.fillMaxWidth()) {
                 Text("Create Support Request (Coming Soon)")
             }
+        }
+    }
+}
+
+@Composable
+fun IntegrationStatusScreen(onBack: () -> Unit) {
+    LazyColumn(
+        modifier = page.padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        item { ScreenTitle("Integration Readiness", onBack) }
+        item {
+            InfoCard(
+                "Safe by default",
+                "All external providers are disabled. No API keys, payment details, location data or device tokens are stored."
+            )
+        }
+        items(
+            items = IntegrationRegistry.patientCapabilities,
+            key = { capability -> capability.type.name }
+        ) { capability ->
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(18.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Surface(
+                        color = DoloSurfaceAlt,
+                        shape = CircleShape
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Settings,
+                            contentDescription = null,
+                            tint = DoloTeal,
+                            modifier = Modifier.padding(12.dp)
+                        )
+                    }
+                    Spacer(Modifier.width(14.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(capability.title, fontWeight = FontWeight.Bold)
+                        Text(
+                            capability.description,
+                            color = DoloMuted,
+                            fontSize = 13.sp
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "Status: " + capability.mode.name.lowercase()
+                                .replaceFirstChar(Char::uppercase),
+                            color = MaterialTheme.colorScheme.error,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+        }
+        item {
+            Text(
+                "Live providers will be enabled one at a time through environment-specific configuration. Credentials must never be committed to this repository.",
+                color = DoloMuted,
+                fontSize = 12.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            )
         }
     }
 }
