@@ -11,7 +11,7 @@ import com.dolo.patient.auth.*
 import com.dolo.patient.data.*
 import com.dolo.patient.ui.screens.*
 
-object Routes{const val Splash="splash";const val Login="login";const val Home="home";const val Categories="categories";const val Doctors="doctors/{category}";const val DoctorDetails="doctor/{doctorId}";const val Booking="booking/{doctorId}";const val Confirmation="confirmation/{doctorId}/{session}";const val History="history";const val Favourites="favourites";const val Queue="queue/{appointmentId}";const val Profile="profile";const val Notifications="notifications";const val Support="support";const val Review="review/{doctorId}/{appointmentId}"}
+object Routes{const val Splash="splash";const val Login="login";const val Home="home";const val Categories="categories";const val Doctors="doctors/{category}";const val DoctorDetails="doctor/{doctorId}";const val Booking="booking/{doctorId}";const val Confirmation="confirmation/{doctorId}/{session}";const val History="history";const val Favourites="favourites";const val Queue="queue/{appointmentId}";const val Profile="profile";const val Notifications="notifications";const val Support="support";const val Integrations="integrations";const val Review="review/{doctorId}/{appointmentId}"}
 @Composable fun DoloPatientApp(authRepository:AuthRepository,patientRepository:PatientRepository){
  val nav=rememberNavController();val auth:AuthViewModel=viewModel(factory=AuthViewModelFactory(authRepository));val patient:PatientViewModel=viewModel(factory=PatientViewModelFactory(patientRepository))
  NavHost(nav,startDestination=Routes.Splash){
@@ -26,7 +26,8 @@ object Routes{const val Splash="splash";const val Login="login";const val Home="
   composable(Routes.Queue,arguments=listOf(navArgument("appointmentId"){type=NavType.StringType})){e->val id=e.arguments?.getString("appointmentId").orEmpty();LiveQueueScreen(patient.uiState,id,nav::popBackStack,{patient.refreshQueue(id)},{patient.refreshQueue(id,false)},{patient.advanceQueue(id)},{patient.markMissed(id)},{patient.completeAppointment(id)},{patient.reschedule(id)},patient::canReschedule)}
   composable(Routes.Profile){ProfileScreen(patient.uiState,nav::popBackStack,{name,phone,city->patient.updateProfile(name,phone,city)},{name,relation,age->patient.addFamilyMember(name,relation,age)})}
   composable(Routes.Notifications){NotificationsScreen(patient.uiState,nav::popBackStack,patient::markNotificationsRead)}
-  composable(Routes.Support){SupportScreen(nav::popBackStack)}
+  composable(Routes.Support){SupportScreen(nav::popBackStack){nav.navigate(Routes.Integrations)}}
+  composable(Routes.Integrations){IntegrationStatusScreen(nav::popBackStack)}
   composable(Routes.Review,arguments=listOf(navArgument("doctorId"){type=NavType.StringType},navArgument("appointmentId"){type=NavType.StringType})){e->val doctorId=e.arguments?.getString("doctorId").orEmpty();val appointmentId=e.arguments?.getString("appointmentId").orEmpty();ReviewScreen(patient.uiState,doctorId,appointmentId,nav::popBackStack){rating,comment->patient.addReview(appointmentId,rating,comment)}}
   composable(Routes.Booking,arguments=listOf(navArgument("doctorId"){type=NavType.StringType})){e->BookingScreen(e.arguments?.getString("doctorId").orEmpty(),patient.uiState,nav::popBackStack){id,date,s,patientName->patient.book(id,date,s,patientName);nav.navigate("confirmation/"+id+"/"+s.name)}}
   composable(Routes.Confirmation){e->ConfirmationScreen(e.arguments?.getString("doctorId").orEmpty(),e.arguments?.getString("session").orEmpty(),patient.uiState.active,{patient.uiState.active?.id?.let{nav.navigate("queue/"+it)}}){nav.navigate(Routes.Home){popUpTo(Routes.Home){inclusive=true}}}}
