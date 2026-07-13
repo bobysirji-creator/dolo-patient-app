@@ -36,7 +36,22 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
 @Composable fun SplashScreen(onContinue:()->Unit){Box(page.padding(28.dp),contentAlignment=Alignment.Center){Column(horizontalAlignment=Alignment.CenterHorizontally){BrandLogo();Spacer(Modifier.height(28.dp));Icon(Icons.Outlined.HealthAndSafety,null,tint=DoloTeal,modifier=Modifier.size(130.dp));Text("Book. Track. Visit.",style=MaterialTheme.typography.headlineMedium);Text("Worry less.",color=DoloTeal,fontSize=22.sp,fontWeight=FontWeight.Bold);Spacer(Modifier.height(34.dp));PrimaryButton("Get started",onContinue)}}}
 @Composable fun LoginScreen(auth:AuthViewModel,onLogin:()->Unit){val s=auth.uiState;LaunchedEffect(s.step){if(s.step==AuthStep.AUTHENTICATED)onLogin()};Column(page.padding(24.dp),verticalArrangement=Arrangement.Center){BrandLogo();Spacer(Modifier.height(30.dp));Text(if(s.step==AuthStep.OTP)"Verify OTP" else "Welcome Back!",style=MaterialTheme.typography.headlineMedium);Text(if(s.step==AuthStep.OTP)"Code sent to +91 "+s.phone else "Login using your mobile number",color=DoloMuted);Spacer(Modifier.height(20.dp));if(s.step==AuthStep.PHONE){OutlinedTextField(s.phone,auth::updatePhone,Modifier.fillMaxWidth(),label={Text("Mobile number")},prefix={Text("+91 ")},keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Phone),singleLine=true);Spacer(Modifier.height(16.dp));PrimaryButton("Send OTP",auth::requestOtp,s.phone.length==10)}else{OutlinedTextField(s.otp,auth::updateOtp,Modifier.fillMaxWidth(),label={Text("6-digit OTP")},keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.NumberPassword),singleLine=true);Text("Demo OTP: 123456",color=DoloTeal,modifier=Modifier.padding(vertical=12.dp));PrimaryButton("Verify & Continue",auth::verifyOtp,s.otp.length==6);TextButton(auth::editPhone){Text("Change mobile number")}};s.error?.let{Text(it,color=MaterialTheme.colorScheme.error)}}}
 
-@Composable fun HomeScreen(onCategories:()->Unit,onDoctor:(String)->Unit,onHistory:()->Unit,onFavourites:()->Unit,onLogout:()->Unit,state:PatientUiState,onSearch:(String)->Unit){var q by remember{mutableStateOf("")};Scaffold(containerColor=DoloBackground,bottomBar={DoloBottomBar()}){p->LazyColumn(Modifier.padding(p).padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){item{Row(verticalAlignment=Alignment.CenterVertically){BrandLogo();Spacer(Modifier.weight(1f));IconButton(onHistory){Icon(Icons.Outlined.History,"History")};IconButton(onLogout){Icon(Icons.Outlined.Logout,"Logout")}}};item{Text("Welcome, Rahul Sharma 👋",fontSize=26.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal)};item{OutlinedTextField(q,{q=it},Modifier.fillMaxWidth(),placeholder={Text("Search doctor, specialty or clinic")},leadingIcon={Icon(Icons.Outlined.Search,null)},trailingIcon={IconButton({onSearch(q)}){Icon(Icons.Outlined.ArrowForward,null)}},singleLine=true,shape=RoundedCornerShape(18.dp))};item{Row(horizontalArrangement=Arrangement.spacedBy(12.dp)){MetricCard("Your token",(state.active?.token?:0).toString(),Modifier.weight(1f));MetricCard("In process","12",Modifier.weight(1f),Color(0xFF1769D2))}};item{PrimaryButton("Browse doctor categories",onCategories)};item{Row(verticalAlignment=Alignment.CenterVertically){Text("Favourite Doctors",style=MaterialTheme.typography.titleLarge);Spacer(Modifier.weight(1f));TextButton(onFavourites){Text("View all")}}};val favs=DummyData.doctors.filter{it.id in state.favouriteIds};if(favs.isEmpty())item{EmptyCard("Tap the heart on a doctor to save them.")}else items(favs){DoctorCard(it,true,{onDoctor(it.id)},{})}}}}
+@Composable fun HomeScreen(onCategories:()->Unit,onDoctor:(String)->Unit,onHistory:()->Unit,onFavourites:()->Unit,onQueue:()->Unit,onLogout:()->Unit,state:PatientUiState,onSearch:(String)->Unit){
+ var q by remember{mutableStateOf("")}
+ Scaffold(containerColor=DoloBackground,bottomBar={DoloBottomBar()}){p->
+  LazyColumn(Modifier.padding(p).padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){
+   item{Row(verticalAlignment=Alignment.CenterVertically){BrandLogo();Spacer(Modifier.weight(1f));IconButton(onHistory){Icon(Icons.Outlined.History,"History")};IconButton(onLogout){Icon(Icons.Outlined.Logout,"Logout")}}}
+   item{Text("Welcome, Rahul Sharma 👋",fontSize=26.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal)}
+   item{OutlinedTextField(q,{q=it},Modifier.fillMaxWidth(),placeholder={Text("Search doctor, specialty or clinic")},leadingIcon={Icon(Icons.Outlined.Search,null)},trailingIcon={IconButton({onSearch(q)}){Icon(Icons.Outlined.ArrowForward,null)}},singleLine=true,shape=RoundedCornerShape(18.dp))}
+   item{Row(horizontalArrangement=Arrangement.spacedBy(12.dp)){MetricCard("Your token",(state.active?.token?:0).toString(),Modifier.weight(1f));MetricCard("In process",(state.queue?.currentToken?:0).toString(),Modifier.weight(1f),Color(0xFF1769D2))}}
+   state.active?.let{item{QueueHomeCard(state.queue,onQueue)}}
+   item{PrimaryButton("Browse doctor categories",onCategories)}
+   item{Row(verticalAlignment=Alignment.CenterVertically){Text("Favourite Doctors",style=MaterialTheme.typography.titleLarge);Spacer(Modifier.weight(1f));TextButton(onFavourites){Text("View all")}}}
+   val favs=DummyData.doctors.filter{it.id in state.favouriteIds}
+   if(favs.isEmpty())item{EmptyCard("Tap the heart on a doctor to save them.")}else items(favs){DoctorCard(it,true,{onDoctor(it.id)},{})}
+  }
+ }
+}
 
 @Composable fun CategoriesScreen(onBack:()->Unit,onSelect:(String)->Unit){Column(page.padding(20.dp)){ScreenTitle("Categories",onBack);Spacer(Modifier.height(18.dp));Text("Find the right specialist",style=MaterialTheme.typography.headlineMedium);Spacer(Modifier.height(16.dp));LazyVerticalGrid(GridCells.Fixed(2),horizontalArrangement=Arrangement.spacedBy(12.dp),verticalArrangement=Arrangement.spacedBy(12.dp)){items(DummyData.categories){c->Card(Modifier.height(145.dp).clickable{onSelect(c.name)},shape=RoundedCornerShape(22.dp)){Column(Modifier.fillMaxSize().padding(16.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.SpaceEvenly){Text(c.symbol,fontSize=40.sp,color=DoloTeal);Text(c.name,textAlign=TextAlign.Center,fontWeight=FontWeight.Bold)}}}}}}
 
@@ -46,10 +61,61 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
 
 @Composable fun DoctorDetailsScreen(id:String,favourite:Boolean,onBack:()->Unit,onFavourite:()->Unit,onBook:()->Unit){val d=DummyData.doctors.firstOrNull{it.id==id}?:DummyData.doctors.first();LazyColumn(page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){item{ScreenTitle("Doctor Details",onBack)};item{DoctorCard(d,favourite,{},onFavourite)};item{InfoCard("About","Experienced "+d.specialty.lowercase()+" focused on clear guidance and patient-friendly care.")};item{InfoCard("Clinic",d.clinic+"\nWalk-in sessions: Morning and Evening")};item{InfoCard("Patient reviews","★ "+d.rating+" / 5\nVerified patient feedback will appear here.")};item{PrimaryButton("Book Walk-in Appointment",onBook)}}}
 @Composable fun FavouritesScreen(state:PatientUiState,onBack:()->Unit,onDoctor:(String)->Unit,onFavourite:(String)->Unit){val ds=DummyData.doctors.filter{it.id in state.favouriteIds};LazyColumn(page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){item{ScreenTitle("Favourite Doctors",onBack)};if(ds.isEmpty())item{EmptyCard("You have not saved any doctors yet.")}else items(ds){DoctorCard(it,true,{onDoctor(it.id)},{onFavourite(it.id)})}}}
-@Composable fun AppointmentHistoryScreen(list:List<Appointment>,onBack:()->Unit){LazyColumn(page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){item{ScreenTitle("Appointment History",onBack)};if(list.isEmpty())item{EmptyCard("Your booked appointments will appear here.")}else items(list){a->Card(Modifier.fillMaxWidth(),shape=RoundedCornerShape(20.dp)){Column(Modifier.padding(16.dp)){Row{Text(a.doctorName,fontWeight=FontWeight.Bold,modifier=Modifier.weight(1f));AssistChip({},label={Text(a.status)})};Text(a.clinic,color=DoloMuted);Text(a.date+" • "+a.session.name.lowercase().replaceFirstChar(Char::uppercase)+" session");Text("Token "+a.token,color=DoloTeal,fontSize=22.sp,fontWeight=FontWeight.Bold)}}}}}
+@Composable fun AppointmentHistoryScreen(list:List<Appointment>,onBack:()->Unit,onQueue:(String)->Unit,onReschedule:(String)->Unit,canReschedule:(Appointment)->Boolean){
+ LazyColumn(page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){
+  item{ScreenTitle("Appointment History",onBack)}
+  if(list.isEmpty())item{EmptyCard("Your booked appointments will appear here.")}
+  else items(list){a->
+   Card(Modifier.fillMaxWidth(),shape=RoundedCornerShape(20.dp)){Column(Modifier.padding(16.dp)){
+    Row{Text(a.doctorName,fontWeight=FontWeight.Bold,modifier=Modifier.weight(1f));AssistChip({},label={Text(a.status.replace("_"," "))})}
+    Text(a.clinic,color=DoloMuted);Text(a.date+" • "+a.session.name.lowercase().replaceFirstChar(Char::uppercase)+" session")
+    Text("Token "+a.token,color=DoloTeal,fontSize=22.sp,fontWeight=FontWeight.Bold)
+    if(a.status in listOf(AppointmentStatus.BOOKED,AppointmentStatus.WAITING,AppointmentStatus.IN_CONSULTATION)){TextButton({onQueue(a.id)}){Text("Track live queue")}}
+    if(canReschedule(a)){Button({onReschedule(a.id)}){Text("Reschedule once")}}
+   }}
+  }
+ }
+}
 
 @Composable fun BookingScreen(doctorId:String,onBack:()->Unit,onConfirm:(String,Session)->Unit){val d=DummyData.doctors.firstOrNull{it.id==doctorId}?:DummyData.doctors.first();var session by remember{mutableStateOf(Session.MORNING)};LazyColumn(page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){item{ScreenTitle("Book Appointment",onBack)};item{InfoCard(d.name,d.specialty+"\n"+d.clinic)};item{Text("Choose walk-in session",style=MaterialTheme.typography.titleLarge)};item{SessionChoice("Morning","09:00 AM – 01:00 PM",session==Session.MORNING){session=Session.MORNING}};item{SessionChoice("Evening","05:00 PM – 09:00 PM",session==Session.EVENING){session=Session.EVENING}};item{InfoCard("Payment summary","Consultation ₹"+d.consultationFee+"\nService charge ₹20\nTotal ₹"+(d.consultationFee+20))};item{PrimaryButton("Confirm Booking",onClick={onConfirm(d.id,session)})}}}
-@Composable fun ConfirmationScreen(doctorId:String,session:String,appointment:Appointment?=null,onDone:()->Unit){val d=DummyData.doctors.firstOrNull{it.id==doctorId}?:DummyData.doctors.first();Column(page.padding(24.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.Center){Icon(Icons.Outlined.CheckCircle,null,tint=DoloTeal,modifier=Modifier.size(80.dp));Text("Booking Confirmed!",style=MaterialTheme.typography.headlineMedium);Text("YOUR TOKEN NUMBER",modifier=Modifier.padding(top=24.dp));Text((appointment?.token?:0).toString(),fontSize=88.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal);InfoCard(appointment?.doctorName?:d.name,(appointment?.clinic?:d.clinic)+"\n"+(appointment?.date?:"Today")+" • "+session.lowercase().replaceFirstChar(Char::uppercase)+" session");Spacer(Modifier.height(20.dp));PrimaryButton("Back to Home",onDone)}}
+@Composable fun ConfirmationScreen(doctorId:String,session:String,appointment:Appointment?=null,onQueue:()->Unit,onDone:()->Unit){
+ val d=DummyData.doctors.firstOrNull{it.id==doctorId}?:DummyData.doctors.first()
+ Column(page.padding(24.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.Center){
+  Icon(Icons.Outlined.CheckCircle,null,tint=DoloTeal,modifier=Modifier.size(80.dp));Text("Booking Confirmed!",style=MaterialTheme.typography.headlineMedium)
+  Text("YOUR TOKEN NUMBER",modifier=Modifier.padding(top=24.dp));Text((appointment?.token?:0).toString(),fontSize=88.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal)
+  InfoCard(appointment?.doctorName?:d.name,(appointment?.clinic?:d.clinic)+"\n"+(appointment?.date?:"Today")+" • "+session.lowercase().replaceFirstChar(Char::uppercase)+" session")
+  Spacer(Modifier.height(20.dp));PrimaryButton("Track Live Queue",onQueue);Spacer(Modifier.height(10.dp));OutlinedButton(onDone,Modifier.fillMaxWidth()){Text("Back to Home")}
+ }
+}
+
+@Composable fun LiveQueueScreen(state:PatientUiState,appointmentId:String,onBack:()->Unit,onRefresh:()->Unit,onAdvance:()->Unit,onMissed:()->Unit,onReschedule:()->Unit,canReschedule:(Appointment)->Boolean){
+ val appointment=state.appointments.firstOrNull{it.id==appointmentId}?:state.active
+ val queue=state.queue?.takeIf{it.appointmentId==appointmentId}
+ LaunchedEffect(appointmentId){onRefresh()}
+ LazyColumn(page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){
+  item{ScreenTitle("Live Queue",onBack)}
+  if(appointment==null)item{EmptyCard("Appointment not found.")}
+  else{
+   item{InfoCard(appointment.doctorName,appointment.clinic+"\nToken "+appointment.token+" • "+appointment.session.name.lowercase().replaceFirstChar(Char::uppercase)+" session")}
+   item{Card(Modifier.fillMaxWidth(),colors=CardDefaults.cardColors(containerColor=DoloSurfaceAlt),shape=RoundedCornerShape(24.dp)){Column(Modifier.padding(20.dp),horizontalAlignment=Alignment.CenterHorizontally){
+    Text("CURRENTLY IN CONSULTATION",color=DoloMuted,fontWeight=FontWeight.Bold);Text((queue?.currentToken?:0).toString(),fontSize=58.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal)
+    HorizontalDivider(Modifier.padding(vertical=12.dp));Row(Modifier.fillMaxWidth()){QueueMetric("Your token",appointment.token.toString(),Modifier.weight(1f));QueueMetric("Patients ahead",(queue?.patientsAhead?:0).toString(),Modifier.weight(1f));QueueMetric("Est. wait",(queue?.estimatedMinutes?:0).toString()+" min",Modifier.weight(1f))}
+   }}}
+   item{InfoCard("Queue status",(queue?.status?:appointment.status).replace("_"," ")+"\nAverage consultation: "+QueueCalculator.AVERAGE_CONSULTATION_MINUTES+" minutes")}
+   if(appointment.status!=AppointmentStatus.MISSED){
+    item{PrimaryButton("Refresh Queue",onRefresh)}
+    item{OutlinedButton(onAdvance,Modifier.fillMaxWidth()){Text("Demo: advance one token")}}
+    item{TextButton(onMissed,Modifier.fillMaxWidth()){Text("Demo: mark appointment missed",color=MaterialTheme.colorScheme.error)}}
+   }else{
+    item{InfoCard("Appointment missed","You can reschedule once within 10 days.")}
+    if(canReschedule(appointment))item{PrimaryButton("Reschedule for Tomorrow",onReschedule)}
+    else item{EmptyCard("This appointment is no longer eligible for rescheduling.")}
+   }
+  }
+ }
+}
+@Composable private fun QueueHomeCard(queue:QueueSnapshot?,onClick:()->Unit){Card(Modifier.fillMaxWidth().clickable(onClick=onClick),colors=CardDefaults.cardColors(containerColor=DoloSurfaceAlt),shape=RoundedCornerShape(22.dp)){Row(Modifier.padding(18.dp),verticalAlignment=Alignment.CenterVertically){Icon(Icons.Outlined.Schedule,null,tint=DoloTeal,modifier=Modifier.size(42.dp));Spacer(Modifier.width(14.dp));Column(Modifier.weight(1f)){Text("Live queue",fontWeight=FontWeight.Bold);Text((queue?.patientsAhead?:0).toString()+" patients ahead • "+(queue?.estimatedMinutes?:0)+" min",color=DoloMuted)};Icon(Icons.Outlined.ArrowForward,null,tint=DoloTeal)}}}
+@Composable private fun QueueMetric(label:String,value:String,modifier:Modifier=Modifier){Column(modifier,horizontalAlignment=Alignment.CenterHorizontally){Text(value,fontSize=20.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal);Text(label,fontSize=11.sp,color=DoloMuted,textAlign=TextAlign.Center)}}
 
 @Composable private fun SessionChoice(title:String,time:String,selected:Boolean,onClick:()->Unit){Card(Modifier.fillMaxWidth().clickable(onClick=onClick),colors=CardDefaults.cardColors(containerColor=if(selected)DoloSurfaceAlt else Color.White),shape=RoundedCornerShape(18.dp)){Row(Modifier.padding(18.dp),verticalAlignment=Alignment.CenterVertically){Icon(if(title=="Morning")Icons.Outlined.LightMode else Icons.Outlined.DarkMode,null,tint=DoloTeal);Spacer(Modifier.width(14.dp));Column(Modifier.weight(1f)){Text(title+" Session",fontWeight=FontWeight.Bold);Text(time,color=DoloMuted)};if(selected)Icon(Icons.Outlined.CheckCircle,null,tint=DoloTeal)}}}
 @Composable private fun InfoCard(title:String,text:String){Card(Modifier.fillMaxWidth(),shape=RoundedCornerShape(20.dp)){Column(Modifier.padding(18.dp)){Text(title,fontWeight=FontWeight.Bold,fontSize=18.sp);Spacer(Modifier.height(6.dp));Text(text,color=DoloMuted)}}}
