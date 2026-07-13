@@ -30,6 +30,8 @@ import com.dolo.patient.data.model.Doctor
 import com.dolo.patient.data.model.Session
 import com.dolo.patient.ui.components.*
 import com.dolo.patient.ui.theme.*
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 private val page=Modifier.fillMaxSize().background(DoloBackground)
 
@@ -77,13 +79,30 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
  }
 }
 
-@Composable fun BookingScreen(doctorId:String,onBack:()->Unit,onConfirm:(String,Session)->Unit){val d=DummyData.doctors.firstOrNull{it.id==doctorId}?:DummyData.doctors.first();var session by remember{mutableStateOf(Session.MORNING)};LazyColumn(page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){item{ScreenTitle("Book Appointment",onBack)};item{InfoCard(d.name,d.specialty+"\n"+d.clinic)};item{Text("Choose walk-in session",style=MaterialTheme.typography.titleLarge)};item{SessionChoice("Morning","09:00 AM – 01:00 PM",session==Session.MORNING){session=Session.MORNING}};item{SessionChoice("Evening","05:00 PM – 09:00 PM",session==Session.EVENING){session=Session.EVENING}};item{InfoCard("Payment summary","Consultation ₹"+d.consultationFee+"\nService charge ₹20\nTotal ₹"+(d.consultationFee+20))};item{PrimaryButton("Confirm Booking",onClick={onConfirm(d.id,session)})}}}
+@Composable fun BookingScreen(doctorId:String,onBack:()->Unit,onConfirm:(String,String,Session)->Unit){
+ val d=DummyData.doctors.firstOrNull{it.id==doctorId}?:DummyData.doctors.first()
+ val dates=remember{(0L..2L).map{LocalDate.now().plusDays(it)}}
+ var selectedDate by remember{mutableStateOf(dates.first())}
+ var session by remember{mutableStateOf(Session.MORNING)}
+ LazyColumn(page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){
+  item{ScreenTitle("Book Appointment",onBack)}
+  item{InfoCard(d.name,d.specialty+"\n"+d.clinic)}
+  item{Text("Choose appointment date",style=MaterialTheme.typography.titleLarge)}
+  item{Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){dates.forEach{date->DateChoice(date,date==selectedDate,{selectedDate=date},Modifier.weight(1f))}}}
+  item{InfoCard("Selected date",selectedDate.format(DateTimeFormatter.ofPattern("EEEE, dd MMM yyyy")))}
+  item{Text("Choose walk-in session",style=MaterialTheme.typography.titleLarge)}
+  item{SessionChoice("Morning","09:00 AM – 01:00 PM",session==Session.MORNING){session=Session.MORNING}}
+  item{SessionChoice("Evening","05:00 PM – 09:00 PM",session==Session.EVENING){session=Session.EVENING}}
+  item{InfoCard("Payment summary","Consultation ₹"+d.consultationFee+"\nService charge ₹20\nTotal ₹"+(d.consultationFee+20))}
+  item{PrimaryButton("Confirm Booking",onClick={onConfirm(d.id,selectedDate.toString(),session)})}
+ }
+}
 @Composable fun ConfirmationScreen(doctorId:String,session:String,appointment:Appointment?=null,onQueue:()->Unit,onDone:()->Unit){
  val d=DummyData.doctors.firstOrNull{it.id==doctorId}?:DummyData.doctors.first()
  Column(page.padding(24.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.Center){
   Icon(Icons.Outlined.CheckCircle,null,tint=DoloTeal,modifier=Modifier.size(80.dp));Text("Booking Confirmed!",style=MaterialTheme.typography.headlineMedium)
   Text("YOUR TOKEN NUMBER",modifier=Modifier.padding(top=24.dp));Text((appointment?.token?:0).toString(),fontSize=88.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal)
-  InfoCard(appointment?.doctorName?:d.name,(appointment?.clinic?:d.clinic)+"\n"+(appointment?.date?:"Today")+" • "+session.lowercase().replaceFirstChar(Char::uppercase)+" session")
+  InfoCard(appointment?.doctorName?:d.name,(appointment?.clinic?:d.clinic)+"\n"+displayDate(appointment?.date?:"Today")+" • "+session.lowercase().replaceFirstChar(Char::uppercase)+" session")
   Spacer(Modifier.height(20.dp));PrimaryButton("Track Live Queue",onQueue);Spacer(Modifier.height(10.dp));OutlinedButton(onDone,Modifier.fillMaxWidth()){Text("Back to Home")}
  }
 }
@@ -96,7 +115,7 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
   item{ScreenTitle("Live Queue",onBack)}
   if(appointment==null)item{EmptyCard("Appointment not found.")}
   else{
-   item{InfoCard(appointment.doctorName,appointment.clinic+"\nToken "+appointment.token+" • "+appointment.session.name.lowercase().replaceFirstChar(Char::uppercase)+" session")}
+   item{InfoCard(appointment.doctorName,appointment.clinic+"\nAppointment date: "+displayDate(appointment.date)+"\nToken "+appointment.token+" • "+appointment.session.name.lowercase().replaceFirstChar(Char::uppercase)+" session")}
    item{Card(Modifier.fillMaxWidth(),colors=CardDefaults.cardColors(containerColor=DoloSurfaceAlt),shape=RoundedCornerShape(24.dp)){Column(Modifier.padding(20.dp),horizontalAlignment=Alignment.CenterHorizontally){
     Text("CURRENTLY IN CONSULTATION",color=DoloMuted,fontWeight=FontWeight.Bold);Text((queue?.currentToken?:0).toString(),fontSize=58.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal)
     HorizontalDivider(Modifier.padding(vertical=12.dp));Row(Modifier.fillMaxWidth()){QueueMetric("Your token",appointment.token.toString(),Modifier.weight(1f));QueueMetric("Patients ahead",(queue?.patientsAhead?:0).toString(),Modifier.weight(1f));QueueMetric("Est. wait",(queue?.estimatedMinutes?:0).toString()+" min",Modifier.weight(1f))}
@@ -107,8 +126,8 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
     item{OutlinedButton(onAdvance,Modifier.fillMaxWidth()){Text("Demo: advance one token")}}
     item{TextButton(onMissed,Modifier.fillMaxWidth()){Text("Demo: mark appointment missed",color=MaterialTheme.colorScheme.error)}}
    }else{
-    item{InfoCard("Appointment missed","You can reschedule once within 10 days.")}
-    if(canReschedule(appointment))item{PrimaryButton("Reschedule for Tomorrow",onReschedule)}
+    item{InfoCard("Appointment missed","You can reschedule once within 10 days.\nNew appointment date: "+LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("EEEE, dd MMM yyyy")))}
+    if(canReschedule(appointment))item{PrimaryButton("Reschedule for "+LocalDate.now().plusDays(1).format(DateTimeFormatter.ofPattern("dd MMM")),onReschedule)}
     else item{EmptyCard("This appointment is no longer eligible for rescheduling.")}
    }
   }
@@ -116,6 +135,9 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
 }
 @Composable private fun QueueHomeCard(queue:QueueSnapshot?,onClick:()->Unit){Card(Modifier.fillMaxWidth().clickable(onClick=onClick),colors=CardDefaults.cardColors(containerColor=DoloSurfaceAlt),shape=RoundedCornerShape(22.dp)){Row(Modifier.padding(18.dp),verticalAlignment=Alignment.CenterVertically){Icon(Icons.Outlined.Schedule,null,tint=DoloTeal,modifier=Modifier.size(42.dp));Spacer(Modifier.width(14.dp));Column(Modifier.weight(1f)){Text("Live queue",fontWeight=FontWeight.Bold);Text((queue?.patientsAhead?:0).toString()+" patients ahead • "+(queue?.estimatedMinutes?:0)+" min",color=DoloMuted)};Icon(Icons.Outlined.ArrowForward,null,tint=DoloTeal)}}}
 @Composable private fun QueueMetric(label:String,value:String,modifier:Modifier=Modifier){Column(modifier,horizontalAlignment=Alignment.CenterHorizontally){Text(value,fontSize=20.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal);Text(label,fontSize=11.sp,color=DoloMuted,textAlign=TextAlign.Center)}}
+
+@Composable private fun DateChoice(date:LocalDate,selected:Boolean,onClick:()->Unit,modifier:Modifier=Modifier){Card(modifier.clickable(onClick=onClick),colors=CardDefaults.cardColors(containerColor=if(selected)DoloTeal else Color.White),shape=RoundedCornerShape(16.dp)){Column(Modifier.fillMaxWidth().padding(vertical=12.dp),horizontalAlignment=Alignment.CenterHorizontally){Text(date.format(DateTimeFormatter.ofPattern("EEE")),color=if(selected)Color.White else DoloMuted,fontSize=12.sp);Text(date.dayOfMonth.toString(),color=if(selected)Color.White else DoloNavy,fontSize=20.sp,fontWeight=FontWeight.Bold);Text(date.format(DateTimeFormatter.ofPattern("MMM")),color=if(selected)Color.White else DoloMuted,fontSize=12.sp)}}}
+private fun displayDate(value:String):String=runCatching{LocalDate.parse(value).format(DateTimeFormatter.ofPattern("EEEE, dd MMM yyyy"))}.getOrDefault(value)
 
 @Composable private fun SessionChoice(title:String,time:String,selected:Boolean,onClick:()->Unit){Card(Modifier.fillMaxWidth().clickable(onClick=onClick),colors=CardDefaults.cardColors(containerColor=if(selected)DoloSurfaceAlt else Color.White),shape=RoundedCornerShape(18.dp)){Row(Modifier.padding(18.dp),verticalAlignment=Alignment.CenterVertically){Icon(if(title=="Morning")Icons.Outlined.LightMode else Icons.Outlined.DarkMode,null,tint=DoloTeal);Spacer(Modifier.width(14.dp));Column(Modifier.weight(1f)){Text(title+" Session",fontWeight=FontWeight.Bold);Text(time,color=DoloMuted)};if(selected)Icon(Icons.Outlined.CheckCircle,null,tint=DoloTeal)}}}
 @Composable private fun InfoCard(title:String,text:String){Card(Modifier.fillMaxWidth(),shape=RoundedCornerShape(20.dp)){Column(Modifier.padding(18.dp)){Text(title,fontWeight=FontWeight.Bold,fontSize=18.sp);Spacer(Modifier.height(6.dp));Text(text,color=DoloMuted)}}}
