@@ -14,7 +14,7 @@ Only the dedicated Patient App is in development. Doctor App and Admin App are i
 - [x] Stage 6 — Live queue tracking, estimates and foreground/background refresh strategy
 - [x] Stage 7 — Favourites, reviews, missed-appointment rescheduling
 - [x] Stage 8 — Provider-ready maps, payments, SMS and push-notification foundations
-- [ ] Stage 9 — accessibility, offline/error states, tests, performance and release hardening
+- [x] Stage 9 — accessibility, offline/error states, tests, performance and release hardening
 - [ ] Future — Create separate Doctor App, then separate Admin App, reusing contracts/design tokens without coupling app builds
 
 ## Stage 1 acceptance status
