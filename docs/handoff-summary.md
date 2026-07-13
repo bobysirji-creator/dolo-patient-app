@@ -73,3 +73,8 @@ Missed appointments can be rescheduled once within the configurable prototype ru
 Validated build: https://github.com/bobysirji-creator/dolo-patient-app/actions/runs/29226964239
 
 Recommended next stage: replace demo queue advancement with a REST/WebSocket or polling contract, add foreground lifecycle refresh, queue-delay notifications, and backend-authoritative concurrency-safe token allocation.
+
+
+### Stage 5 date-display correction
+
+Booking now provides three selectable appointment dates and persists the selected date. Confirmation and Live Queue display a human-readable appointment date. The missed-appointment flow shows the exact proposed reschedule date before confirmation and the updated date afterward. Validated build: https://github.com/bobysirji-creator/dolo-patient-app/actions/runs/29228036084
