@@ -93,3 +93,18 @@ Validated build and artifact: https://github.com/bobysirji-creator/dolo-patient-
 Artifact name: dolo-patient-debug-apk
 
 Recommended next stage: Stage 8 provider abstractions and environment configuration for maps, payments, SMS and push notifications. Integrate providers one at a time, starting with a backend-authoritative OTP and appointment API before handling real patient data.
+
+
+## Stage 8 handoff
+
+Stage 8 is complete as a provider-ready foundation. New maps, payment, SMS and push interfaces define the operations the future backend and Android providers must implement. Their current disabled implementations return explicit unavailable results, which prevents accidental navigation, charges, outbound messages or device registration before configuration exists.
+
+The Integration Readiness screen is available from Help & Support. It shows every provider as disabled and explains that no API keys, payment details, location data or device tokens are stored. IntegrationRegistry is the single lightweight source for this readiness state.
+
+No real provider, SDK, credential or paid service has been connected. Real OTP and appointment authority should live behind an HTTPS backend rather than embedding service secrets in the APK.
+
+Validated build: https://github.com/bobysirji-creator/dolo-patient-app/actions/runs/29232911280
+
+Artifact name: dolo-patient-debug-apk
+
+Recommended next stage: Stage 9 release hardening. Focus on accessibility labels and touch targets, offline and error-state consistency, UI and repository test expansion, performance checks, versioning, privacy copy and a release-candidate checklist before connecting live providers.
