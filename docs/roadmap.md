@@ -99,3 +99,17 @@ Only the dedicated Patient App is in development. Doctor App and Admin App are i
 - Pure unit tests verify capability defaults and disabled-provider behavior.
 - No third-party SDK or additional build weight was added.
 - GitHub Actions unit tests and debug APK assembly passed in run 29232911280.
+
+
+## Stage 9 — Patient release hardening (complete)
+
+- Release candidate version is 0.9.0-rc1 (version code 9).
+- Core controls have accessible descriptions, button roles and minimum 48 dp touch targets.
+- Live Queue distinguishes current, stale and offline data and provides a retry action.
+- Release-readiness policy centralizes refresh timing, stale detection, readable statuses and safe local text.
+- Unit tests cover queue freshness and safe-text behavior.
+- Android backup and cleartext HTTP traffic are disabled.
+- GitHub Actions now runs Android lint, unit tests and debug assembly, cancels stale builds, and publishes an APK SHA-256 checksum.
+- README, prototype privacy notice and release checklist document the controlled-test scope.
+- Maps, payments, SMS and push notifications remain disabled.
+- The Patient App roadmap is complete for the offline release candidate; production backend/provider work remains a separate future program.
