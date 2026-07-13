@@ -62,3 +62,14 @@ Stage 4 is complete. The Patient App now has search/category filtering, a doctor
 Validated build: https://github.com/bobysirji-creator/dolo-patient-app/actions/runs/29201170208
 
 Recommended next stage: live queue state and appointment lifecycle simulation, including patients ahead, estimated waiting time, refresh behavior, and reschedule eligibility.
+
+
+## Stage 5 handoff
+
+Stage 5 is complete. Each persisted appointment now has a local queue snapshot with current token, patients ahead, estimated waiting time, lifecycle status and refresh time. The Live Queue screen exposes explicit refresh plus deterministic demo controls for advancing the queue or marking an appointment missed.
+
+Missed appointments can be rescheduled once within the configurable prototype rule of 10 days. Rescheduling moves the appointment to tomorrow, allocates a new token, records that the one-time option was used, and resets queue progress. The appointment codec remains backward compatible with records written by earlier stages.
+
+Validated build: https://github.com/bobysirji-creator/dolo-patient-app/actions/runs/29226964239
+
+Recommended next stage: replace demo queue advancement with a REST/WebSocket or polling contract, add foreground lifecycle refresh, queue-delay notifications, and backend-authoritative concurrency-safe token allocation.
