@@ -108,3 +108,14 @@ Validated build: https://github.com/bobysirji-creator/dolo-patient-app/actions/r
 Artifact name: dolo-patient-debug-apk
 
 Recommended next stage: Stage 9 release hardening. Focus on accessibility labels and touch targets, offline and error-state consistency, UI and repository test expansion, performance checks, versioning, privacy copy and a release-candidate checklist before connecting live providers.
+
+
+## Stage 9 release-candidate handoff
+
+Stage 9 is complete. The Patient App is version 0.9.0-rc1 (version code 9). Accessibility semantics and minimum touch targets cover the primary controls. Live Queue now distinguishes current, stale and offline data and offers retry without discarding the last local snapshot.
+
+ReleaseReadiness centralizes polling/staleness rules and safe local text behavior, with focused unit tests. Android backup and cleartext HTTP traffic are disabled. GitHub Actions now runs lint, unit tests and APK assembly, cancels stale builds, generates a SHA-256 checksum and uploads both files in `dolo-patient-debug-apk`.
+
+The README, prototype privacy notice and release checklist document the demo scope and release blockers. Maps, payments, SMS and push notifications remain disabled. No production backend, real OTP, server-authoritative appointment/token/queue data, signing pipeline or real medical data is included.
+
+Recommended next action: install the final successful artifact on a physical Android device and complete `docs/release-checklist.md`. After acceptance, freeze this Patient App release candidate. The next ecosystem project should be the dedicated Doctor App in its own repository/project, followed later by the Admin App; do not add either to this Patient App module.
