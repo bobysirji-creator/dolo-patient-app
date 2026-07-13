@@ -13,7 +13,7 @@ Only the dedicated Patient App is in development. Doctor App and Admin App are i
 - [x] Stage 5 — Live queue simulation, lifecycle states, waiting estimates and one-time rescheduling
 - [x] Stage 6 — Live queue tracking, estimates and foreground/background refresh strategy
 - [x] Stage 7 — Favourites, reviews, missed-appointment rescheduling
-- [ ] Stage 8 — Provider integrations: maps, payments, SMS and push notifications
+- [x] Stage 8 — Provider-ready maps, payments, SMS and push-notification foundations
 - [ ] Stage 9 — accessibility, offline/error states, tests, performance and release hardening
 - [ ] Future — Create separate Doctor App, then separate Admin App, reusing contracts/design tokens without coupling app builds
 
@@ -87,3 +87,15 @@ Only the dedicated Patient App is in development. Doctor App and Admin App are i
 - Help and support placeholders reserve future complaint/chat integration.
 - Legacy appointment records remain readable and Stage 6/7 codec behavior is covered by unit tests.
 - GitHub Actions unit tests and debug APK assembly passed in run 29230262592.
+
+
+## Stage 8 — Provider integration foundations (complete)
+
+- Provider-neutral contracts exist for maps/navigation, payment order creation and verification, SMS OTP/reminders, and push registration/queue alerts.
+- Disabled provider implementations fail safely and never create navigation links, payment orders, messages or device registrations.
+- A central integration registry reports provider mode and readiness without storing credentials.
+- The Patient App exposes an Integration Readiness screen from Help & Support.
+- All external providers default to DISABLED; no API keys, payment data, precise location or device tokens are committed.
+- Pure unit tests verify capability defaults and disabled-provider behavior.
+- No third-party SDK or additional build weight was added.
+- GitHub Actions unit tests and debug APK assembly passed in run 29232911280.
