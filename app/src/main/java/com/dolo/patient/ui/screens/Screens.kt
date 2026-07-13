@@ -114,7 +114,7 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
 @Composable fun LiveQueueScreen(state:PatientUiState,appointmentId:String,onBack:()->Unit,onRefresh:()->Unit,onOffline:()->Unit,onAdvance:()->Unit,onMissed:()->Unit,onComplete:()->Unit,onReschedule:()->Unit,canReschedule:(Appointment)->Boolean){
  val appointment=state.appointments.firstOrNull{it.id==appointmentId}?:state.active
  val queue=state.queue?.takeIf{it.appointmentId==appointmentId}
- LaunchedEffect(appointmentId){while(true){onRefresh();delay(15000)}}
+ LaunchedEffect(appointmentId){while(true){onRefresh();delay(ReleaseReadiness.QUEUE_REFRESH_INTERVAL_MILLIS)}}
  LazyColumn(page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){
   item{ScreenTitle("Live Queue",onBack)}
   if(appointment==null)item{EmptyCard("Appointment not found.")}
@@ -124,7 +124,7 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
     Text("CURRENTLY IN CONSULTATION",color=DoloMuted,fontWeight=FontWeight.Bold);Text((queue?.currentToken?:0).toString(),fontSize=58.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal)
     HorizontalDivider(Modifier.padding(vertical=12.dp));Row(Modifier.fillMaxWidth()){QueueMetric("Your token",appointment.token.toString(),Modifier.weight(1f));QueueMetric("Patients ahead",(queue?.patientsAhead?:0).toString(),Modifier.weight(1f));QueueMetric("Est. wait",(queue?.estimatedMinutes?:0).toString()+" min",Modifier.weight(1f))}
    }}}
-   item{InfoCard("Queue synchronization",state.syncStatus+" • Auto refresh every 15 seconds\nLast update: "+(queue?.refreshedAt?:0))};item{InfoCard("Queue status",(queue?.status?:appointment.status).replace("_"," ")+"\nAverage consultation: "+QueueCalculator.AVERAGE_CONSULTATION_MINUTES+" minutes")}
+   item{QueueConnectionBanner(state.syncStatus,queue?.refreshedAt?:0,onRefresh)};item{InfoCard("Queue status",ReleaseReadiness.readableStatus(queue?.status?:appointment.status)+"\nAverage consultation: "+QueueCalculator.AVERAGE_CONSULTATION_MINUTES+" minutes")}
    if(appointment.status!=AppointmentStatus.MISSED){
     item{PrimaryButton("Refresh Queue",onRefresh)}
     item{OutlinedButton(onOffline,Modifier.fillMaxWidth()){Text("Demo: show offline state")}};item{OutlinedButton(onAdvance,Modifier.fillMaxWidth()){Text("Demo: advance one token")}};if(appointment.status==AppointmentStatus.IN_CONSULTATION)item{PrimaryButton("Demo: complete consultation",onComplete)}
@@ -137,6 +137,68 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
   }
  }
 }
+@Composable
+private fun QueueConnectionBanner(
+    syncStatus: String,
+    refreshedAt: Long,
+    onRetry: () -> Unit
+) {
+    val offline = syncStatus == SyncStatus.OFFLINE
+    val stale = !offline && ReleaseReadiness.isQueueStale(refreshedAt)
+    val title = when {
+        offline -> "You are offline"
+        stale -> "Queue update may be stale"
+        else -> "Queue is up to date"
+    }
+    val message = when {
+        offline -> "Showing the last saved queue. Reconnect and retry before travelling."
+        stale -> "The last queue update is over one minute old. Refresh before relying on the estimate."
+        else -> "Automatically refreshes every 15 seconds while this screen is open."
+    }
+    val icon = when {
+        offline -> Icons.Outlined.Warning
+        stale -> Icons.Outlined.Schedule
+        else -> Icons.Outlined.CheckCircle
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = if (offline || stale) {
+                MaterialTheme.colorScheme.errorContainer
+            } else {
+                DoloSurfaceAlt
+            }
+        ),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (offline || stale) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    DoloTeal
+                }
+            )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(title, fontWeight = FontWeight.Bold)
+                Text(message, color = DoloMuted, fontSize = 13.sp)
+            }
+            if (offline || stale) {
+                TextButton(onClick = onRetry) {
+                    Text("Retry")
+                }
+            }
+        }
+    }
+}
+
 @Composable private fun QueueHomeCard(queue:QueueSnapshot?,onClick:()->Unit){Card(Modifier.fillMaxWidth().clickable(onClick=onClick),colors=CardDefaults.cardColors(containerColor=DoloSurfaceAlt),shape=RoundedCornerShape(22.dp)){Row(Modifier.padding(18.dp),verticalAlignment=Alignment.CenterVertically){Icon(Icons.Outlined.Schedule,null,tint=DoloTeal,modifier=Modifier.size(42.dp));Spacer(Modifier.width(14.dp));Column(Modifier.weight(1f)){Text("Live queue",fontWeight=FontWeight.Bold);Text((queue?.patientsAhead?:0).toString()+" patients ahead • "+(queue?.estimatedMinutes?:0)+" min",color=DoloMuted)};Icon(Icons.Outlined.ArrowForward,null,tint=DoloTeal)}}}
 @Composable private fun QueueMetric(label:String,value:String,modifier:Modifier=Modifier){Column(modifier,horizontalAlignment=Alignment.CenterHorizontally){Text(value,fontSize=20.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal);Text(label,fontSize=11.sp,color=DoloMuted,textAlign=TextAlign.Center)}}
 
