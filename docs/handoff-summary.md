@@ -78,3 +78,18 @@ Recommended next stage: replace demo queue advancement with a REST/WebSocket or 
 ### Stage 5 date-display correction
 
 Booking now provides three selectable appointment dates and persists the selected date. Confirmation and Live Queue display a human-readable appointment date. The missed-appointment flow shows the exact proposed reschedule date before confirmation and the updated date afterward. Validated build: https://github.com/bobysirji-creator/dolo-patient-app/actions/runs/29228036084
+
+
+## Combined Stages 6 and 7 handoff
+
+Stages 6 and 7 are complete. The patient experience now includes foreground queue polling every 15 seconds, manual refresh, a visible sync/offline state, and a repository contract that can later be replaced by REST polling or WebSocket updates. Queue and token allocation remain a deterministic local prototype until the backend becomes authoritative.
+
+The Patient App also adds persistent patient profile and family-member management, booking on behalf of a selected family member, appointment lifecycle timelines, completed-consultation review eligibility, verified local reviews, and an in-app notification centre. Notifications are created for booking, approaching turns, rescheduling, consultation completion and review submission. A Help & Support screen reserves complaint and chat integration without adding a provider yet.
+
+All Stage 6 and 7 state remains behind PatientRepository. No maps, payment, SMS, real push provider, Doctor App or Admin App was introduced.
+
+Validated build and artifact: https://github.com/bobysirji-creator/dolo-patient-app/actions/runs/29230262592
+
+Artifact name: dolo-patient-debug-apk
+
+Recommended next stage: Stage 8 provider abstractions and environment configuration for maps, payments, SMS and push notifications. Integrate providers one at a time, starting with a backend-authoritative OTP and appointment API before handling real patient data.
