@@ -44,15 +44,13 @@ class ReleaseReadinessTest {
     @Test
     fun patientTextIsSingleLineBoundedAndStorageSafe() {
         val sanitized = ReleaseReadiness.safeSingleLine(
-            value = "  Maya|Sharma
-Emergency contact  ",
+            value = "  Maya|Sharma\nEmergency contact  ",
             maxLength = 18
         )
 
         assertEquals("Maya/Sharma Emerge", sanitized)
         assertFalse(sanitized.contains('|'))
-        assertFalse(sanitized.contains('
-'))
+        assertFalse(sanitized.contains('\n'))
     }
 
     @Test
