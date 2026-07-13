@@ -82,18 +82,135 @@ class LocalPatientRepository(private val preferences:SharedPreferences):PatientR
  private fun queueKey(id:String)="queue_current_"+id
  companion object{private const val KEY_APPOINTMENTS="patient_appointments";private const val KEY_FAVOURITES="patient_favourites";private const val KEY_PROFILE_NAME="profile_name";private const val KEY_PROFILE_PHONE="profile_phone";private const val KEY_PROFILE_CITY="profile_city";private const val KEY_FAMILY="family_members";private const val KEY_REVIEWS="doctor_reviews";private const val KEY_NOTIFICATIONS="app_notifications"}
 }
-data class PatientUiState(val query:String="",val specialty:String?=null,val doctors:List<Doctor> = DummyData.doctors,val appointments:List<Appointment> = emptyList(),val active:Appointment?=null,val favouriteIds:Set<String> = emptySet(),val queue:QueueSnapshot?=null)
-class PatientViewModel(private val repository:PatientRepository):ViewModel(){
- var uiState by mutableStateOf(loadState());private set
- fun search(value:String,specialty:String?=uiState.specialty){uiState=uiState.copy(query=value,specialty=specialty,doctors=repository.doctors(value,specialty))}
- fun toggleFavourite(id:String){uiState=uiState.copy(favouriteIds=repository.toggleFavourite(id))}
- fun book(id:String,date:String,session:Session):Appointment{val a=repository.book(id,date,session);refresh(a.id);return a}
- fun refreshQueue(id:String)=refresh(id)
- fun advanceQueue(id:String){repository.advanceQueue(id);refresh(id)}
- fun markMissed(id:String){repository.markMissed(id);refresh(id)}
- fun canReschedule(a:Appointment)=repository.canReschedule(a)
- fun reschedule(id:String):Boolean{val a=repository.reschedule(id)?:return false;refresh(a.id);return true}
- private fun refresh(id:String?=repository.activeAppointment()?.id){val active=repository.activeAppointment();uiState=uiState.copy(appointments=repository.appointments(),active=active,queue=(id?:active?.id)?.let(repository::queue))}
- private fun loadState():PatientUiState{val active=repository.activeAppointment();return PatientUiState(appointments=repository.appointments(),active=active,favouriteIds=repository.favouriteDoctorIds(),queue=active?.id?.let(repository::queue))}
+data class PatientUiState(
+    val query: String = "",
+    val specialty: String? = null,
+    val doctors: List<Doctor> = DummyData.doctors,
+    val appointments: List<Appointment> = emptyList(),
+    val active: Appointment? = null,
+    val favouriteIds: Set<String> = emptySet(),
+    val queue: QueueSnapshot? = null,
+    val profile: PatientProfile = PatientProfile(),
+    val family: List<FamilyMember> = emptyList(),
+    val reviews: List<DoctorReview> = emptyList(),
+    val notifications: List<AppNotification> = emptyList(),
+    val syncStatus: String = SyncStatus.FRESH
+)
+
+class PatientViewModel(private val repository: PatientRepository) : ViewModel() {
+    var uiState by mutableStateOf(loadState())
+        private set
+
+    fun search(value: String, specialty: String? = uiState.specialty) {
+        uiState = uiState.copy(
+            query = value,
+            specialty = specialty,
+            doctors = repository.doctors(value, specialty)
+        )
+    }
+
+    fun toggleFavourite(id: String) {
+        uiState = uiState.copy(favouriteIds = repository.toggleFavourite(id))
+    }
+
+    fun book(id: String, date: String, session: Session, patientName: String): Appointment {
+        val appointment = repository.book(id, date, session, patientName)
+        refresh(appointment.id)
+        return appointment
+    }
+
+    fun refreshQueue(id: String, online: Boolean = true) {
+        uiState = uiState.copy(syncStatus = if (online) SyncStatus.SYNCING else SyncStatus.OFFLINE)
+        val snapshot = repository.refreshQueue(id, online)
+        refresh(id, snapshot, if (online) SyncStatus.FRESH else SyncStatus.OFFLINE)
+    }
+
+    fun advanceQueue(id: String) {
+        repository.advanceQueue(id)
+        refresh(id)
+    }
+
+    fun markMissed(id: String) {
+        repository.markMissed(id)
+        refresh(id)
+    }
+
+    fun completeAppointment(id: String) {
+        repository.completeAppointment(id)
+        refresh(id)
+    }
+
+    fun canReschedule(appointment: Appointment): Boolean = repository.canReschedule(appointment)
+
+    fun reschedule(id: String): Boolean {
+        val appointment = repository.reschedule(id) ?: return false
+        refresh(appointment.id)
+        return true
+    }
+
+    fun updateProfile(name: String, phone: String, city: String) {
+        val profile = repository.updateProfile(PatientProfile(name, phone, city))
+        uiState = uiState.copy(profile = profile)
+    }
+
+    fun addFamilyMember(name: String, relation: String, age: Int) {
+        repository.addFamilyMember(name, relation, age)
+        uiState = uiState.copy(family = repository.familyMembers())
+    }
+
+    fun canReview(appointment: Appointment): Boolean = repository.canReview(appointment)
+
+    fun addReview(appointmentId: String, rating: Int, comment: String) {
+        repository.addReview(appointmentId, rating, comment)
+        uiState = uiState.copy(
+            reviews = repository.reviews(),
+            notifications = repository.notifications()
+        )
+    }
+
+    fun markNotificationsRead() {
+        repository.markNotificationsRead()
+        uiState = uiState.copy(notifications = repository.notifications())
+    }
+
+    private fun refresh(
+        id: String? = repository.activeAppointment()?.id,
+        queueOverride: QueueSnapshot? = null,
+        syncStatus: String = SyncStatus.FRESH
+    ) {
+        val active = repository.activeAppointment()
+        val queueId = id ?: active?.id
+        uiState = uiState.copy(
+            appointments = repository.appointments(),
+            active = active,
+            queue = queueOverride ?: queueId?.let(repository::queue),
+            profile = repository.profile(),
+            family = repository.familyMembers(),
+            reviews = repository.reviews(),
+            notifications = repository.notifications(),
+            syncStatus = syncStatus
+        )
+    }
+
+    private fun loadState(): PatientUiState {
+        val active = repository.activeAppointment()
+        return PatientUiState(
+            appointments = repository.appointments(),
+            active = active,
+            favouriteIds = repository.favouriteDoctorIds(),
+            queue = active?.id?.let(repository::queue),
+            profile = repository.profile(),
+            family = repository.familyMembers(),
+            reviews = repository.reviews(),
+            notifications = repository.notifications()
+        )
+    }
 }
-class PatientViewModelFactory(private val repository:PatientRepository):ViewModelProvider.Factory{@Suppress("UNCHECKED_CAST") override fun <T:ViewModel> create(modelClass:Class<T>):T=PatientViewModel(repository) as T}
+
+class PatientViewModelFactory(
+    private val repository: PatientRepository
+) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
+    override fun <T : ViewModel> create(modelClass: Class<T>): T =
+        PatientViewModel(repository) as T
+}
