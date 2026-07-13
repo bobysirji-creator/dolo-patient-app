@@ -139,15 +139,254 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
 @Composable private fun QueueHomeCard(queue:QueueSnapshot?,onClick:()->Unit){Card(Modifier.fillMaxWidth().clickable(onClick=onClick),colors=CardDefaults.cardColors(containerColor=DoloSurfaceAlt),shape=RoundedCornerShape(22.dp)){Row(Modifier.padding(18.dp),verticalAlignment=Alignment.CenterVertically){Icon(Icons.Outlined.Schedule,null,tint=DoloTeal,modifier=Modifier.size(42.dp));Spacer(Modifier.width(14.dp));Column(Modifier.weight(1f)){Text("Live queue",fontWeight=FontWeight.Bold);Text((queue?.patientsAhead?:0).toString()+" patients ahead • "+(queue?.estimatedMinutes?:0)+" min",color=DoloMuted)};Icon(Icons.Outlined.ArrowForward,null,tint=DoloTeal)}}}
 @Composable private fun QueueMetric(label:String,value:String,modifier:Modifier=Modifier){Column(modifier,horizontalAlignment=Alignment.CenterHorizontally){Text(value,fontSize=20.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal);Text(label,fontSize=11.sp,color=DoloMuted,textAlign=TextAlign.Center)}}
 
-@Composable fun ProfileScreen(state:PatientUiState,onBack:()->Unit,onSave:(String,String,String)->Unit,onAddFamily:(String,String,Int)->Unit){
- var name by remember{mutableStateOf(state.profile.name)};var phone by remember{mutableStateOf(state.profile.phone)};var city by remember{mutableStateOf(state.profile.city)}
- var familyName by remember{mutableStateOf("")};var relation by remember{mutableStateOf("")};var age by remember{mutableStateOf("")}
- LazyColumn(page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){item{ScreenTitle("Patient Profile",onBack)};item{OutlinedTextField(name,{name=it},Modifier.fillMaxWidth(),label={Text("Full name")})};item{OutlinedTextField(phone,{phone=it.filter(Char::isDigit).take(10)},Modifier.fillMaxWidth(),label={Text("Mobile number")})};item{OutlinedTextField(city,{city=it},Modifier.fillMaxWidth(),label={Text("City")})};item{PrimaryButton("Save Profile",onClick={onSave(name,phone,city)})};item{Text("Family Members",style=MaterialTheme.typography.titleLarge)};if(state.family.isEmpty())item{EmptyCard("Add a family member to book appointments for them.")}else items(state.family){InfoCard(it.name,it.relation+" • "+it.age+" years")};item{OutlinedTextField(familyName,{familyName=it},Modifier.fillMaxWidth(),label={Text("Family member name")})};item{OutlinedTextField(relation,{relation=it},Modifier.fillMaxWidth(),label={Text("Relation")})};item{OutlinedTextField(age,{age=it.filter(Char::isDigit).take(3)},Modifier.fillMaxWidth(),label={Text("Age")})};item{Button({if(familyName.isNotBlank()&&relation.isNotBlank()){onAddFamily(familyName,relation,age.toIntOrNull()?:0);familyName="";relation="";age=""}},Modifier.fillMaxWidth()){Text("Add Family Member")}}}
+@Composable
+fun ProfileScreen(
+    state: PatientUiState,
+    onBack: () -> Unit,
+    onSave: (String, String, String) -> Unit,
+    onAddFamily: (String, String, Int) -> Unit
+) {
+    var name by remember { mutableStateOf(state.profile.name) }
+    var phone by remember { mutableStateOf(state.profile.phone) }
+    var city by remember { mutableStateOf(state.profile.city) }
+    var familyName by remember { mutableStateOf("") }
+    var relation by remember { mutableStateOf("") }
+    var age by remember { mutableStateOf("") }
+
+    LazyColumn(
+        modifier = page.padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        item { ScreenTitle("Patient Profile", onBack) }
+        item {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { value -> name = value },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Full name") }
+            )
+        }
+        item {
+            OutlinedTextField(
+                value = phone,
+                onValueChange = { value -> phone = value.filter { char -> char.isDigit() }.take(10) },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Mobile number") }
+            )
+        }
+        item {
+            OutlinedTextField(
+                value = city,
+                onValueChange = { value -> city = value },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("City") }
+            )
+        }
+        item { PrimaryButton("Save Profile", { onSave(name, phone, city) }) }
+        item { Text("Family Members", style = MaterialTheme.typography.titleLarge) }
+        if (state.family.isEmpty()) {
+            item { EmptyCard("Add a family member to book appointments for them.") }
+        } else {
+            items(items = state.family, key = { member -> member.id }) { member ->
+                InfoCard(member.name, member.relation + " • " + member.age + " years")
+            }
+        }
+        item {
+            OutlinedTextField(
+                value = familyName,
+                onValueChange = { value -> familyName = value },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Family member name") }
+            )
+        }
+        item {
+            OutlinedTextField(
+                value = relation,
+                onValueChange = { value -> relation = value },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Relation") }
+            )
+        }
+        item {
+            OutlinedTextField(
+                value = age,
+                onValueChange = { value -> age = value.filter { char -> char.isDigit() }.take(3) },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Age") }
+            )
+        }
+        item {
+            Button(
+                onClick = {
+                    if (familyName.isNotBlank() && relation.isNotBlank()) {
+                        onAddFamily(familyName, relation, age.toIntOrNull() ?: 0)
+                        familyName = ""
+                        relation = ""
+                        age = ""
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Add Family Member") }
+        }
+    }
 }
-@Composable fun NotificationsScreen(state:PatientUiState,onBack:()->Unit,onMarkRead:()->Unit){LaunchedEffect(Unit){onMarkRead()};LazyColumn(page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(12.dp)){item{ScreenTitle("Notifications",onBack)};if(state.notifications.isEmpty())item{EmptyCard("Queue and appointment updates will appear here.")}else items(state.notifications){n->Card(Modifier.fillMaxWidth(),colors=CardDefaults.cardColors(containerColor=if(n.isRead)Color.White else DoloSurfaceAlt),shape=RoundedCornerShape(18.dp)){Column(Modifier.padding(16.dp)){Text(n.title,fontWeight=FontWeight.Bold);Text(n.message,color=DoloMuted)}}}}}
-@Composable fun ReviewScreen(state:PatientUiState,doctorId:String,appointmentId:String,onBack:()->Unit,onSubmit:(Int,String)->Unit){val doctor=DummyData.doctors.firstOrNull{it.id==doctorId};var rating by remember{mutableIntStateOf(5)};var comment by remember{mutableStateOf("")};LazyColumn(page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){item{ScreenTitle("Rate Consultation",onBack)};item{InfoCard(doctor?.name?:"Doctor","Only completed consultations can receive a verified review.")};item{Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceEvenly){(1..5).forEach{star->IconButton({rating=star}){Icon(if(star<=rating)Icons.Outlined.Star else Icons.Outlined.StarBorder,star.toString(),tint=DoloTeal)}}}};item{OutlinedTextField(comment,{comment=it.take(300)},Modifier.fillMaxWidth(),label={Text("Share your experience")},minLines=4)};item{PrimaryButton("Submit Verified Review",onClick={onSubmit(rating,comment)},enabled=comment.isNotBlank())};if(state.reviews.any{it.appointmentId==appointmentId})item{InfoCard("Review submitted","Thank you for your feedback.")}}}
-@Composable fun SupportScreen(onBack:()->Unit){LazyColumn(page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){item{ScreenTitle("Help & Support",onBack)};item{InfoCard("How does the live queue work?","Your token, patients ahead and estimated wait refresh while this screen is open.")};item{InfoCard("What if I miss my turn?","A missed appointment can be rescheduled once within 10 days.")};item{InfoCard("Need more help?","Complaint and chat integration placeholders are reserved for Stage 8.")};item{OutlinedButton({},Modifier.fillMaxWidth()){Text("Create Support Request (Coming Soon)")}}}
-@Composable private fun StatusTimeline(status:String){val steps=listOf(AppointmentStatus.BOOKED,AppointmentStatus.WAITING,AppointmentStatus.IN_CONSULTATION,AppointmentStatus.COMPLETED);Row(Modifier.fillMaxWidth().padding(vertical=10.dp),horizontalArrangement=Arrangement.SpaceBetween){steps.forEach{step->Column(horizontalAlignment=Alignment.CenterHorizontally){Icon(if(steps.indexOf(step)<=steps.indexOf(status))Icons.Outlined.CheckCircle else Icons.Outlined.RadioButtonUnchecked,null,tint=if(steps.indexOf(step)<=steps.indexOf(status))DoloTeal else DoloMuted);Text(step.replace("_"," ").lowercase().replaceFirstChar(Char::uppercase),fontSize=9.sp)}}}}
+
+@Composable
+fun NotificationsScreen(
+    state: PatientUiState,
+    onBack: () -> Unit,
+    onMarkRead: () -> Unit
+) {
+    LaunchedEffect(Unit) { onMarkRead() }
+    LazyColumn(
+        modifier = page.padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item { ScreenTitle("Notifications", onBack) }
+        if (state.notifications.isEmpty()) {
+            item { EmptyCard("Queue and appointment updates will appear here.") }
+        } else {
+            items(items = state.notifications, key = { notification -> notification.id }) { notification ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (notification.isRead) Color.White else DoloSurfaceAlt
+                    ),
+                    shape = RoundedCornerShape(18.dp)
+                ) {
+                    Column(Modifier.padding(16.dp)) {
+                        Text(notification.title, fontWeight = FontWeight.Bold)
+                        Text(notification.message, color = DoloMuted)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ReviewScreen(
+    state: PatientUiState,
+    doctorId: String,
+    appointmentId: String,
+    onBack: () -> Unit,
+    onSubmit: (Int, String) -> Unit
+) {
+    val doctor = DummyData.doctors.firstOrNull { it.id == doctorId }
+    var rating by remember { mutableStateOf(5) }
+    var comment by remember { mutableStateOf("") }
+
+    LazyColumn(
+        modifier = page.padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        item { ScreenTitle("Rate Consultation", onBack) }
+        item {
+            InfoCard(
+                doctor?.name ?: "Doctor",
+                "Only completed consultations can receive a verified review."
+            )
+        }
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                (1..5).forEach { star ->
+                    IconButton(onClick = { rating = star }) {
+                        Icon(
+                            imageVector = if (star <= rating) Icons.Outlined.Star else Icons.Outlined.StarBorder,
+                            contentDescription = star.toString(),
+                            tint = DoloTeal
+                        )
+                    }
+                }
+            }
+        }
+        item {
+            OutlinedTextField(
+                value = comment,
+                onValueChange = { value -> comment = value.take(300) },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Share your experience") },
+                minLines = 4
+            )
+        }
+        item {
+            PrimaryButton(
+                text = "Submit Verified Review",
+                onClick = { onSubmit(rating, comment) },
+                enabled = comment.isNotBlank()
+            )
+        }
+        if (state.reviews.any { review -> review.appointmentId == appointmentId }) {
+            item { InfoCard("Review submitted", "Thank you for your feedback.") }
+        }
+    }
+}
+
+@Composable
+fun SupportScreen(onBack: () -> Unit) {
+    LazyColumn(
+        modifier = page.padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        item { ScreenTitle("Help & Support", onBack) }
+        item {
+            InfoCard(
+                "How does the live queue work?",
+                "Your token, patients ahead and estimated wait refresh while this screen is open."
+            )
+        }
+        item {
+            InfoCard(
+                "What if I miss my turn?",
+                "A missed appointment can be rescheduled once within 10 days."
+            )
+        }
+        item {
+            InfoCard(
+                "Need more help?",
+                "Complaint and chat integration placeholders are reserved for Stage 8."
+            )
+        }
+        item {
+            OutlinedButton(onClick = {}, modifier = Modifier.fillMaxWidth()) {
+                Text("Create Support Request (Coming Soon)")
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatusTimeline(status: String) {
+    val steps = listOf(
+        AppointmentStatus.BOOKED,
+        AppointmentStatus.WAITING,
+        AppointmentStatus.IN_CONSULTATION,
+        AppointmentStatus.COMPLETED
+    )
+    val currentIndex = steps.indexOf(status).coerceAtLeast(0)
+
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        steps.forEachIndexed { index, step ->
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(
+                    imageVector = if (index <= currentIndex) Icons.Outlined.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
+                    contentDescription = null,
+                    tint = if (index <= currentIndex) DoloTeal else DoloMuted
+                )
+                Text(
+                    text = step.replace("_", " ").lowercase().replaceFirstChar(Char::uppercase),
+                    fontSize = 9.sp
+                )
+            }
+        }
+    }
+}
 
 @Composable private fun DateChoice(date:LocalDate,selected:Boolean,onClick:()->Unit,modifier:Modifier=Modifier){Card(modifier.clickable(onClick=onClick),colors=CardDefaults.cardColors(containerColor=if(selected)DoloTeal else Color.White),shape=RoundedCornerShape(16.dp)){Column(Modifier.fillMaxWidth().padding(vertical=12.dp),horizontalAlignment=Alignment.CenterHorizontally){Text(date.format(DateTimeFormatter.ofPattern("EEE")),color=if(selected)Color.White else DoloMuted,fontSize=12.sp);Text(date.dayOfMonth.toString(),color=if(selected)Color.White else DoloNavy,fontSize=20.sp,fontWeight=FontWeight.Bold);Text(date.format(DateTimeFormatter.ofPattern("MMM")),color=if(selected)Color.White else DoloMuted,fontSize=12.sp)}}}
 private fun displayDate(value:String):String=runCatching{LocalDate.parse(value).format(DateTimeFormatter.ofPattern("EEEE, dd MMM yyyy"))}.getOrDefault(value)
