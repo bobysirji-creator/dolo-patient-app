@@ -314,7 +314,7 @@ fun ReviewScreen(
         }
         item {
             PrimaryButton(
-                text = "Submit Verified Review",
+                label = "Submit Verified Review",
                 onClick = { onSubmit(rating, comment) },
                 enabled = comment.isNotBlank()
             )
