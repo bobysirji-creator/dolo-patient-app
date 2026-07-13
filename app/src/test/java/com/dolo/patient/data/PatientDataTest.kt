@@ -21,10 +21,10 @@ class PatientDataTest {
             id = "1",
             doctorId = "2",
             doctorName = "Dr Test",
-            clinicName = "Clinic",
-            appointmentDate = "2026-07-12",
+            clinic = "Clinic",
+            date = "2026-07-12",
             session = Session.MORNING,
-            tokenNumber = 18,
+            token = 18,
             rescheduleUsed = true,
             patientName = "Maya Sharma"
         )
