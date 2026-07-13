@@ -24,7 +24,7 @@ object Routes{const val Splash="splash";const val Login="login";const val Home="
   composable(Routes.Favourites){FavouritesScreen(patient.uiState,nav::popBackStack,{nav.navigate("doctor/"+it)},patient::toggleFavourite)}
   composable(Routes.History){AppointmentHistoryScreen(patient.uiState.appointments,nav::popBackStack,{nav.navigate("queue/"+it)},{patient.reschedule(it)},patient::canReschedule)}
   composable(Routes.Queue,arguments=listOf(navArgument("appointmentId"){type=NavType.StringType})){e->val id=e.arguments?.getString("appointmentId").orEmpty();LiveQueueScreen(patient.uiState,id,nav::popBackStack,{patient.refreshQueue(id)},{patient.advanceQueue(id)},{patient.markMissed(id)},{patient.reschedule(id)},patient::canReschedule)}
-  composable(Routes.Booking,arguments=listOf(navArgument("doctorId"){type=NavType.StringType})){e->BookingScreen(e.arguments?.getString("doctorId").orEmpty(),nav::popBackStack){id,s->patient.book(id,s);nav.navigate("confirmation/"+id+"/"+s.name)}}
+  composable(Routes.Booking,arguments=listOf(navArgument("doctorId"){type=NavType.StringType})){e->BookingScreen(e.arguments?.getString("doctorId").orEmpty(),nav::popBackStack){id,date,s->patient.book(id,date,s);nav.navigate("confirmation/"+id+"/"+s.name)}}
   composable(Routes.Confirmation){e->ConfirmationScreen(e.arguments?.getString("doctorId").orEmpty(),e.arguments?.getString("session").orEmpty(),patient.uiState.active,{patient.uiState.active?.id?.let{nav.navigate("queue/"+it)}}){nav.navigate(Routes.Home){popUpTo(Routes.Home){inclusive=true}}}}
  }
 }
