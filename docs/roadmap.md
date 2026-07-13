@@ -1,4 +1,4 @@
-# DO-LO Android Ecosystem Roadmap
+- [ ] Stage 9- [x] Stage 9# DO-LO Android Ecosystem Roadmap
 
 ## Current scope
 
