@@ -11,8 +11,8 @@ Only the dedicated Patient App is in development. Doctor App and Admin App are i
 - [x] Stage 3 — API-ready contracts, offline repository, persisted appointments, generated tokens and repository tests
 - [x] Stage 4 — Doctor search, filters, profiles, clinics and favourites
 - [x] Stage 5 — Live queue simulation, lifecycle states, waiting estimates and one-time rescheduling
-- [ ] Stage 6 — Live queue tracking, estimates and foreground/background refresh strategy
-- [ ] Stage 7 — Favourites, reviews, missed-appointment rescheduling
+- [x] Stage 6 — Live queue tracking, estimates and foreground/background refresh strategy
+- [x] Stage 7 — Favourites, reviews, missed-appointment rescheduling
 - [ ] Stage 8 — Provider integrations: maps, payments, SMS and push notifications
 - [ ] Stage 9 — accessibility, offline/error states, tests, performance and release hardening
 - [ ] Future — Create separate Doctor App, then separate Admin App, reusing contracts/design tokens without coupling app builds
@@ -73,3 +73,17 @@ Only the dedicated Patient App is in development. Doctor App and Admin App are i
 - Legacy Stage 3/4 appointment records remain readable.
 - Queue calculations and codec compatibility have unit tests.
 - GitHub Actions tests and debug APK assembly passed in run 29226964239.
+
+
+## Stages 6 and 7 — Queue synchronization and patient engagement (complete)
+
+- Live queue refreshes automatically every 15 seconds while the screen is open and also supports manual refresh.
+- Queue sync exposes fresh, syncing and offline demonstration states while preserving the provider-neutral repository boundary.
+- Booking supports the patient profile or a saved family member, and selected patient names persist with appointments.
+- Patient profile and family-member management persist locally.
+- Appointment history includes a clear lifecycle timeline.
+- Completed consultations can receive one verified local review; doctor details show verified review totals.
+- In-app notifications are generated for booking, turn-approaching, rescheduling, completion and review events.
+- Help and support placeholders reserve future complaint/chat integration.
+- Legacy appointment records remain readable and Stage 6/7 codec behavior is covered by unit tests.
+- GitHub Actions unit tests and debug APK assembly passed in run 29230262592.
