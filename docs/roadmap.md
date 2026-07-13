@@ -38,7 +38,7 @@ Only the dedicated Patient App is in development. Doctor App and Admin App are i
 - Phone validation unit tests: complete
 - Real backend and SMS provider: intentionally deferred
 - Remote APK validation: pending current GitHub Actions run
-
+- [x] Stage 9 — accessibility, offline/error states, tests, performance and release hardening
 
 ## Stage 3 acceptance status
 
