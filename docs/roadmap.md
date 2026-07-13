@@ -9,8 +9,8 @@ Only the dedicated Patient App is in development. Doctor App and Admin App are i
 - [x] Stage 1 — Lean Android project, Compose theme, navigation skeleton, placeholder screens, reusable components, dummy models, documentation
 - [x] Stage 2 — Local state architecture, validation, fake OTP contract, persisted session and authentication repository
 - [x] Stage 3 — API-ready contracts, offline repository, persisted appointments, generated tokens and repository tests
-- [ ] Stage 4 — Doctor search, filters, profiles, clinics and availability
-- [ ] Stage 5 — Walk-in booking, concurrency-safe token allocation and appointment history
+- [x] Stage 4 — Doctor search, filters, profiles, clinics and favourites
+- [x] Stage 5 — Live queue simulation, lifecycle states, waiting estimates and one-time rescheduling
 - [ ] Stage 6 — Live queue tracking, estimates and foreground/background refresh strategy
 - [ ] Stage 7 — Favourites, reviews, missed-appointment rescheduling
 - [ ] Stage 8 — Provider integrations: maps, payments, SMS and push notifications
@@ -61,3 +61,15 @@ Only the dedicated Patient App is in development. Doctor App and Admin App are i
 - Favourite doctors persist locally and appear on Home and the dedicated Favourites screen.
 - Appointment History reads persisted bookings.
 - GitHub Actions tests and debug APK assembly passed in run 29201170208.
+
+
+## Stage 5 — Live queue and appointment lifecycle (complete)
+
+- Queue snapshot persists current token for each appointment.
+- Patients-ahead and estimated waiting time use a 12-minute configurable prototype average.
+- Live Queue screen supports refresh and deterministic demo advancement.
+- Appointment lifecycle includes BOOKED, WAITING, IN_CONSULTATION, COMPLETED and MISSED states.
+- Missed appointments are eligible for one reschedule within 10 days; successful reschedule is stored for the next day.
+- Legacy Stage 3/4 appointment records remain readable.
+- Queue calculations and codec compatibility have unit tests.
+- GitHub Actions tests and debug APK assembly passed in run 29226964239.
