@@ -1,5 +1,11 @@
 package com.dolo.patient.ui.screens
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,7 +23,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -49,7 +60,7 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
  Scaffold(containerColor=DoloBackground,bottomBar={DoloBottomBar(selected=PatientBottomDestination.HOME,onHome={},onAppointments=onHistory,onBook=onCategories)}){p->
   LazyColumn(Modifier.padding(p).padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){
    item{Row(verticalAlignment=Alignment.CenterVertically){BrandLogo();Spacer(Modifier.weight(1f));IconButton(onNotifications){BadgedBox({if(state.notifications.any{!it.isRead})Badge()}){Icon(Icons.Outlined.Notifications,"Notifications")}};IconButton(onProfile){Icon(Icons.Outlined.Person,"Profile")};IconButton(onLogout){Icon(Icons.Outlined.Logout,"Logout")}}}
-   item{Text("Welcome, "+state.profile.name,fontSize=26.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal)}
+   item{Text(state.profile.name+" ("+state.profile.city+")",fontSize=26.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal)}
    item{OutlinedTextField(q,{q=it},Modifier.fillMaxWidth(),placeholder={Text("Search doctor, specialty or clinic")},leadingIcon={Icon(Icons.Outlined.Search,null)},trailingIcon={IconButton({onSearch(q)}){Icon(Icons.Outlined.ArrowForward,null)}},singleLine=true,shape=RoundedCornerShape(18.dp))}
    item{Text(if(activeAppointments.size==1)"Live Appointment" else "Live Appointments",style=MaterialTheme.typography.titleLarge)}
    if(activeAppointments.isEmpty())item{EmptyCard("Your active appointment and live queue will appear here.")}
@@ -62,12 +73,62 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
   }
  }
 }
-@Composable fun CategoriesScreen(onBack:()->Unit,onSelect:(String)->Unit){Column(page.padding(20.dp)){ScreenTitle("Categories",onBack);Spacer(Modifier.height(18.dp));Text("Find the right specialist",style=MaterialTheme.typography.headlineMedium);Spacer(Modifier.height(16.dp));LazyVerticalGrid(GridCells.Fixed(2),horizontalArrangement=Arrangement.spacedBy(12.dp),verticalArrangement=Arrangement.spacedBy(12.dp)){items(DummyData.categories){c->Card(Modifier.height(145.dp).clickable{onSelect(c.name)},shape=RoundedCornerShape(22.dp)){Column(Modifier.fillMaxSize().padding(16.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.SpaceEvenly){Text(c.symbol,fontSize=40.sp,color=DoloTeal);Text(c.name,textAlign=TextAlign.Center,fontWeight=FontWeight.Bold)}}}}}}
+@Composable
+fun CategoriesScreen(onBack:()->Unit,onSelect:(String)->Unit){
+ Column(page.padding(20.dp)){
+  ScreenTitle("Categories",onBack)
+  Spacer(Modifier.height(18.dp))
+  Text("Find the right specialist",style=MaterialTheme.typography.headlineMedium)
+  Text(DummyData.categories.size.toString()+" specialties available",color=DoloMuted)
+  Spacer(Modifier.height(16.dp))
+  LazyVerticalGrid(GridCells.Fixed(2),horizontalArrangement=Arrangement.spacedBy(14.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){
+   items(DummyData.categories,key={it.id}){category->CategoryCard(category,onSelect)}
+  }
+ }
+}
 
+@Composable
+private fun CategoryCard(category:com.dolo.patient.data.model.DoctorCategory,onSelect:(String)->Unit){
+ val transition=rememberInfiniteTransition(label="category-"+category.id)
+ val lift by transition.animateFloat(initialValue=0f,targetValue=-7f,animationSpec=infiniteRepeatable(animation=tween(1500),repeatMode=RepeatMode.Reverse),label="category-art-lift")
+ Card(
+  modifier=Modifier.height(184.dp).shadow(10.dp,RoundedCornerShape(24.dp)).clickable{onSelect(category.name)},
+  colors=CardDefaults.cardColors(containerColor=Color(0xFFF8FCFF)),
+  elevation=CardDefaults.cardElevation(defaultElevation=5.dp,pressedElevation=2.dp),
+  shape=RoundedCornerShape(24.dp)
+ ){
+  Column(Modifier.fillMaxSize().padding(12.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.SpaceBetween){
+   Image(painter=painterResource(category.imageRes),contentDescription=category.name+" illustration",modifier=Modifier.fillMaxWidth().height(118.dp).graphicsLayer{translationY=lift}.clip(RoundedCornerShape(18.dp)),contentScale=ContentScale.Crop)
+   Text(category.name,textAlign=TextAlign.Center,fontWeight=FontWeight.ExtraBold,color=DoloNavy,modifier=Modifier.padding(bottom=5.dp))
+  }
+ }
+}
 @Composable fun DoctorListScreen(category:String,onBack:()->Unit,state:PatientUiState,onSearch:(String)->Unit,onDoctor:(String)->Unit,onFavourite:(String)->Unit,onHome:()->Unit,onAppointments:()->Unit,onBook:()->Unit){var q by remember(category){mutableStateOf(if(category=="All")state.query else "")};LaunchedEffect(category){onSearch(q)};Scaffold(containerColor=DoloBackground,bottomBar={DoloBottomBar(selected=PatientBottomDestination.BOOK,onHome=onHome,onAppointments=onAppointments,onBook=onBook)}){p->LazyColumn(Modifier.padding(p).padding(20.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){item{ScreenTitle(if(category=="All")"Search Doctors" else category,onBack)};item{OutlinedTextField(q,{q=it;onSearch(it)},Modifier.fillMaxWidth(),placeholder={Text("Search doctors or clinics")},leadingIcon={Icon(Icons.Outlined.Search,null)},singleLine=true,shape=RoundedCornerShape(18.dp))};if(state.doctors.isEmpty())item{EmptyCard("No doctors match your search.")}else items(state.doctors){d->DoctorCard(d,d.id in state.favouriteIds,{onDoctor(d.id)},{onFavourite(d.id)})}}}}
 
-@Composable fun DoctorCard(d:Doctor,favourite:Boolean,onOpen:()->Unit,onFavourite:()->Unit){Card(Modifier.fillMaxWidth().clickable(onClick=onOpen),shape=RoundedCornerShape(22.dp)){Column(Modifier.padding(16.dp)){Row(verticalAlignment=Alignment.CenterVertically){Surface(shape=CircleShape,color=DoloSurfaceAlt,modifier=Modifier.size(64.dp)){Icon(Icons.Outlined.MedicalServices,null,tint=DoloTeal,modifier=Modifier.padding(15.dp))};Spacer(Modifier.width(12.dp));Column(Modifier.weight(1f)){Text(d.name,fontWeight=FontWeight.Bold,fontSize=18.sp);Text(d.specialty,color=DoloMuted);Text("★ "+d.rating+"  •  "+d.experienceYears+"+ years",fontSize=12.sp);Text(d.clinic,color=DoloMuted,fontSize=12.sp)};IconButton(onFavourite){Icon(if(favourite)Icons.Outlined.Favorite else Icons.Outlined.FavoriteBorder,"Favourite",tint=if(favourite)Color.Red else DoloTeal)}};Spacer(Modifier.height(10.dp));Row(verticalAlignment=Alignment.CenterVertically){Text("₹"+d.consultationFee,fontWeight=FontWeight.Bold);Spacer(Modifier.weight(1f));Button(onClick=onOpen){Text("View & Book")}}}}}
-
+@Composable
+fun DoctorCard(d:Doctor,favourite:Boolean,onOpen:()->Unit,onFavourite:()->Unit){
+ Card(
+  modifier=Modifier.fillMaxWidth().shadow(10.dp,RoundedCornerShape(24.dp)).clickable(onClick=onOpen),
+  colors=CardDefaults.cardColors(containerColor=Color(0xFFEEF6FF)),
+  elevation=CardDefaults.cardElevation(defaultElevation=6.dp,pressedElevation=2.dp),
+  shape=RoundedCornerShape(24.dp)
+ ){
+  Column(Modifier.padding(16.dp)){
+   Row(verticalAlignment=Alignment.CenterVertically){
+    Surface(shape=CircleShape,color=Color.White,shadowElevation=6.dp,modifier=Modifier.size(64.dp)){Icon(Icons.Outlined.MedicalServices,null,tint=DoloTeal,modifier=Modifier.padding(15.dp))}
+    Spacer(Modifier.width(12.dp))
+    Column(Modifier.weight(1f)){Text(d.name,fontWeight=FontWeight.ExtraBold,fontSize=18.sp,color=DoloNavy);Text(d.specialty,color=DoloTeal,fontWeight=FontWeight.SemiBold);Text("★ "+d.rating+"  •  "+d.experienceYears+"+ years",fontSize=12.sp);Text(d.clinic,color=DoloMuted,fontSize=12.sp)}
+    IconButton(onFavourite){Icon(if(favourite)Icons.Outlined.Favorite else Icons.Outlined.FavoriteBorder,"Favourite",tint=if(favourite)Color(0xFFE94F64) else DoloTeal)}
+   }
+   Spacer(Modifier.height(12.dp))
+   Row(verticalAlignment=Alignment.CenterVertically){
+    Text("₹"+d.consultationFee,fontWeight=FontWeight.ExtraBold,fontSize=18.sp,color=DoloNavy)
+    Spacer(Modifier.weight(1f))
+    Button(onClick=onOpen,elevation=ButtonDefaults.buttonElevation(defaultElevation=8.dp,pressedElevation=2.dp)){Text("View & Book")}
+   }
+  }
+ }
+}
 @Composable fun DoctorDetailsScreen(id:String,favourite:Boolean,reviews:List<DoctorReview>,onBack:()->Unit,onFavourite:()->Unit,onBook:()->Unit){val d=DummyData.doctors.firstOrNull{it.id==id}?:DummyData.doctors.first();LazyColumn(page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){item{ScreenTitle("Doctor Details",onBack)};item{DoctorCard(d,favourite,{},onFavourite)};item{InfoCard("About","Experienced "+d.specialty.lowercase()+" focused on clear guidance and patient-friendly care.")};item{InfoCard("Clinic",d.clinic+"\nWalk-in sessions: Morning and Evening")};item{InfoCard("Patient reviews","★ "+d.rating+" / 5\n"+reviews.count{it.doctorId==d.id}+" verified DO-LO reviews")};item{PrimaryButton("Book Walk-in Appointment",onBook)}}}
 @Composable fun FavouritesScreen(state:PatientUiState,onBack:()->Unit,onDoctor:(String)->Unit,onFavourite:(String)->Unit){val ds=DummyData.doctors.filter{it.id in state.favouriteIds};LazyColumn(page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){item{ScreenTitle("Favourite Doctors",onBack)};if(ds.isEmpty())item{EmptyCard("You have not saved any doctors yet.")}else items(ds){DoctorCard(it,true,{onDoctor(it.id)},{onFavourite(it.id)})}}}
 @Composable fun AppointmentHistoryScreen(list:List<Appointment>,onBack:()->Unit,onQueue:(String)->Unit,onReschedule:(String)->Unit,onReview:(String,String)->Unit,canReschedule:(Appointment)->Boolean,canReview:(Appointment)->Boolean,onHome:()->Unit,onBook:()->Unit){
@@ -76,13 +137,13 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
   item{ScreenTitle("Appointment History",onBack)}
   if(list.isEmpty())item{EmptyCard("Your booked appointments will appear here.")}
   else items(list){a->
-   Card(Modifier.fillMaxWidth(),shape=RoundedCornerShape(20.dp)){Column(Modifier.padding(16.dp)){
+   Card(Modifier.fillMaxWidth().shadow(8.dp,RoundedCornerShape(20.dp)),elevation=CardDefaults.cardElevation(defaultElevation=5.dp),shape=RoundedCornerShape(20.dp)){Column(Modifier.padding(16.dp)){
     Row{Text(a.doctorName,fontWeight=FontWeight.Bold,modifier=Modifier.weight(1f));AssistChip({},label={Text(a.status.replace("_"," "))})}
     Text(a.patientName+" • "+a.clinic,color=DoloMuted);Text(displayDate(a.date)+" • "+a.session.name.lowercase().replaceFirstChar(Char::uppercase)+" session")
     StatusTimeline(a.status);Text("Token "+a.token,color=DoloTeal,fontSize=22.sp,fontWeight=FontWeight.Bold)
     if(a.status in listOf(AppointmentStatus.BOOKED,AppointmentStatus.WAITING,AppointmentStatus.IN_CONSULTATION)){TextButton({onQueue(a.id)}){Text("Track live queue")}}
-    if(canReschedule(a)){Button({onReschedule(a.id)}){Text("Reschedule once")}}
-    if(canReview(a)){Button({onReview(a.doctorId,a.id)}){Text("Rate consultation")}}
+    if(canReschedule(a)){Button(onClick={onReschedule(a.id)},elevation=ButtonDefaults.buttonElevation(defaultElevation=8.dp,pressedElevation=2.dp)){Text("Reschedule once")}}
+    if(canReview(a)){Button(onClick={onReview(a.doctorId,a.id)},elevation=ButtonDefaults.buttonElevation(defaultElevation=8.dp,pressedElevation=2.dp)){Text("Rate consultation")}}
    }}
   }
  }
@@ -113,7 +174,7 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
   Icon(Icons.Outlined.CheckCircle,null,tint=DoloTeal,modifier=Modifier.size(80.dp));Text("Booking Confirmed!",style=MaterialTheme.typography.headlineMedium)
   Text("YOUR TOKEN NUMBER",modifier=Modifier.padding(top=24.dp));Text((appointment?.token?:0).toString(),fontSize=88.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal)
   InfoCard(appointment?.doctorName?:d.name,(appointment?.patientName?:"Patient")+"\n"+(appointment?.clinic?:d.clinic)+"\n"+displayDate(appointment?.date?:"Today")+" • "+session.lowercase().replaceFirstChar(Char::uppercase)+" session")
-  Spacer(Modifier.height(20.dp));PrimaryButton("Track Live Queue",onQueue);Spacer(Modifier.height(10.dp));OutlinedButton(onDone,Modifier.fillMaxWidth()){Text("Back to Home")}
+  Spacer(Modifier.height(20.dp));PrimaryButton("Track Live Queue",onQueue);Spacer(Modifier.height(10.dp));OutlinedButton(onDone,Modifier.fillMaxWidth().shadow(7.dp,RoundedCornerShape(20.dp))){Text("Back to Home")}
  }
 }
 
@@ -128,16 +189,16 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
   if(appointment==null)item{EmptyCard("Appointment not found.")}
   else{
    item{InfoCard(appointment.doctorName,"Patient: "+appointment.patientName+"\n"+appointment.clinic+"\nAppointment date: "+displayDate(appointment.date)+"\nToken "+appointment.token+" - "+appointment.session.name.lowercase().replaceFirstChar(Char::uppercase)+" session")}
-   item{Card(Modifier.fillMaxWidth(),colors=CardDefaults.cardColors(containerColor=DoloSurfaceAlt),shape=RoundedCornerShape(24.dp)){Column(Modifier.padding(20.dp),horizontalAlignment=Alignment.CenterHorizontally){
+   item{Card(Modifier.fillMaxWidth().shadow(9.dp,RoundedCornerShape(24.dp)),colors=CardDefaults.cardColors(containerColor=DoloSurfaceAlt),elevation=CardDefaults.cardElevation(defaultElevation=5.dp),shape=RoundedCornerShape(24.dp)){Column(Modifier.padding(20.dp),horizontalAlignment=Alignment.CenterHorizontally){
     Text("CURRENTLY IN CONSULTATION",color=DoloMuted,fontWeight=FontWeight.Bold);Text((queue?.currentToken?:0).toString(),fontSize=58.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal)
-    HorizontalDivider(Modifier.padding(vertical=12.dp));Row(Modifier.fillMaxWidth()){QueueMetric("Your token",appointment.token.toString(),Modifier.weight(1f));QueueMetric("Patients ahead",(queue?.patientsAhead?:0).toString(),Modifier.weight(1f));QueueMetric("Countdown",QueueCountdown.format(QueueCountdown.remainingSeconds(queue,nowMillis)),Modifier.weight(1f))}
+    HorizontalDivider(Modifier.padding(vertical=12.dp));Row(Modifier.fillMaxWidth()){QueueMetric("Your token",appointment.token.toString(),Modifier.weight(1f),accent=Color(0xFFE94F64));QueueMetric("Patients ahead",(queue?.patientsAhead?:0).toString(),Modifier.weight(1f));QueueMetric("Countdown",QueueCountdown.format(QueueCountdown.remainingSeconds(queue,nowMillis)),Modifier.weight(1f))}
    }}}
    item{QueueConnectionBanner(state.syncStatus,queue?.refreshedAt?:0,onRefresh)}
    item{InfoCard("Queue status",ReleaseReadiness.readableStatus(queue?.status?:appointment.status)+"\nAverage consultation: "+QueueCalculator.AVERAGE_CONSULTATION_MINUTES+" minutes\nThe current consultation is included in your estimated wait.")}
    if(appointment.status!=AppointmentStatus.MISSED){
     item{PrimaryButton("Refresh Queue",onRefresh)}
-    item{OutlinedButton(onOffline,Modifier.fillMaxWidth()){Text("Demo: show offline state")}}
-    item{OutlinedButton(onAdvance,Modifier.fillMaxWidth()){Text("Demo: advance one token")}}
+    item{OutlinedButton(onOffline,Modifier.fillMaxWidth().shadow(7.dp,RoundedCornerShape(20.dp))){Text("Demo: show offline state")}}
+    item{OutlinedButton(onAdvance,Modifier.fillMaxWidth().shadow(7.dp,RoundedCornerShape(20.dp))){Text("Demo: advance one token")}}
     if(appointment.status==AppointmentStatus.IN_CONSULTATION)item{PrimaryButton("Demo: complete consultation",onComplete)}
     item{TextButton(onMissed,Modifier.fillMaxWidth()){Text("Demo: mark appointment missed",color=MaterialTheme.colorScheme.error)}}
    }else{
@@ -174,7 +235,8 @@ private fun QueueConnectionBanner(
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().shadow(8.dp, RoundedCornerShape(20.dp)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (offline || stale) {
                 MaterialTheme.colorScheme.errorContainer
@@ -219,7 +281,7 @@ private fun HomeAppointmentQueueCard(
  onClick:()->Unit
 ){
  val countdown=QueueCountdown.format(QueueCountdown.remainingSeconds(queue,nowMillis))
- Card(Modifier.fillMaxWidth().clickable(onClick=onClick),colors=CardDefaults.cardColors(containerColor=DoloSurfaceAlt),shape=RoundedCornerShape(22.dp)){
+ Card(Modifier.fillMaxWidth().shadow(10.dp,RoundedCornerShape(24.dp)).clickable(onClick=onClick),colors=CardDefaults.cardColors(containerColor=Color(0xFFF1F8FF)),elevation=CardDefaults.cardElevation(defaultElevation=6.dp,pressedElevation=2.dp),shape=RoundedCornerShape(24.dp)){
   Column(Modifier.padding(18.dp),verticalArrangement=Arrangement.spacedBy(12.dp)){
    Row(verticalAlignment=Alignment.CenterVertically){
     Icon(Icons.Outlined.MedicalServices,null,tint=DoloTeal,modifier=Modifier.size(42.dp));Spacer(Modifier.width(14.dp))
@@ -228,7 +290,7 @@ private fun HomeAppointmentQueueCard(
    }
    HorizontalDivider()
    Row(Modifier.fillMaxWidth()){
-    QueueMetric("Your token",appointment.token.toString(),Modifier.weight(1f))
+    QueueMetric("Your token",appointment.token.toString(),Modifier.weight(1f),accent=Color(0xFFE94F64))
     QueueMetric("In consultation",(queue?.currentToken?:0).toString(),Modifier.weight(1f))
     QueueMetric("Patients ahead",(queue?.patientsAhead?:0).toString(),Modifier.weight(1f))
    }
@@ -240,7 +302,7 @@ private fun HomeAppointmentQueueCard(
  }
 }
 
-@Composable private fun QueueMetric(label:String,value:String,modifier:Modifier=Modifier){Column(modifier,horizontalAlignment=Alignment.CenterHorizontally){Text(value,fontSize=20.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal);Text(label,fontSize=11.sp,color=DoloMuted,textAlign=TextAlign.Center)}}
+@Composable private fun QueueMetric(label:String,value:String,modifier:Modifier=Modifier,accent:Color=DoloTeal){Column(modifier,horizontalAlignment=Alignment.CenterHorizontally){Text(value,fontSize=22.sp,fontWeight=FontWeight.ExtraBold,color=accent);Text(label,fontSize=11.sp,color=DoloMuted,textAlign=TextAlign.Center)}}
 
 @Composable
 fun ProfileScreen(
@@ -328,7 +390,8 @@ fun ProfileScreen(
                         age = ""
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().shadow(8.dp, RoundedCornerShape(20.dp)),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp, pressedElevation = 2.dp)
             ) { Text("Add Family Member") }
         }
     }
@@ -351,7 +414,8 @@ fun NotificationsScreen(
         } else {
             items(items = state.notifications, key = { notification -> notification.id }) { notification ->
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().shadow(8.dp, RoundedCornerShape(18.dp)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = if (notification.isRead) Color.White else DoloSurfaceAlt
                     ),
@@ -459,7 +523,7 @@ fun SupportScreen(
         item {
             OutlinedButton(
                 onClick = onIntegrations,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().shadow(7.dp, RoundedCornerShape(20.dp))
             ) {
                 Icon(Icons.Outlined.Settings, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
@@ -467,7 +531,7 @@ fun SupportScreen(
             }
         }
         item {
-            OutlinedButton(onClick = {}, modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(onClick = {}, modifier = Modifier.fillMaxWidth().shadow(7.dp, RoundedCornerShape(20.dp))) {
                 Text("Create Support Request (Coming Soon)")
             }
         }
@@ -492,7 +556,8 @@ fun IntegrationStatusScreen(onBack: () -> Unit) {
             key = { capability -> capability.type.name }
         ) { capability ->
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().shadow(8.dp, RoundedCornerShape(20.dp)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 shape = RoundedCornerShape(20.dp)
             ) {
@@ -573,9 +638,9 @@ private fun StatusTimeline(status: String) {
     }
 }
 
-@Composable private fun DateChoice(date:LocalDate,selected:Boolean,onClick:()->Unit,modifier:Modifier=Modifier){Card(modifier.clickable(onClick=onClick),colors=CardDefaults.cardColors(containerColor=if(selected)DoloTeal else Color.White),shape=RoundedCornerShape(16.dp)){Column(Modifier.fillMaxWidth().padding(vertical=12.dp),horizontalAlignment=Alignment.CenterHorizontally){Text(date.format(DateTimeFormatter.ofPattern("EEE")),color=if(selected)Color.White else DoloMuted,fontSize=12.sp);Text(date.dayOfMonth.toString(),color=if(selected)Color.White else DoloNavy,fontSize=20.sp,fontWeight=FontWeight.Bold);Text(date.format(DateTimeFormatter.ofPattern("MMM")),color=if(selected)Color.White else DoloMuted,fontSize=12.sp)}}}
+@Composable private fun DateChoice(date:LocalDate,selected:Boolean,onClick:()->Unit,modifier:Modifier=Modifier){Card(modifier.shadow(7.dp,RoundedCornerShape(16.dp)).clickable(onClick=onClick),colors=CardDefaults.cardColors(containerColor=if(selected)DoloTeal else Color.White),elevation=CardDefaults.cardElevation(defaultElevation=4.dp),shape=RoundedCornerShape(16.dp)){Column(Modifier.fillMaxWidth().padding(vertical=12.dp),horizontalAlignment=Alignment.CenterHorizontally){Text(date.format(DateTimeFormatter.ofPattern("EEE")),color=if(selected)Color.White else DoloMuted,fontSize=12.sp);Text(date.dayOfMonth.toString(),color=if(selected)Color.White else DoloNavy,fontSize=20.sp,fontWeight=FontWeight.Bold);Text(date.format(DateTimeFormatter.ofPattern("MMM")),color=if(selected)Color.White else DoloMuted,fontSize=12.sp)}}}
 private fun displayDate(value:String):String=runCatching{LocalDate.parse(value).format(DateTimeFormatter.ofPattern("EEEE, dd MMM yyyy"))}.getOrDefault(value)
 
-@Composable private fun SessionChoice(title:String,time:String,selected:Boolean,onClick:()->Unit){Card(Modifier.fillMaxWidth().clickable(onClick=onClick),colors=CardDefaults.cardColors(containerColor=if(selected)DoloSurfaceAlt else Color.White),shape=RoundedCornerShape(18.dp)){Row(Modifier.padding(18.dp),verticalAlignment=Alignment.CenterVertically){Icon(if(title=="Morning")Icons.Outlined.LightMode else Icons.Outlined.DarkMode,null,tint=DoloTeal);Spacer(Modifier.width(14.dp));Column(Modifier.weight(1f)){Text(title+" Session",fontWeight=FontWeight.Bold);Text(time,color=DoloMuted)};if(selected)Icon(Icons.Outlined.CheckCircle,null,tint=DoloTeal)}}}
-@Composable private fun InfoCard(title:String,text:String){Card(Modifier.fillMaxWidth(),shape=RoundedCornerShape(20.dp)){Column(Modifier.padding(18.dp)){Text(title,fontWeight=FontWeight.Bold,fontSize=18.sp);Spacer(Modifier.height(6.dp));Text(text,color=DoloMuted)}}}
-@Composable private fun EmptyCard(text:String){Card(Modifier.fillMaxWidth(),colors=CardDefaults.cardColors(containerColor=DoloSurfaceAlt),shape=RoundedCornerShape(20.dp)){Text(text,Modifier.padding(22.dp),textAlign=TextAlign.Center,color=DoloMuted)}}
+@Composable private fun SessionChoice(title:String,time:String,selected:Boolean,onClick:()->Unit){Card(Modifier.fillMaxWidth().shadow(7.dp,RoundedCornerShape(18.dp)).clickable(onClick=onClick),colors=CardDefaults.cardColors(containerColor=if(selected)DoloSurfaceAlt else Color.White),elevation=CardDefaults.cardElevation(defaultElevation=4.dp),shape=RoundedCornerShape(18.dp)){Row(Modifier.padding(18.dp),verticalAlignment=Alignment.CenterVertically){Icon(if(title=="Morning")Icons.Outlined.LightMode else Icons.Outlined.DarkMode,null,tint=DoloTeal);Spacer(Modifier.width(14.dp));Column(Modifier.weight(1f)){Text(title+" Session",fontWeight=FontWeight.Bold);Text(time,color=DoloMuted)};if(selected)Icon(Icons.Outlined.CheckCircle,null,tint=DoloTeal)}}}
+@Composable private fun InfoCard(title:String,text:String){Card(Modifier.fillMaxWidth().shadow(8.dp,RoundedCornerShape(20.dp)),colors=CardDefaults.cardColors(containerColor=Color(0xFFF8FCFF)),elevation=CardDefaults.cardElevation(defaultElevation=5.dp),shape=RoundedCornerShape(20.dp)){Column(Modifier.padding(18.dp)){Text(title,fontWeight=FontWeight.Bold,fontSize=18.sp);Spacer(Modifier.height(6.dp));Text(text,color=DoloMuted)}}}
+@Composable private fun EmptyCard(text:String){Card(Modifier.fillMaxWidth().shadow(8.dp,RoundedCornerShape(20.dp)),colors=CardDefaults.cardColors(containerColor=DoloSurfaceAlt),elevation=CardDefaults.cardElevation(defaultElevation=5.dp),shape=RoundedCornerShape(20.dp)){Text(text,Modifier.padding(22.dp),textAlign=TextAlign.Center,color=DoloMuted)}}

@@ -1,6 +1,11 @@
 package com.dolo.patient.data.model
 
-data class DoctorCategory(val id: String, val name: String, val symbol: String)
+data class DoctorCategory(
+    val id: String,
+    val name: String,
+    val symbol: String,
+    val imageRes: Int,
+)
 
 data class Doctor(
     val id: String,

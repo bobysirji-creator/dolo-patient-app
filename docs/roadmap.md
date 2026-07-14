@@ -121,3 +121,11 @@ Only the dedicated Patient App is in development. Doctor App and Admin App are i
 - Each active appointment has its own token, live queue progress and navigation to the matching queue.
 - Estimated wait includes the current 12-minute consultation; a live countdown updates every second without resetting on normal refresh.
 - Regression tests cover the corrected token 10/current token 9 estimate and countdown.
+## Stage 10 polish pass 3
+
+- Expanded test catalogue to 12 illustrated specialties and 24 doctors, with at least two doctors per category.
+- Added optimized 3D medical category artwork with a lightweight Compose floating animation.
+- Added stronger elevation and shadow treatment to category, doctor, appointment, queue, information and action surfaces.
+- Updated doctor tickets to a softer blue treatment and highlighted the patient's token in coral.
+- Simplified the Home greeting to patient name and saved city.
+- Added catalogue integrity tests for category artwork, specialty coverage and unique doctor IDs.

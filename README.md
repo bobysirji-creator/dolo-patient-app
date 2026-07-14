@@ -2,12 +2,12 @@
 
 DO-LO Patient is a lightweight Kotlin and Jetpack Compose Android prototype for booking walk-in doctor consultations, receiving a token and following a live queue from home.
 
-Current release candidate: **0.9.0-rc3** (version code 11).
+Current release candidate: **0.9.0-rc4** (version code 12).
 
 ## What works
 
 - mobile-number login with the local demo OTP;
-- doctor categories, search, details and persistent favourites;
+- 12 illustrated doctor categories, 24 test doctors, search, details and persistent favourites;
 - walk-in booking with selectable date, morning/evening session and family member;
 - local token allocation, appointment history and lifecycle timeline;
 - foreground live-queue refresh, waiting estimate, stale/offline states and retry;

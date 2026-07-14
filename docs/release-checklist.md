@@ -2,8 +2,8 @@
 
 ## Release candidate
 
-- Version name: `0.9.0-rc3`
-- Version code: `11`
+- Version name: `0.9.0-rc4`
+- Version code: `12`
 - Build type: debug APK for controlled testing
 - Maps, payments, SMS and push notifications: disabled
 

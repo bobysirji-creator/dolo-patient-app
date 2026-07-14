@@ -131,3 +131,8 @@ Stage 10 remains in progress for further physical-device UI feedback. Maps, paym
 Version 0.9.0-rc3 (version code 11) centers Book between Home and Appointments. Home now renders a separate live queue card for every active appointment and identifies both the doctor and booked patient, so self and family-member bookings remain clear.
 
 Queue estimates now include the consultation currently in progress. For example, token 10 while token 9 is in consultation starts at an estimated 12 minutes. Each active appointment stores the current token start time and exposes a one-second countdown that is preserved across routine queue refreshes and app restarts. Stage 10 remains open for further physical-device UI feedback; external integrations remain disabled.
+## Stage 10 polish pass 3
+
+Version 0.9.0-rc4 (version code 12) expands the offline test catalogue to 12 specialties and 24 doctors. Every specialty has two matching doctors and an optimized generated 3D illustration. Category artwork uses a small Compose floating animation without introducing a new runtime dependency.
+
+Cards and primary actions now use stronger elevation and shadows. Doctor tickets use a softer blue surface, the patient's token uses a focused coral accent, and Home identifies the signed-in patient as `Name (City)`. Catalogue integrity is covered by unit tests. External integrations remain disabled and Stage 10 remains open for physical-device feedback.
