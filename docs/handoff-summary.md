@@ -125,3 +125,9 @@ Recommended next action: install the final successful artifact on a physical And
 The Patient App remains open for iterative polish and is now version 0.9.0-rc2 (version code 10). The bottom navigation has been reduced to Home, Appointments and Book. All three destinations are interactive, Appointment History is the Appointments destination, and the central Book action opens doctor categories. The inactive notification bell was removed from the shared page header; the active notification button remains only on Home.
 
 Stage 10 remains in progress for further physical-device UI feedback. Maps, payments, SMS and push notifications remain disabled.
+
+## Stage 10 polish pass 2
+
+Version 0.9.0-rc3 (version code 11) centers Book between Home and Appointments. Home now renders a separate live queue card for every active appointment and identifies both the doctor and booked patient, so self and family-member bookings remain clear.
+
+Queue estimates now include the consultation currently in progress. For example, token 10 while token 9 is in consultation starts at an estimated 12 minutes. Each active appointment stores the current token start time and exposes a one-second countdown that is preserved across routine queue refreshes and app restarts. Stage 10 remains open for further physical-device UI feedback; external integrations remain disabled.

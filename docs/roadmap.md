@@ -113,3 +113,11 @@ Only the dedicated Patient App is in development. Doctor App and Admin App are i
 - README, prototype privacy notice and release checklist document the controlled-test scope.
 - Maps, payments, SMS and push notifications remain disabled.
 - The Patient App roadmap is complete for the offline release candidate; production backend/provider work remains a separate future program.
+
+## Stage 10 polish pass 2
+
+- Bottom navigation order is Home, Book, Appointments, with Book centered.
+- Home shows doctor and patient names for every active appointment, including family-member bookings.
+- Each active appointment has its own token, live queue progress and navigation to the matching queue.
+- Estimated wait includes the current 12-minute consultation; a live countdown updates every second without resetting on normal refresh.
+- Regression tests cover the corrected token 10/current token 9 estimate and countdown.

@@ -195,12 +195,6 @@ fun DoloBottomBar(
                 selected = selected == PatientBottomDestination.HOME,
                 onClick = onHome
             )
-            BottomItem(
-                icon = Icons.Outlined.CalendarMonth,
-                label = "Appointments",
-                selected = selected == PatientBottomDestination.APPOINTMENTS,
-                onClick = onAppointments
-            )
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
@@ -228,6 +222,12 @@ fun DoloBottomBar(
                     modifier = Modifier.padding(top = 2.dp)
                 )
             }
+            BottomItem(
+                icon = Icons.Outlined.CalendarMonth,
+                label = "Appointments",
+                selected = selected == PatientBottomDestination.APPOINTMENTS,
+                onClick = onAppointments
+            )
         }
     }
 }

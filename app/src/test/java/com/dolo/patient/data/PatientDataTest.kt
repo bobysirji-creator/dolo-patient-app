@@ -55,10 +55,21 @@ class PatientDataTest {
         val queue = QueueCalculator.snapshot(appointment, 12, 100)
 
         assertEquals(5, queue.patientsAhead)
-        assertEquals(60, queue.estimatedMinutes)
+        assertEquals(72, queue.estimatedMinutes)
         assertEquals(AppointmentStatus.WAITING, queue.status)
     }
 
+    @Test
+    fun queueIncludesCurrentConsultationInEstimate() {
+        val appointment = Appointment("1", "2", "Dr Test", "Clinic", "2026-07-12", Session.MORNING, 10)
+        val queue = QueueCalculator.snapshot(appointment, 9, refreshedAt = 1_000, currentTokenStartedAt = 1_000)
+
+        assertEquals(0, queue.patientsAhead)
+        assertEquals(12, queue.estimatedMinutes)
+        assertEquals(720, QueueCountdown.remainingSeconds(queue, now = 1_000))
+        assertEquals(660, QueueCountdown.remainingSeconds(queue, now = 61_000))
+        assertEquals("11:00", QueueCountdown.format(660))
+    }
     @Test
     fun queueMarksTurnAtPatientToken() {
         val appointment = Appointment("1", "2", "Dr Test", "Clinic", "2026-07-12", Session.MORNING, 18)
