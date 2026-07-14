@@ -70,16 +70,6 @@ fun ScreenTitle(title: String, onBack: (() -> Unit)? = null) {
             }
         }
         BrandLogo()
-        BadgedBox(
-            badge = { Badge { Text("3") } },
-            modifier = Modifier.align(Alignment.CenterEnd)
-        ) {
-            Icon(
-                Icons.Outlined.Notifications,
-                contentDescription = "Notifications, 3 unread",
-                tint = DoloNavy
-            )
-        }
     }
 }
 
@@ -174,8 +164,19 @@ fun PrimaryButton(
     }
 }
 
+enum class PatientBottomDestination {
+    HOME,
+    APPOINTMENTS,
+    BOOK
+}
+
 @Composable
-fun DoloBottomBar() {
+fun DoloBottomBar(
+    selected: PatientBottomDestination,
+    onHome: () -> Unit,
+    onAppointments: () -> Unit,
+    onBook: () -> Unit
+) {
     Surface(
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         color = Color.White,
@@ -184,29 +185,49 @@ fun DoloBottomBar() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(horizontal = 28.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            BottomItem(Icons.Outlined.Home, "Home", true)
-            BottomItem(Icons.Outlined.CalendarMonth, "Appointments", false)
-            Surface(
-                modifier = Modifier.semantics {
-                    contentDescription = "Book appointment"
-                },
-                shape = CircleShape,
-                color = DoloTeal,
-                shadowElevation = 8.dp
+            BottomItem(
+                icon = Icons.Outlined.Home,
+                label = "Home",
+                selected = selected == PatientBottomDestination.HOME,
+                onClick = onHome
+            )
+            BottomItem(
+                icon = Icons.Outlined.CalendarMonth,
+                label = "Appointments",
+                selected = selected == PatientBottomDestination.APPOINTMENTS,
+                onClick = onAppointments
+            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Icon(
-                    Icons.Outlined.Add,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.padding(15.dp).size(28.dp)
+                Surface(
+                    modifier = Modifier
+                        .sizeIn(minWidth = 56.dp, minHeight = 56.dp)
+                        .semantics { contentDescription = "Book appointment" }
+                        .clickable(role = Role.Button, onClick = onBook),
+                    shape = CircleShape,
+                    color = DoloTeal,
+                    shadowElevation = 8.dp
+                ) {
+                    Icon(
+                        Icons.Outlined.Add,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.padding(15.dp).size(28.dp)
+                    )
+                }
+                Text(
+                    "Book",
+                    fontSize = 10.sp,
+                    color = DoloTeal,
+                    modifier = Modifier.padding(top = 2.dp)
                 )
             }
-            BottomItem(Icons.Outlined.ReceiptLong, "History", false)
-            BottomItem(Icons.Outlined.Person, "Profile", false)
         }
     }
 }
@@ -215,14 +236,16 @@ fun DoloBottomBar() {
 private fun BottomItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     label: String,
-    selected: Boolean
+    selected: Boolean,
+    onClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
-            .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+            .sizeIn(minWidth = 72.dp, minHeight = 56.dp)
             .semantics(mergeDescendants = true) {
                 contentDescription = label + if (selected) ", selected" else ""
-            },
+            }
+            .clickable(role = Role.Button, onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

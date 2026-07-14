@@ -12,8 +12,8 @@ android {
         applicationId = "com.dolo.patient"
         minSdk = 26
         targetSdk = 35
-        versionCode = 9
-        versionName = "0.9.0-rc1"
+        versionCode = 10
+        versionName = "0.9.0-rc2"
     }
 
     buildFeatures { compose = true }

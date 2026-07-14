@@ -1,4 +1,4 @@
-- [ ] Stage 9- [x] Stage 9# DO-LO Android Ecosystem Roadmap
+# DO-LO Android Ecosystem Roadmap
 
 ## Current scope
 
@@ -15,6 +15,7 @@ Only the dedicated Patient App is in development. Doctor App and Admin App are i
 - [x] Stage 7 — Favourites, reviews, missed-appointment rescheduling
 - [x] Stage 8 — Provider-ready maps, payments, SMS and push-notification foundations
 - [x] Stage 9 — accessibility, offline/error states, tests, performance and release hardening
+- [ ] Stage 10 - iterative UI/UX polish from physical-device feedback
 - [ ] Future — Create separate Doctor App, then separate Admin App, reusing contracts/design tokens without coupling app builds
 
 ## Stage 1 acceptance status
@@ -38,7 +39,6 @@ Only the dedicated Patient App is in development. Doctor App and Admin App are i
 - Phone validation unit tests: complete
 - Real backend and SMS provider: intentionally deferred
 - Remote APK validation: pending current GitHub Actions run
-- [x] Stage 9 — accessibility, offline/error states, tests, performance and release hardening
 
 ## Stage 3 acceptance status
 

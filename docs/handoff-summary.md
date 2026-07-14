@@ -119,3 +119,9 @@ ReleaseReadiness centralizes polling/staleness rules and safe local text behavio
 The README, prototype privacy notice and release checklist document the demo scope and release blockers. Maps, payments, SMS and push notifications remain disabled. No production backend, real OTP, server-authoritative appointment/token/queue data, signing pipeline or real medical data is included.
 
 Recommended next action: install the final successful artifact on a physical Android device and complete `docs/release-checklist.md`. After acceptance, freeze this Patient App release candidate. The next ecosystem project should be the dedicated Doctor App in its own repository/project, followed later by the Admin App; do not add either to this Patient App module.
+
+## Stage 10 polish pass 1
+
+The Patient App remains open for iterative polish and is now version 0.9.0-rc2 (version code 10). The bottom navigation has been reduced to Home, Appointments and Book. All three destinations are interactive, Appointment History is the Appointments destination, and the central Book action opens doctor categories. The inactive notification bell was removed from the shared page header; the active notification button remains only on Home.
+
+Stage 10 remains in progress for further physical-device UI feedback. Maps, payments, SMS and push notifications remain disabled.
