@@ -146,3 +146,13 @@ Only the dedicated Patient App is changed in this repository. The Doctor App and
 - Unit tests cover hosted response parsing, malformed clinic filtering, and HTTPS enforcement.
 - Public API code passed GitHub Actions in version 0.10.0-stage16a (version code 13).
 - Stable Patient prototype signing and certificate verification are implemented in version 0.10.1-stage16a (version code 14); first-install and later-upgrade acceptance are pending.
+
+## Stage 16C - Server-authoritative seeded prototype flow
+
+- [x] protected bootstrap using the Keystore-backed renewable Bearer session
+- [x] explicit separate hosted screen; no silent migration of local data
+- [x] PostgreSQL-authoritative appointment and session token allocation
+- [x] persistent idempotency key prevents duplicate retry allocation
+- [x] server appointment history and 15-second live-queue polling
+- [x] local booking, profile, family, favourites and reviews remain unchanged
+- [ ] GitHub Actions and physical-device checklist acceptance

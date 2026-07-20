@@ -48,7 +48,8 @@ The GitHub Actions build must pass all of these before the APK is shared:
 - [ ] APK signature verification passes and its certificate digest matches `signing-certificate.sha256`.
 - [ ] No signing key or secret value exists in the repository or artifact.
 - [ ] No API keys, provider credentials or real patient records are present.
-- [ ] The hosted calls use HTTPS public GET endpoints only and do not upload patient input.
+- [ ] Hosted calls use HTTPS; protected writes are limited to the fixed seeded dummy profile and never upload entered phone or existing local Patient data.
+- [ ] Stage 16C duplicate booking retry returns the original server token through its persisted idempotency key.
 - [ ] Disabled provider screens do not imply that a real payment, SMS, map or push action occurred.
 - [ ] The privacy notice matches the actual build.
 

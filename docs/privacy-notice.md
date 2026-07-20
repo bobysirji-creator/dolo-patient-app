@@ -16,7 +16,7 @@ The prototype can store the following in Android private app storage:
 - appointment date, session and locally generated token;
 - local queue progress, reviews and in-app notifications.
 
-The prototype does not upload this information to DO-LO servers. Stage 16B sends only the fixed key `patient-demo`, demo OTP `123456`, and a generic device label to obtain prototype tokens. The entered phone number, profile, family member, appointment, queue, location, payment, and device-token data are not included. Access and refresh tokens are encrypted with Android Keystore before local storage.
+The ordinary local app does not upload this information. Stage 16C adds a separate, clearly labelled hosted flow that uses only the fixed seeded `Prototype Patient`, doctor, clinic, appointment and queue records. It does not upload the entered phone number or any existing local profile, family member, appointment, favourite, review, location, payment or device-token data. Access and refresh tokens remain encrypted with Android Keystore.
 
 ## External services
 

@@ -37,3 +37,7 @@ The next boundary must add controlled prototype authentication before any write 
 `HttpPrototypeAuthApi` sends only the fixed `patient-demo` key, demo OTP, and a generic device label over HTTPS on a background executor. The phone typed into the UI is not included. `AndroidKeystoreTokenStore` encrypts access and refresh tokens with AES/GCM using a non-exportable Android Keystore key; SharedPreferences contains only IV and ciphertext. Logout clears ciphertext before making a best-effort revocation request.
 
 If the hosted service is offline or cold-starting, login deliberately falls back to the existing local demo session and the Home screen labels that state. Local profiles, appointments, queues, favourites and reviews remain authoritative throughout Stage 16B. No authenticated booking write is attempted.
+
+## Stage 16C authoritative dummy synchronization boundary
+
+Stage 16C adds a separate hosted adapter rather than replacing `LocalPatientRepository`. Only the fixed seeded Patient profile returned by the protected bootstrap can be booked through this adapter. The server owns token allocation, capacity, appointment history and queue estimates. A per-session idempotency key is persisted locally so network retries resolve to the original appointment. The Compose screen polls only while visible; failures are surfaced without converting a failed server write into a local booking.

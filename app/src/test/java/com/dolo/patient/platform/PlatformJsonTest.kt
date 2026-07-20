@@ -9,25 +9,27 @@ class PlatformJsonTest {
     @Test
     fun parsesAcceptedHostedHealthAndCapabilities() {
         assertEquals(
-            "0.2.0-stage16b",
+            "0.3.0-stage16c",
             PlatformJson.parseHealth(
-                """{"status":"ok","version":"0.2.0-stage16b"}"""
+                """{"status":"ok","version":"0.3.0-stage16c"}"""
             )
         )
 
         val capabilities = PlatformJson.parseCapabilities(
             """{
-                "stage":16.2,
-                "transport":"CONTROLLED_PROTOTYPE_IDENTITY",
+                "stage":16.3,
+                "transport":"AUTHORITATIVE_DUMMY_PATIENT_SYNC",
                 "databaseConnected":true,
                 "authenticationEnabled":true,
+                "patientSynchronization":"AUTHORITATIVE_DUMMY_ONLY",
                 "providers":{"sms":false,"push":false,"maps":false,"payments":false}
             }""".trimIndent()
         )
 
-        assertEquals("16.2", capabilities.stage)
+        assertEquals("16.3", capabilities.stage)
         assertTrue(capabilities.databaseConnected)
         assertTrue(capabilities.authenticationEnabled)
+        assertEquals("AUTHORITATIVE_DUMMY_ONLY", capabilities.patientSynchronization)
         assertFalse(capabilities.smsEnabled)
         assertFalse(capabilities.pushEnabled)
         assertFalse(capabilities.mapsEnabled)

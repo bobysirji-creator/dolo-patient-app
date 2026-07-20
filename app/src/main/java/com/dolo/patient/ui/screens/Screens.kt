@@ -544,7 +544,8 @@ fun SupportScreen(
 fun IntegrationStatusScreen(
     onBack: () -> Unit,
     platform: PlatformConnectionState,
-    onRefreshPlatform: () -> Unit
+    onRefreshPlatform: () -> Unit,
+    onHostedSync: () -> Unit
 ) {
     LaunchedEffect(Unit) {
         if (platform.status == PlatformConnectionStatus.NOT_CHECKED) onRefreshPlatform()
@@ -573,6 +574,7 @@ fun IntegrationStatusScreen(
                     }
                     Text(platform.message, color = DoloMuted, fontSize = 13.sp)
                     if (platform.status == PlatformConnectionStatus.CONNECTED) {
+
                         val capability = platform.capabilities
                         Text(
                             "Version ${platform.serviceVersion} • Stage ${capability?.stage ?: "unknown"}",
@@ -585,7 +587,7 @@ fun IntegrationStatusScreen(
                             fontSize = 13.sp
                         )
                         Text(
-                            "Prototype identity: ${if (capability?.authenticationEnabled == true) "enabled" else "disabled"}",
+                            "Prototype identity: ${if (capability?.authenticationEnabled == true) "enabled" else "disabled"} | Patient sync: ${capability?.patientSynchronization ?: "DISABLED"}",
                             color = if (capability?.authenticationEnabled == true) DoloTeal else DoloMuted,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.SemiBold
@@ -611,9 +613,16 @@ fun IntegrationStatusScreen(
         }
         item {
             InfoCard(
-                "Safe Stage 16B boundary",
-                "Login can obtain encrypted tokens for one seeded dummy identity. Your entered phone, profile, booking and queue data remain on this device and are not uploaded."
+                "Safe Stage 16C boundary",
+                "Only the separate seeded dummy flow can now create server-authoritative bookings. Your entered phone and existing local profile, family, bookings and queue data are never uploaded."
             )
+        }
+        item {
+            Button(onClick = onHostedSync, modifier = Modifier.fillMaxWidth()) {
+                Icon(Icons.Outlined.CloudDone, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Open hosted prototype sync")
+            }
         }
         if (platform.status == PlatformConnectionStatus.CONNECTED) {
             item {

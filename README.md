@@ -2,7 +2,7 @@
 
 DO-LO Patient is a lightweight Kotlin and Jetpack Compose Android prototype for booking walk-in doctor consultations, receiving a token and following a live queue from home.
 
-Current integration build: **0.11.0-stage16b** (version code 15).
+Current integration build: **0.12.0-stage16c** (version code 16).
 
 ## What works
 
@@ -16,7 +16,7 @@ Current integration build: **0.11.0-stage16b** (version code 15).
 - accessible labels and minimum touch targets;
 - public connection checks plus securely stored, backend-issued prototype access and refresh tokens.
 
-Maps, payments, SMS and push-notification providers remain deliberately disabled. Stage 16B sends only the fixed `patient-demo` identity and demo OTP over HTTPS; the mobile number typed into the app is not sent. Profiles, family members, bookings and queues remain local and are never uploaded.
+Maps, payments, SMS and push-notification providers remain deliberately disabled. Stage 16C sends only the fixed `patient-demo` identity and demo OTP for authentication, then uses a separate seeded dummy profile/clinic flow for authoritative booking and queue reads. The typed mobile number and all existing local profiles, family members, bookings, favourites and reviews are not uploaded.
 
 ## Demo login
 
@@ -58,3 +58,7 @@ The Doctor App and platform API are separate projects. The future Admin App will
 - Review [Privacy Notice](docs/privacy-notice.md).
 - Follow the [Release Checklist](docs/release-checklist.md).
 - See the [Roadmap](docs/roadmap.md) and [Handoff Summary](docs/handoff-summary.md).
+
+## Stage 16C authoritative dummy flow
+
+Support > Integration readiness now opens a separate hosted prototype screen. It uses only seeded dummy records and the protected Platform API for server-authoritative booking, token history and live-queue polling. Existing local Patient data is not migrated or uploaded, and the local workflow remains available when the prototype service is offline. See `docs/stage16c-device-test.md`.

@@ -175,3 +175,9 @@ Real SMS/OTP, arbitrary accounts, authenticated booking writes, server queue syn
 ### Stage 16B acceptance
 
 Accepted on 20 July 2026. GitHub Actions passed, the stable APK updated the existing installation without data loss, hosted identity and Android Keystore session restoration passed after full app closure, Integration Readiness matched the deployed Stage 16.2 API, offline login visibly fell back to local mode, and reconnecting restored hosted prototype mode. Stage 16C is the next recommended phase.
+
+## Stage 16C implementation checkpoint
+
+Patient App `0.12.0-stage16c` (version code 16) adds an explicit Hosted Prototype Sync screen under Support > Integration readiness. It reuses the Stage 16B Keystore token pair, refreshes expired access tokens, boots the seeded dummy profile/clinic sessions, sends idempotent authoritative booking writes, reads server appointment history, and polls the owner-scoped live queue every 15 seconds while visible.
+
+This does not migrate or upload existing local profiles, family members, appointments, favourites or reviews. The ordinary local workflow remains the fallback. Hosted snapshots are fetched again from the server and are not presented as an offline source of truth. GitHub Actions and `docs/stage16c-device-test.md` remain pending; local Android tooling is unavailable on this low-resource PC.

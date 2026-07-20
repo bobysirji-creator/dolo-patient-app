@@ -73,6 +73,18 @@ sealed interface PrototypeAuthResult<out T> {
     data class Failure(val message: String) : PrototypeAuthResult<Nothing>
 }
 
+class PrototypeSessionManager(private val store: SecureTokenStore, private val api: PrototypeAuthApi) {
+    @Synchronized fun accessToken(): String? {
+        val current = store.read() ?: return null
+        if (PrototypeAuthJson.hasUsableAccess(current)) return current.accessToken
+        if (!PrototypeAuthJson.hasUsableRefresh(current)) { store.clear(); return null }
+        return when (val refreshed = api.refresh(current.refreshToken)) {
+            is PrototypeAuthResult.Success -> { store.save(refreshed.value); refreshed.value.accessToken }
+            is PrototypeAuthResult.Failure -> { store.clear(); null }
+        }
+    }
+}
+
 interface PrototypeAuthApi {
     fun createDemoSession(): PrototypeAuthResult<PrototypeTokenBundle>
     fun refresh(refreshToken: String): PrototypeAuthResult<PrototypeTokenBundle>
