@@ -1,10 +1,10 @@
 # DO-LO Patient App Privacy Notice
 
-Last updated: 13 July 2026
+Last updated: 20 July 2026
 
 ## Current release-candidate scope
 
-DO-LO Patient is currently an offline-first demonstration app. Stage 16A reads public health, capability, and clinic-discovery data from the hosted DO-LO prototype, but it is not connected to a production healthcare service and must not be used for emergencies, diagnosis, prescriptions, or storage of sensitive medical records.
+DO-LO Patient is currently an offline-first demonstration app. Stage 16B reads public health, capability, and clinic-discovery data and can create a session for one seeded dummy identity from the hosted DO-LO prototype, but it is not connected to a production healthcare service and must not be used for emergencies, diagnosis, prescriptions, or storage of sensitive medical records.
 
 ## Data currently stored on the device
 
@@ -16,7 +16,7 @@ The prototype can store the following in Android private app storage:
 - appointment date, session and locally generated token;
 - local queue progress, reviews and in-app notifications.
 
-The prototype does not upload this information to DO-LO servers. Stage 16A sends only public GET requests for service status and clinic discovery; no phone number, profile, family member, appointment, queue, location, payment, or device-token data is included.
+The prototype does not upload this information to DO-LO servers. Stage 16B sends only the fixed key `patient-demo`, demo OTP `123456`, and a generic device label to obtain prototype tokens. The entered phone number, profile, family member, appointment, queue, location, payment, and device-token data are not included. Access and refresh tokens are encrypted with Android Keystore before local storage.
 
 ## External services
 
@@ -35,7 +35,7 @@ Any future provider must be documented, configured outside source control, and r
 - Android backup is disabled.
 - Cleartext HTTP traffic is disabled.
 - No provider credentials or API keys are included in the repository or APK.
-- The debug APK is for testing only and is not a signed production release.
+- The stable debug APK has a repeatable prototype signature for upgrades, but it is not a Play Store production release.
 
 ## User controls
 

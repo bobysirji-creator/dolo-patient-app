@@ -17,7 +17,7 @@ Only the dedicated Patient App is changed in this repository. The Doctor App and
 - [x] Stage 9 — accessibility, offline/error states, tests, performance and release hardening
 - [ ] Stage 10 - iterative UI/UX polish from physical-device feedback
 - [x] Stage 16A - Patient App public hosted-API connection, capability status and clinic-discovery preview with local fallback
-- [ ] Stage 16B - controlled prototype identity/authentication and secure access-token storage
+- [x] Stage 16B - controlled prototype identity/authentication and Android Keystore-encrypted token storage (device acceptance pending)
 - [ ] Stage 16C - server-authoritative Patient booking, token and live-queue synchronization behind an explicit migration switch
 - [x] Ecosystem - Dedicated Doctor App created in a separate repository
 - [ ] Future - Create the separate Admin App, reusing contracts/design tokens without coupling app builds

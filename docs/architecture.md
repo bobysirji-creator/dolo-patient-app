@@ -31,3 +31,9 @@ Doctor is already a separate Android project and the platform API is a separate 
 `PlatformConnectionViewModel` runs those calls on one background executor and reports connecting, connected, or offline state to the Integration Readiness screen. A hosted failure never replaces or clears local PatientRepository data.
 
 The next boundary must add controlled prototype authentication before any write endpoint is called. Server appointments and queues must not be mixed with local appointments until an explicit migration and conflict policy exists.
+
+## Stage 16B identity and token boundary
+
+`HttpPrototypeAuthApi` sends only the fixed `patient-demo` key, demo OTP, and a generic device label over HTTPS on a background executor. The phone typed into the UI is not included. `AndroidKeystoreTokenStore` encrypts access and refresh tokens with AES/GCM using a non-exportable Android Keystore key; SharedPreferences contains only IV and ciphertext. Logout clears ciphertext before making a best-effort revocation request.
+
+If the hosted service is offline or cold-starting, login deliberately falls back to the existing local demo session and the Home screen labels that state. Local profiles, appointments, queues, favourites and reviews remain authoritative throughout Stage 16B. No authenticated booking write is attempted.

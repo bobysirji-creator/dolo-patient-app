@@ -51,9 +51,9 @@ import kotlinx.coroutines.delay
 private val page=Modifier.fillMaxSize().background(DoloBackground)
 
 @Composable fun SplashScreen(onContinue:()->Unit){Box(page.padding(28.dp),contentAlignment=Alignment.Center){Column(horizontalAlignment=Alignment.CenterHorizontally){BrandLogo();Spacer(Modifier.height(28.dp));Icon(Icons.Outlined.HealthAndSafety,null,tint=DoloTeal,modifier=Modifier.size(130.dp));Text("Book. Track. Visit.",style=MaterialTheme.typography.headlineMedium);Text("Worry less.",color=DoloTeal,fontSize=22.sp,fontWeight=FontWeight.Bold);Spacer(Modifier.height(34.dp));PrimaryButton("Get started",onContinue)}}}
-@Composable fun LoginScreen(auth:AuthViewModel,onLogin:()->Unit){val s=auth.uiState;LaunchedEffect(s.step){if(s.step==AuthStep.AUTHENTICATED)onLogin()};Column(page.padding(24.dp),verticalArrangement=Arrangement.Center){BrandLogo();Spacer(Modifier.height(30.dp));Text(if(s.step==AuthStep.OTP)"Verify OTP" else "Welcome Back!",style=MaterialTheme.typography.headlineMedium);Text(if(s.step==AuthStep.OTP)"Code sent to +91 "+s.phone else "Login using your mobile number",color=DoloMuted);Spacer(Modifier.height(20.dp));if(s.step==AuthStep.PHONE){OutlinedTextField(s.phone,auth::updatePhone,Modifier.fillMaxWidth(),label={Text("Mobile number")},prefix={Text("+91 ")},keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Phone),singleLine=true);Spacer(Modifier.height(16.dp));PrimaryButton("Send OTP",auth::requestOtp,s.phone.length==10)}else{OutlinedTextField(s.otp,auth::updateOtp,Modifier.fillMaxWidth(),label={Text("6-digit OTP")},keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.NumberPassword),singleLine=true);Text("Demo OTP: 123456",color=DoloTeal,modifier=Modifier.padding(vertical=12.dp));PrimaryButton("Verify & Continue",auth::verifyOtp,s.otp.length==6);TextButton(auth::editPhone){Text("Change mobile number")}};s.error?.let{Text(it,color=MaterialTheme.colorScheme.error)}}}
+@Composable fun LoginScreen(auth:AuthViewModel,onLogin:()->Unit){val s=auth.uiState;LaunchedEffect(s.step){if(s.step==AuthStep.AUTHENTICATED)onLogin()};Column(page.padding(24.dp),verticalArrangement=Arrangement.Center){BrandLogo();Spacer(Modifier.height(30.dp));Text(if(s.step==AuthStep.OTP)"Verify OTP" else "Welcome Back!",style=MaterialTheme.typography.headlineMedium);Text(if(s.step==AuthStep.OTP)"Code sent to +91 "+s.phone else "Login using your mobile number",color=DoloMuted);Spacer(Modifier.height(20.dp));if(s.step==AuthStep.PHONE){OutlinedTextField(s.phone,auth::updatePhone,Modifier.fillMaxWidth(),label={Text("Mobile number")},prefix={Text("+91 ")},keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Phone),singleLine=true);Spacer(Modifier.height(16.dp));PrimaryButton("Send OTP",auth::requestOtp,s.phone.length==10)}else{OutlinedTextField(s.otp,auth::updateOtp,Modifier.fillMaxWidth(),label={Text("6-digit OTP")},keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.NumberPassword),singleLine=true);Text("Demo OTP: 123456",color=DoloTeal,modifier=Modifier.padding(vertical=12.dp));PrimaryButton(if(s.isLoading)"Connecting..." else "Verify & Continue",auth::verifyOtp,s.otp.length==6&&!s.isLoading);TextButton(auth::editPhone){Text("Change mobile number")}};s.error?.let{Text(it,color=MaterialTheme.colorScheme.error)}}}
 
-@Composable fun HomeScreen(onCategories:()->Unit,onDoctor:(String)->Unit,onHistory:()->Unit,onFavourites:()->Unit,onQueue:(String)->Unit,onProfile:()->Unit,onNotifications:()->Unit,onSupport:()->Unit,onLogout:()->Unit,state:PatientUiState,onSearch:(String)->Unit,onRefreshQueues:()->Unit){
+@Composable fun HomeScreen(onCategories:()->Unit,onDoctor:(String)->Unit,onHistory:()->Unit,onFavourites:()->Unit,onQueue:(String)->Unit,onProfile:()->Unit,onNotifications:()->Unit,onSupport:()->Unit,onLogout:()->Unit,state:PatientUiState,onSearch:(String)->Unit,onRefreshQueues:()->Unit,authStatus:String){
  var q by remember{mutableStateOf("")}
  var nowMillis by remember{mutableStateOf(System.currentTimeMillis())}
  val activeAppointments=state.appointments.filter{it.status in listOf(AppointmentStatus.BOOKED,AppointmentStatus.WAITING,AppointmentStatus.IN_CONSULTATION)}
@@ -62,7 +62,7 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
  Scaffold(containerColor=DoloBackground,bottomBar={DoloBottomBar(selected=PatientBottomDestination.HOME,onHome={},onAppointments=onHistory,onBook=onCategories)}){p->
   LazyColumn(Modifier.padding(p).padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){
    item{Row(verticalAlignment=Alignment.CenterVertically){BrandLogo();Spacer(Modifier.weight(1f));IconButton(onNotifications){BadgedBox({if(state.notifications.any{!it.isRead})Badge()}){Icon(Icons.Outlined.Notifications,"Notifications")}};IconButton(onProfile){Icon(Icons.Outlined.Person,"Profile")};IconButton(onLogout){Icon(Icons.Outlined.Logout,"Logout")}}}
-   item{Text(state.profile.name+" ("+state.profile.city+")",fontSize=26.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal)}
+   item{Column{Text(state.profile.name+" ("+state.profile.city+")",fontSize=26.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal);Text("Identity: "+authStatus,color=if(authStatus=="Hosted prototype")DoloTeal else DoloMuted,fontSize=12.sp,fontWeight=FontWeight.SemiBold)}}
    item{OutlinedTextField(q,{q=it},Modifier.fillMaxWidth(),placeholder={Text("Search doctor, specialty or clinic")},leadingIcon={Icon(Icons.Outlined.Search,null)},trailingIcon={IconButton({onSearch(q)}){Icon(Icons.Outlined.ArrowForward,null)}},singleLine=true,shape=RoundedCornerShape(18.dp))}
    item{Text(if(activeAppointments.size==1)"Live Appointment" else "Live Appointments",style=MaterialTheme.typography.titleLarge)}
    if(activeAppointments.isEmpty())item{EmptyCard("Your active appointment and live queue will appear here.")}
@@ -584,6 +584,12 @@ fun IntegrationStatusScreen(
                             color = DoloMuted,
                             fontSize = 13.sp
                         )
+                        Text(
+                            "Prototype identity: ${if (capability?.authenticationEnabled == true) "enabled" else "disabled"}",
+                            color = if (capability?.authenticationEnabled == true) DoloTeal else DoloMuted,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
                     Button(
                         onClick = onRefreshPlatform,
@@ -605,8 +611,8 @@ fun IntegrationStatusScreen(
         }
         item {
             InfoCard(
-                "Safe Stage 16A boundary",
-                "Only public health, capability and clinic-discovery data is downloaded. Login, profile, booking and queue data remain on this device and are not uploaded."
+                "Safe Stage 16B boundary",
+                "Login can obtain encrypted tokens for one seeded dummy identity. Your entered phone, profile, booking and queue data remain on this device and are not uploaded."
             )
         }
         if (platform.status == PlatformConnectionStatus.CONNECTED) {
@@ -660,7 +666,7 @@ fun IntegrationStatusScreen(
         }
         item {
             Text(
-                "Provider credentials are not stored in this app. Authenticated appointments and live synchronization will be enabled only after the prototype identity stage is complete.",
+                "Provider credentials are not stored in this app. Server appointments and live synchronization remain disabled until the separate Stage 16C migration is tested.",
                 color = DoloMuted,
                 fontSize = 12.sp,
                 textAlign = TextAlign.Center,

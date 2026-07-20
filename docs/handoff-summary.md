@@ -164,3 +164,9 @@ Main-branch and manual CI builds now require four encrypted Patient-repository s
 A separate Patient certificate was generated outside all Git repositories at `C:\Users\Poly\Documents\codex\private\dolo-patient-prototype-signing`. It must be backed up securely. No private value is committed.
 
 Because the previously installed Patient APK uses an unrecoverable temporary certificate, the first stable build requires one uninstall and loses old local demo data. Once the stable build is installed, all future builds using this certificate can update in place and retain local data.
+
+## Stage 16B controlled prototype identity
+
+Version `0.11.0-stage16b` (version code 15) requests tokens only for the fixed seeded `patient-demo` identity. The entered mobile number is retained locally and never sent to the backend. Access and rotating refresh tokens are encrypted with AES/GCM under Android Keystore; SharedPreferences stores only ciphertext and IV. Token networking runs off the UI thread, logout clears local token material immediately, and a Render/offline failure preserves the established local demo workflow with a visible `Local fallback` label.
+
+Real SMS/OTP, arbitrary accounts, authenticated booking writes, server queue synchronization, maps, payments and push remain disabled. Local build tools are unavailable on this PC, so GitHub Actions must validate lint, unit tests and APK assembly. Follow `docs/stage16b-device-test.md` after the Platform API deploy is healthy.
