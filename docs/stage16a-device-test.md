@@ -1,12 +1,14 @@
 # Stage 16A Physical-Device Test
 
-Use the GitHub Actions `dolo-patient-debug-apk` artifact. Android Studio is not required.
+Use the GitHub Actions `dolo-patient-stable-debug-apk` artifact. Android Studio is not required.
 
 ## Upgrade safety
 
-1. Keep the currently installed Patient App and its local demo data.
-2. Install version `0.10.0-stage16a` (version code 13) over it.
-3. Confirm login state, profile, family members, favourites, appointments, and queue cards remain available.
+1. Record any local demo information needed from the temporary-key app.
+2. Uninstall that existing Patient App once; its local data will be erased because Android backup is disabled.
+3. Install the first stable build, version `0.10.1-stage16a` (version code 14).
+4. Recreate enough demo data to test retention.
+5. For the next stable build, install over this app without uninstalling and confirm all local data remains available.
 
 ## Hosted connection
 

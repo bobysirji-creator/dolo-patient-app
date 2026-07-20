@@ -144,4 +144,5 @@ Only the dedicated Patient App is changed in this repository. The Doctor App and
 - No patient data, phone number, appointment, payment data, location, or device token is sent.
 - External SMS, push, maps, and payment providers remain disabled.
 - Unit tests cover hosted response parsing, malformed clinic filtering, and HTTPS enforcement.
-- Physical-device and GitHub Actions acceptance are pending for version 0.10.0-stage16a (version code 13).
+- Public API code passed GitHub Actions in version 0.10.0-stage16a (version code 13).
+- Stable Patient prototype signing and certificate verification are implemented in version 0.10.1-stage16a (version code 14); first-install and later-upgrade acceptance are pending.

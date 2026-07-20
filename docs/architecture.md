@@ -9,8 +9,8 @@ Package boundaries:
 - `ui/theme`: DO-LO visual tokens
 - `ui/components`: reusable Compose controls
 - `ui/screens`: placeholder feature screens
-- ui/DoloPatientApp.kt: navigation graph
-- platform: lightweight HTTPS transport, hosted DTO parsing and connection state
+- `ui/DoloPatientApp.kt`: navigation graph
+- `platform`: lightweight HTTPS transport, hosted DTO parsing and connection state
 
 Planned evolution:
 

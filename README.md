@@ -2,7 +2,7 @@
 
 DO-LO Patient is a lightweight Kotlin and Jetpack Compose Android prototype for booking walk-in doctor consultations, receiving a token and following a live queue from home.
 
-Current integration build: **0.10.0-stage16a** (version code 13).
+Current integration build: **0.10.1-stage16a** (version code 14).
 
 ## What works
 
@@ -29,12 +29,12 @@ Maps, payments, SMS and push-notification providers remain deliberately disabled
 You do not need to run Android Studio and Codex together.
 
 1. Open the latest successful run under [GitHub Actions](https://github.com/bobysirji-creator/dolo-patient-app/actions).
-2. Download the `dolo-patient-debug-apk` artifact.
+2. Download the `dolo-patient-stable-debug-apk` artifact.
 3. Extract the ZIP and compare the APK with its `.sha256` file.
 4. Transfer the APK to the Android phone, allow installation from that trusted source, and install.
 5. Disable that installation permission again after testing.
 
-The debug APK is for controlled physical-device testing, not Play Store publication.
+The stable-debug APK uses a persistent prototype certificate for repeatable device upgrades. It is still only for controlled physical-device testing, not Play Store publication. The first stable installation requires uninstalling an older temporary-key build once; later stable APKs can update in place.
 
 ## Optional local build
 

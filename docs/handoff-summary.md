@@ -136,6 +136,7 @@ Queue estimates now include the consultation currently in progress. For example,
 Version 0.9.0-rc4 (version code 12) expands the offline test catalogue to 12 specialties and 24 doctors. Every specialty has two matching doctors and an optimized generated 3D illustration. Category artwork uses a small Compose floating animation without introducing a new runtime dependency.
 
 Cards and primary actions now use stronger elevation and shadows. Doctor tickets use a softer blue surface, the patient's token uses a focused coral accent, and Home identifies the signed-in patient as `Name (City)`. Catalogue integrity is covered by unit tests. External integrations remain disabled and Stage 10 remains open for physical-device feedback.
+
 ## Stage 16A handoff - public hosted API connection
 
 Version 0.10.0-stage16a (version code 13) starts the Patient App integration phase without risking its accepted offline workflow. The app now calls the hosted Render prototype over HTTPS for health, capabilities, and public clinic discovery. The status is visible through Home > Help & Support > Integration readiness and can be retried after a Render cold start or offline condition.
@@ -153,3 +154,13 @@ Validation required:
 5. Re-enable connectivity and confirm retry returns to connected.
 
 Recommended next stage: Stage 16B controlled prototype identity. Add backend-issued short-lived access tokens and secure Android token storage before connecting booking or queue writes. Do not enable real OTP/SMS or collect real patient data in that stage.
+
+## Stage 16A signing correction
+
+Version `0.10.1-stage16a` (version code 14) fixes repeatable Patient APK upgrades. The package-conflict installation error was caused by GitHub-hosted runners generating a different default debug certificate for each build.
+
+Main-branch and manual CI builds now require four encrypted Patient-repository secrets, reconstruct the private PKCS#12 only in runner temporary storage, sign the debug APK, verify it with `apksigner`, and compare the APK certificate digest with the keystore certificate. The artifact is `dolo-patient-stable-debug-apk` and includes the APK, APK checksum, and signing-certificate SHA-256. Pull requests receive no signing secrets and publish no installable APK.
+
+A separate Patient certificate was generated outside all Git repositories at `C:\Users\Poly\Documents\codex\private\dolo-patient-prototype-signing`. It must be backed up securely. No private value is committed.
+
+Because the previously installed Patient APK uses an unrecoverable temporary certificate, the first stable build requires one uninstall and loses old local demo data. Once the stable build is installed, all future builds using this certificate can update in place and retain local data.

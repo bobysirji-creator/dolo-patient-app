@@ -27,16 +27,62 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
+      - name: Require stable signing secrets
+        if: github.event_name != 'pull_request'
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.DOLO_SIGNING_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.DOLO_SIGNING_STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.DOLO_SIGNING_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.DOLO_SIGNING_KEY_PASSWORD }}
+        run: |
+          : "${KEYSTORE_BASE64:?Missing DOLO_SIGNING_KEYSTORE_BASE64 Actions secret}"
+          : "${STORE_PASSWORD:?Missing DOLO_SIGNING_STORE_PASSWORD Actions secret}"
+          : "${KEY_ALIAS:?Missing DOLO_SIGNING_KEY_ALIAS Actions secret}"
+          : "${KEY_PASSWORD:?Missing DOLO_SIGNING_KEY_PASSWORD Actions secret}"
+      - name: Restore prototype signing keystore
+        if: github.event_name != 'pull_request'
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.DOLO_SIGNING_KEYSTORE_BASE64 }}
+        run: |
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/dolo-patient-prototype.p12"
+          chmod 600 "$RUNNER_TEMP/dolo-patient-prototype.p12"
       - name: Lint, test and build debug APK
+        env:
+          DOLO_SIGNING_STORE_FILE: ${{ runner.temp }}/dolo-patient-prototype.p12
+          DOLO_SIGNING_STORE_PASSWORD: ${{ secrets.DOLO_SIGNING_STORE_PASSWORD }}
+          DOLO_SIGNING_KEY_ALIAS: ${{ secrets.DOLO_SIGNING_KEY_ALIAS }}
+          DOLO_SIGNING_KEY_PASSWORD: ${{ secrets.DOLO_SIGNING_KEY_PASSWORD }}
         run: gradle --no-daemon :app:lintDebug :app:testDebugUnitTest :app:assembleDebug
+      - name: Verify stable APK signature
+        if: github.event_name != 'pull_request'
+        shell: bash
+        env:
+          DOLO_SIGNING_STORE_FILE: ${{ runner.temp }}/dolo-patient-prototype.p12
+          DOLO_SIGNING_STORE_PASSWORD: ${{ secrets.DOLO_SIGNING_STORE_PASSWORD }}
+          DOLO_SIGNING_KEY_ALIAS: ${{ secrets.DOLO_SIGNING_KEY_ALIAS }}
+        run: |
+          APKSIGNER="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -1)"
+          test -n "$APKSIGNER"
+          "$APKSIGNER" verify --verbose --print-certs app/build/outputs/apk/debug/app-debug.apk
+          APK_DIGEST="$("$APKSIGNER" verify --verbose --print-certs app/build/outputs/apk/debug/app-debug.apk | sed -n 's/^.*certificate SHA-256 digest: //p' | head -1)"
+          KEY_DIGEST="$(keytool -exportcert -keystore "$DOLO_SIGNING_STORE_FILE" -storetype PKCS12 -storepass "$DOLO_SIGNING_STORE_PASSWORD" -alias "$DOLO_SIGNING_KEY_ALIAS" | sha256sum | awk '{print $1}')"
+          test -n "$APK_DIGEST"
+          test -n "$KEY_DIGEST"
+          test "$APK_DIGEST" = "$KEY_DIGEST"
+          printf '%s\n' "$APK_DIGEST" > app/build/outputs/apk/debug/signing-certificate.sha256
       - name: Create APK checksum
+        if: github.event_name != 'pull_request'
         run: sha256sum app/build/outputs/apk/debug/app-debug.apk > app/build/outputs/apk/debug/app-debug.apk.sha256
-      - name: Upload installable APK
+      - name: Upload stable installable APK
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: dolo-patient-debug-apk
+          name: dolo-patient-stable-debug-apk
           path: |
             app/build/outputs/apk/debug/app-debug.apk
             app/build/outputs/apk/debug/app-debug.apk.sha256
+            app/build/outputs/apk/debug/signing-certificate.sha256
           if-no-files-found: error
           retention-days: 14

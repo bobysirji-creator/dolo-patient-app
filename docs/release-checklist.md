@@ -2,8 +2,8 @@
 
 ## Release candidate
 
-- Version name: `0.10.0-stage16a`
-- Version code: `13`
+- Version name: `0.10.1-stage16a`
+- Version code: `14`
 - Build type: debug APK for controlled testing
 - Maps, payments, SMS and push notifications: disabled
 
@@ -15,11 +15,12 @@ The GitHub Actions build must pass all of these before the APK is shared:
 - Unit tests: `:app:testDebugUnitTest`
 - APK assembly: `:app:assembleDebug`
 - SHA-256 checksum generation
-- Artifact upload containing the APK and checksum
+- Stable artifact upload containing the APK, checksum, and signing-certificate SHA-256
 
 ## Physical-device acceptance
 
-- [ ] Install or upgrade the APK on a physical Android device.
+- [ ] For the first stable build only, uninstall the temporary-key Patient App and install the stable APK.
+- [ ] Install a later stable APK over it and confirm an in-place upgrade succeeds.
 - [ ] Login accepts a valid 10-digit mobile number and demo OTP `123456`.
 - [ ] Doctor search, categories, doctor details and favourites work.
 - [ ] Booking preserves the selected date, session, patient and family member.
@@ -44,6 +45,8 @@ The GitHub Actions build must pass all of these before the APK is shared:
 
 - [ ] Android backup remains disabled.
 - [ ] Cleartext HTTP traffic remains disabled.
+- [ ] APK signature verification passes and its certificate digest matches `signing-certificate.sha256`.
+- [ ] No signing key or secret value exists in the repository or artifact.
 - [ ] No API keys, provider credentials or real patient records are present.
 - [ ] The hosted calls use HTTPS public GET endpoints only and do not upload patient input.
 - [ ] Disabled provider screens do not imply that a real payment, SMS, map or push action occurred.
@@ -56,7 +59,7 @@ Do not publish this release candidate to Google Play until all of these are reso
 - production backend and authoritative authentication/OTP;
 - server-owned appointment, token and live-queue state;
 - approved provider integrations and policies;
-- release signing and protected signing-key process;
+- production/Play release signing and long-term protected key-custody process;
 - account deletion and data export;
 - production privacy policy, retention rules and legal review;
 - clinic/doctor operational validation;

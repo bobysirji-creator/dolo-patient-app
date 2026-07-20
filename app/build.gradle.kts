@@ -4,6 +4,17 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+val prototypeSigningStore = providers.environmentVariable("DOLO_SIGNING_STORE_FILE").orNull
+val prototypeSigningStorePassword = providers.environmentVariable("DOLO_SIGNING_STORE_PASSWORD").orNull
+val prototypeSigningKeyAlias = providers.environmentVariable("DOLO_SIGNING_KEY_ALIAS").orNull
+val prototypeSigningKeyPassword = providers.environmentVariable("DOLO_SIGNING_KEY_PASSWORD").orNull
+val prototypeSigningAvailable = listOf(
+    prototypeSigningStore,
+    prototypeSigningStorePassword,
+    prototypeSigningKeyAlias,
+    prototypeSigningKeyPassword
+).all { !it.isNullOrBlank() }
+
 android {
     namespace = "com.dolo.patient"
     compileSdk = 35
@@ -12,13 +23,32 @@ android {
         applicationId = "com.dolo.patient"
         minSdk = 26
         targetSdk = 35
-        versionCode = 13
-        versionName = "0.10.0-stage16a"
+        versionCode = 14
+        versionName = "0.10.1-stage16a"
         buildConfigField(
             "String",
             "DOLO_API_BASE_URL",
             "\"https://dolo-platform-api-prototype.onrender.com\""
         )
+    }
+
+    signingConfigs {
+        if (prototypeSigningAvailable) {
+            create("prototype") {
+                storeFile = file(prototypeSigningStore!!)
+                storePassword = prototypeSigningStorePassword
+                keyAlias = prototypeSigningKeyAlias
+                keyPassword = prototypeSigningKeyPassword
+                storeType = "PKCS12"
+            }
+        }
+    }
+
+    buildTypes {
+        if (prototypeSigningAvailable) {
+            getByName("debug") { signingConfig = signingConfigs.getByName("prototype") }
+            getByName("release") { signingConfig = signingConfigs.getByName("prototype") }
+        }
     }
 
     buildFeatures {

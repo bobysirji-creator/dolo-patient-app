@@ -1,0 +1,5 @@
+# Never commit Android signing material or exported CI secret values.
+*.jks
+*.keystore
+*.p12
+DOLO_SIGNING_*.txt
