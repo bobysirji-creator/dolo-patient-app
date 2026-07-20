@@ -2,7 +2,7 @@
 
 ## Current scope
 
-Only the dedicated Patient App is in development. Doctor App and Admin App are intentionally deferred.
+Only the dedicated Patient App is changed in this repository. The Doctor App and platform API live in separate repositories; the Admin App remains a later ecosystem project.
 
 ## Stages
 
@@ -16,7 +16,11 @@ Only the dedicated Patient App is in development. Doctor App and Admin App are i
 - [x] Stage 8 — Provider-ready maps, payments, SMS and push-notification foundations
 - [x] Stage 9 — accessibility, offline/error states, tests, performance and release hardening
 - [ ] Stage 10 - iterative UI/UX polish from physical-device feedback
-- [ ] Future — Create separate Doctor App, then separate Admin App, reusing contracts/design tokens without coupling app builds
+- [x] Stage 16A - Patient App public hosted-API connection, capability status and clinic-discovery preview with local fallback
+- [ ] Stage 16B - controlled prototype identity/authentication and secure access-token storage
+- [ ] Stage 16C - server-authoritative Patient booking, token and live-queue synchronization behind an explicit migration switch
+- [x] Ecosystem - Dedicated Doctor App created in a separate repository
+- [ ] Future - Create the separate Admin App, reusing contracts/design tokens without coupling app builds
 
 ## Stage 1 acceptance status
 
@@ -129,3 +133,15 @@ Only the dedicated Patient App is in development. Doctor App and Admin App are i
 - Updated doctor tickets to a softer blue treatment and highlighted the patient's token in coral.
 - Simplified the Home greeting to patient name and saved city.
 - Added catalogue integrity tests for category artwork, specialty coverage and unique doctor IDs.
+
+## Stage 16A - Safe Patient App hosted integration
+
+- The Patient App connects to the Render prototype through HTTPS only.
+- Public `/health`, `/api/v1/meta/capabilities`, and `/api/v1/clinics` responses are parsed through a lightweight platform boundary.
+- Support > Integration Readiness shows connection state, deployed version/stage, database state, and hosted clinic discovery.
+- Network work runs off the UI thread and exposes retry, timeout, offline, and cold-start messages.
+- Existing local login, profile, doctors, appointments, token allocation, and queue state remain authoritative and continue working offline.
+- No patient data, phone number, appointment, payment data, location, or device token is sent.
+- External SMS, push, maps, and payment providers remain disabled.
+- Unit tests cover hosted response parsing, malformed clinic filtering, and HTTPS enforcement.
+- Physical-device and GitHub Actions acceptance are pending for version 0.10.0-stage16a (version code 13).

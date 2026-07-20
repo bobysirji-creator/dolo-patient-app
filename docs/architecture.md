@@ -9,7 +9,8 @@ Package boundaries:
 - `ui/theme`: DO-LO visual tokens
 - `ui/components`: reusable Compose controls
 - `ui/screens`: placeholder feature screens
-- `ui/DoloPatientApp.kt`: navigation graph
+- ui/DoloPatientApp.kt: navigation graph
+- platform: lightweight HTTPS transport, hosted DTO parsing and connection state
 
 Planned evolution:
 
@@ -20,5 +21,13 @@ Planned evolution:
 5. Never trust client-generated token numbers; allocation must be atomic on the server.
 6. Use server events or a controlled polling policy for live queue updates; do not embed provider SDKs prematurely.
 
-Doctor and Admin will remain separate Android projects/apps when development starts. Shared schemas and design decisions can be copied or extracted later only when duplication becomes costly.
+Doctor is already a separate Android project and the platform API is a separate service repository. Admin will also remain a separate app. Shared schemas and design decisions can be extracted later only when duplication becomes costly.
 
+
+## Stage 16A integration boundary
+
+`HttpPlatformApi` performs public GET requests only. The configured base URL is compiled into BuildConfig, must use HTTPS, and contains no credential. It reads health, capabilities, and clinic discovery without sending patient input.
+
+`PlatformConnectionViewModel` runs those calls on one background executor and reports connecting, connected, or offline state to the Integration Readiness screen. A hosted failure never replaces or clears local PatientRepository data.
+
+The next boundary must add controlled prototype authentication before any write endpoint is called. Server appointments and queues must not be mixed with local appointments until an explicit migration and conflict policy exists.

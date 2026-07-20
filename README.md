@@ -2,7 +2,7 @@
 
 DO-LO Patient is a lightweight Kotlin and Jetpack Compose Android prototype for booking walk-in doctor consultations, receiving a token and following a live queue from home.
 
-Current release candidate: **0.9.0-rc4** (version code 12).
+Current integration build: **0.10.0-stage16a** (version code 13).
 
 ## What works
 
@@ -13,9 +13,10 @@ Current release candidate: **0.9.0-rc4** (version code 12).
 - foreground live-queue refresh, waiting estimate, stale/offline states and retry;
 - one-time missed-appointment rescheduling;
 - verified local reviews and in-app notifications;
-- accessible labels and minimum touch targets.
+- accessible labels and minimum touch targets;
+- public, read-only connection checks for the hosted DO-LO API, including capability and clinic discovery status.
 
-Maps, payments, SMS and push-notification providers remain deliberately disabled. The app does not contact a production healthcare backend.
+Maps, payments, SMS and push-notification providers remain deliberately disabled. Stage 16A contacts only the public prototype health, capability and clinic-discovery endpoints over HTTPS; login, profiles, bookings and queues remain local and are never uploaded.
 
 ## Demo login
 
@@ -47,9 +48,9 @@ The project keeps Gradle memory conservative and does not require an emulator. A
 
 ## Architecture
 
-The repository is a single Patient App module. Compose screens use ViewModels and provider-neutral repository/service contracts. Local implementations preserve the demonstrated flow while leaving boundaries for HTTPS REST APIs, authoritative OTP, appointments, tokens, live queue, maps, payments, SMS and push providers.
+The repository is a single Patient App module. Compose screens use ViewModels and provider-neutral repository/service contracts. `platform/PlatformApi.kt` provides a lightweight, read-only HTTPS boundary for the hosted prototype. Local implementations preserve the demonstrated booking flow while leaving authenticated REST boundaries for OTP, appointments, tokens, live queue, maps, payments, SMS and push providers.
 
-Doctor App and Admin App are intentionally separate future projects; they are not coupled to this build.
+The Doctor App and platform API are separate projects. The future Admin App will also remain separate; none is coupled to this Patient App build.
 
 ## Safety and documentation
 

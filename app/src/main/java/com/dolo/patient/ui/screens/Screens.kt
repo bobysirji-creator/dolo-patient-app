@@ -34,6 +34,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dolo.patient.platform.PlatformConnectionState
+import com.dolo.patient.platform.PlatformConnectionStatus
 import com.dolo.patient.auth.AuthStep
 import com.dolo.patient.auth.AuthViewModel
 import com.dolo.patient.data.*
@@ -539,17 +541,85 @@ fun SupportScreen(
 }
 
 @Composable
-fun IntegrationStatusScreen(onBack: () -> Unit) {
+fun IntegrationStatusScreen(
+    onBack: () -> Unit,
+    platform: PlatformConnectionState,
+    onRefreshPlatform: () -> Unit
+) {
+    LaunchedEffect(Unit) {
+        if (platform.status == PlatformConnectionStatus.NOT_CHECKED) onRefreshPlatform()
+    }
     LazyColumn(
         modifier = page.padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         item { ScreenTitle("Integration Readiness", onBack) }
         item {
+            Card(
+                modifier = Modifier.fillMaxWidth().shadow(8.dp, RoundedCornerShape(20.dp)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+                colors = CardDefaults.cardColors(containerColor = DoloSurfaceAlt),
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = if (platform.status == PlatformConnectionStatus.CONNECTED) Icons.Outlined.CloudDone else Icons.Outlined.CloudOff,
+                            contentDescription = null,
+                            tint = if (platform.status == PlatformConnectionStatus.CONNECTED) DoloTeal else DoloMuted
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        Text("DO-LO hosted prototype", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    }
+                    Text(platform.message, color = DoloMuted, fontSize = 13.sp)
+                    if (platform.status == PlatformConnectionStatus.CONNECTED) {
+                        val capability = platform.capabilities
+                        Text(
+                            "Version ${platform.serviceVersion} • Stage ${capability?.stage ?: "unknown"}",
+                            color = DoloNavy,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            "Database: ${if (capability?.databaseConnected == true) "connected" else "unavailable"} • Hosted clinics: ${platform.clinics.size}",
+                            color = DoloMuted,
+                            fontSize = 13.sp
+                        )
+                    }
+                    Button(
+                        onClick = onRefreshPlatform,
+                        enabled = platform.status != PlatformConnectionStatus.CONNECTING,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        if (platform.status == PlatformConnectionStatus.CONNECTING) {
+                            CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                            Spacer(Modifier.width(10.dp))
+                            Text("Checking...")
+                        } else {
+                            Icon(Icons.Outlined.Refresh, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Check connection")
+                        }
+                    }
+                }
+            }
+        }
+        item {
             InfoCard(
-                "Safe by default",
-                "All external providers are disabled. No API keys, payment details, location data or device tokens are stored."
+                "Safe Stage 16A boundary",
+                "Only public health, capability and clinic-discovery data is downloaded. Login, profile, booking and queue data remain on this device and are not uploaded."
             )
+        }
+        if (platform.status == PlatformConnectionStatus.CONNECTED) {
+            item {
+                val clinicText = if (platform.clinics.isEmpty()) {
+                    "No hosted clinics are published yet. The tested local doctor catalogue remains available."
+                } else {
+                    platform.clinics.take(4).joinToString("\n") { clinic ->
+                        "${clinic.name}, ${clinic.city} — ${clinic.doctorName} (${clinic.specialty})"
+                    }
+                }
+                InfoCard("Hosted clinic discovery", clinicText)
+            }
         }
         items(
             items = IntegrationRegistry.patientCapabilities,
@@ -565,10 +635,7 @@ fun IntegrationStatusScreen(onBack: () -> Unit) {
                     modifier = Modifier.padding(18.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Surface(
-                        color = DoloSurfaceAlt,
-                        shape = CircleShape
-                    ) {
+                    Surface(color = DoloSurfaceAlt, shape = CircleShape) {
                         Icon(
                             imageVector = Icons.Outlined.Settings,
                             contentDescription = null,
@@ -579,15 +646,10 @@ fun IntegrationStatusScreen(onBack: () -> Unit) {
                     Spacer(Modifier.width(14.dp))
                     Column(Modifier.weight(1f)) {
                         Text(capability.title, fontWeight = FontWeight.Bold)
-                        Text(
-                            capability.description,
-                            color = DoloMuted,
-                            fontSize = 13.sp
-                        )
+                        Text(capability.description, color = DoloMuted, fontSize = 13.sp)
                         Spacer(Modifier.height(6.dp))
                         Text(
-                            "Status: " + capability.mode.name.lowercase()
-                                .replaceFirstChar(Char::uppercase),
+                            "Status: Disabled",
                             color = MaterialTheme.colorScheme.error,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold
@@ -598,7 +660,7 @@ fun IntegrationStatusScreen(onBack: () -> Unit) {
         }
         item {
             Text(
-                "Live providers will be enabled one at a time through environment-specific configuration. Credentials must never be committed to this repository.",
+                "Provider credentials are not stored in this app. Authenticated appointments and live synchronization will be enabled only after the prototype identity stage is complete.",
                 color = DoloMuted,
                 fontSize = 12.sp,
                 textAlign = TextAlign.Center,
@@ -607,7 +669,6 @@ fun IntegrationStatusScreen(onBack: () -> Unit) {
         }
     }
 }
-
 @Composable
 private fun StatusTimeline(status: String) {
     val steps = listOf(

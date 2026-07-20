@@ -4,7 +4,7 @@ Last updated: 13 July 2026
 
 ## Current release-candidate scope
 
-DO-LO Patient is currently an offline-first demonstration app. It is not connected to a production healthcare backend and must not be used for emergencies, diagnosis, prescriptions, or storage of sensitive medical records.
+DO-LO Patient is currently an offline-first demonstration app. Stage 16A reads public health, capability, and clinic-discovery data from the hosted DO-LO prototype, but it is not connected to a production healthcare service and must not be used for emergencies, diagnosis, prescriptions, or storage of sensitive medical records.
 
 ## Data currently stored on the device
 
@@ -16,7 +16,7 @@ The prototype can store the following in Android private app storage:
 - appointment date, session and locally generated token;
 - local queue progress, reviews and in-app notifications.
 
-The prototype does not currently upload this information to DO-LO servers.
+The prototype does not upload this information to DO-LO servers. Stage 16A sends only public GET requests for service status and clinic discovery; no phone number, profile, family member, appointment, queue, location, payment, or device-token data is included.
 
 ## External services
 

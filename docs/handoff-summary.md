@@ -136,3 +136,20 @@ Queue estimates now include the consultation currently in progress. For example,
 Version 0.9.0-rc4 (version code 12) expands the offline test catalogue to 12 specialties and 24 doctors. Every specialty has two matching doctors and an optimized generated 3D illustration. Category artwork uses a small Compose floating animation without introducing a new runtime dependency.
 
 Cards and primary actions now use stronger elevation and shadows. Doctor tickets use a softer blue surface, the patient's token uses a focused coral accent, and Home identifies the signed-in patient as `Name (City)`. Catalogue integrity is covered by unit tests. External integrations remain disabled and Stage 10 remains open for physical-device feedback.
+## Stage 16A handoff - public hosted API connection
+
+Version 0.10.0-stage16a (version code 13) starts the Patient App integration phase without risking its accepted offline workflow. The app now calls the hosted Render prototype over HTTPS for health, capabilities, and public clinic discovery. The status is visible through Home > Help & Support > Integration readiness and can be retried after a Render cold start or offline condition.
+
+The implementation deliberately sends no login, phone, patient, family, appointment, queue, payment, location, or device-token data. LocalPatientRepository remains authoritative for all existing app behavior. Hosted clinics are displayed only as a read-only preview and do not silently enter the local booking catalogue.
+
+External SMS, push, maps, and payment providers remain disabled. Backend authentication is still disabled, so authenticated bookings and cross-app queue synchronization are not part of Stage 16A.
+
+Validation required:
+
+1. Push the committed changes and confirm GitHub Actions lint, unit tests, and debug APK assembly pass.
+2. Install version code 13 over the existing Patient App and confirm existing login, profile, favourites, family, and appointments remain intact.
+3. Open Integration readiness with internet enabled. Confirm connected status, backend version 0.1.0-stage15.6, Stage 15.6, database connected, and a hosted clinic count.
+4. Disable connectivity, retry, and confirm an offline message appears while local doctor browsing and appointment history still work.
+5. Re-enable connectivity and confirm retry returns to connected.
+
+Recommended next stage: Stage 16B controlled prototype identity. Add backend-issued short-lived access tokens and secure Android token storage before connecting booking or queue writes. Do not enable real OTP/SMS or collect real patient data in that stage.

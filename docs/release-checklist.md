@@ -2,8 +2,8 @@
 
 ## Release candidate
 
-- Version name: `0.9.0-rc4`
-- Version code: `12`
+- Version name: `0.10.0-stage16a`
+- Version code: `13`
 - Build type: debug APK for controlled testing
 - Maps, payments, SMS and push notifications: disabled
 
@@ -26,6 +26,8 @@ The GitHub Actions build must pass all of these before the APK is shared:
 - [ ] Appointment and token details remain after closing and reopening the app.
 - [ ] Live queue refreshes and shows current, stale and offline states correctly.
 - [ ] Retry works after restoring connectivity.
+- [ ] Integration readiness reports hosted version/stage/database state and clinic discovery.
+- [ ] With connectivity disabled, hosted status fails safely while all local Patient App data and flows remain available.
 - [ ] A missed appointment can be rescheduled once and keeps the updated date.
 - [ ] Completion, review and in-app notification flows work.
 - [ ] Logout clears the active local session as designed.
@@ -43,6 +45,7 @@ The GitHub Actions build must pass all of these before the APK is shared:
 - [ ] Android backup remains disabled.
 - [ ] Cleartext HTTP traffic remains disabled.
 - [ ] No API keys, provider credentials or real patient records are present.
+- [ ] The hosted calls use HTTPS public GET endpoints only and do not upload patient input.
 - [ ] Disabled provider screens do not imply that a real payment, SMS, map or push action occurred.
 - [ ] The privacy notice matches the actual build.
 
