@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dolo.patient.data.HostedPatientSyncViewModel
+import com.dolo.patient.ui.components.ScreenTitle
 import com.dolo.patient.ui.theme.DoloSurfaceAlt
 import com.dolo.patient.ui.theme.DoloTeal
 import kotlinx.coroutines.delay
