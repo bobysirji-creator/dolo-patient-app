@@ -15,3 +15,6 @@ Run only after Platform API `0.3.0-stage16c` is deployed and ready. Use dummy da
 11. Reconnect and refresh. Confirm the server history returns.
 
 Do not enter real patient information. Do not share access/refresh tokens. Stage 16C does not process the doctor's consultation fee, platform payments, maps, SMS or push notifications.
+## Acceptance
+
+Accepted on 20 July 2026. GitHub Actions passed and all eleven checks above passed on a physical Android device, including the stable in-place upgrade, local-data preservation, hosted booking and duplicate protection, restart restoration, automatic refresh, offline handling and reconnection recovery.

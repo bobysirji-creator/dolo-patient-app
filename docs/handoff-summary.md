@@ -180,4 +180,12 @@ Accepted on 20 July 2026. GitHub Actions passed, the stable APK updated the exis
 
 Patient App `0.12.0-stage16c` (version code 16) adds an explicit Hosted Prototype Sync screen under Support > Integration readiness. It reuses the Stage 16B Keystore token pair, refreshes expired access tokens, boots the seeded dummy profile/clinic sessions, sends idempotent authoritative booking writes, reads server appointment history, and polls the owner-scoped live queue every 15 seconds while visible.
 
-This does not migrate or upload existing local profiles, family members, appointments, favourites or reviews. The ordinary local workflow remains the fallback. Hosted snapshots are fetched again from the server and are not presented as an offline source of truth. GitHub Actions and `docs/stage16c-device-test.md` remain pending; local Android tooling is unavailable on this low-resource PC.
+This does not migrate or upload existing local profiles, family members, appointments, favourites or reviews. The ordinary local workflow remains the fallback. Hosted snapshots are fetched again from the server and are not presented as an offline source of truth. Local Android tooling remains unavailable on this low-resource PC, so GitHub Actions is the build verifier.
+
+### Stage 16C acceptance
+
+Accepted on 20 July 2026. GitHub Actions passed and the stable APK upgraded the existing Patient App successfully. All eleven physical-device checks passed: local-data preservation, hosted login and readiness, seeded prototype discovery, authoritative booking/token allocation, idempotent duplicate protection, screen and full-restart history restoration, 15-second refresh stability, offline safety, and reconnection recovery.
+
+The Platform API validation correction in commit `4035cfb` permits the deterministic canonical PostgreSQL UUID used by the seeded Prototype Patient; all 81 API tests passed. No Patient APK change was required for that server-side correction.
+
+Recommended next phase: Stage 16D Doctor App hosted integration using seeded identities and the existing protected appointment, clinic-fee admission and queue-command boundaries. This will allow end-to-end Patient live-queue movement without enabling real identities, payments, SMS, maps or push providers.

@@ -155,4 +155,8 @@ Only the dedicated Patient App is changed in this repository. The Doctor App and
 - [x] persistent idempotency key prevents duplicate retry allocation
 - [x] server appointment history and 15-second live-queue polling
 - [x] local booking, profile, family, favourites and reviews remain unchanged
-- [ ] GitHub Actions and physical-device checklist acceptance
+- [x] GitHub Actions and physical-device checklist acceptance
+
+Accepted on 20 July 2026. The stable APK upgraded in place; all eleven Stage 16C device checks passed, including hosted login, authoritative booking/token allocation, duplicate protection, history and session restoration, automatic refresh, offline safety, local-data preservation and reconnection recovery.
+
+Recommended next phase: Stage 16D Doctor App hosted integration. Connect a seeded Doctor/Assistant prototype to the existing protected appointment, admission and queue-command APIs so Patient live-queue movement can be verified end to end. Keep the accepted Patient local workflow and all external providers unchanged.
