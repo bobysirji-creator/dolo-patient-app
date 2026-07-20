@@ -170,3 +170,8 @@ Because the previously installed Patient APK uses an unrecoverable temporary cer
 Version `0.11.0-stage16b` (version code 15) requests tokens only for the fixed seeded `patient-demo` identity. The entered mobile number is retained locally and never sent to the backend. Access and rotating refresh tokens are encrypted with AES/GCM under Android Keystore; SharedPreferences stores only ciphertext and IV. Token networking runs off the UI thread, logout clears local token material immediately, and a Render/offline failure preserves the established local demo workflow with a visible `Local fallback` label.
 
 Real SMS/OTP, arbitrary accounts, authenticated booking writes, server queue synchronization, maps, payments and push remain disabled. Local build tools are unavailable on this PC, so GitHub Actions must validate lint, unit tests and APK assembly. Follow `docs/stage16b-device-test.md` after the Platform API deploy is healthy.
+
+
+### Stage 16B acceptance
+
+Accepted on 20 July 2026. GitHub Actions passed, the stable APK updated the existing installation without data loss, hosted identity and Android Keystore session restoration passed after full app closure, Integration Readiness matched the deployed Stage 16.2 API, offline login visibly fell back to local mode, and reconnecting restored hosted prototype mode. Stage 16C is the next recommended phase.

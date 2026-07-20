@@ -1,4 +1,6 @@
-# Stage 16B Physical-Device Test
+# Stage 16B Physical-Device Test — Accepted
+
+Accepted on 20 July 2026: all ten checklist items and the user-reported eight grouped device checks passed. The stable APK updated in place and retained existing local data.
 
 Use demonstration data only. Never paste access or refresh tokens into chat, screenshots, logs, or files.
 
