@@ -192,8 +192,8 @@ SMS and Push remain disabled; this stage renders in-app server messages only.
 - [x] show a safe unavailable state if Admin removes the Doctor during navigation
 - [x] preserve local profile, family, favourites, reviews and appointments
 - [x] add JSON/discovery regression tests
-- [ ] GitHub Actions compile, lint and unit tests
-- [ ] stable APK in-place upgrade
-- [ ] cross-app Admin approval/rejection physical-device checks
+- [x] GitHub Actions compile, lint and unit tests
+- [x] stable APK in-place upgrade
+- [x] cross-app Admin approval/rejection physical-device checks
 
 Maps, Payments, SMS and Push remain disabled.
