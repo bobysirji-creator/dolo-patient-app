@@ -2,7 +2,7 @@
 
 DO-LO Patient is a lightweight Kotlin and Jetpack Compose Android prototype for booking walk-in doctor consultations, receiving a token and following a live queue from home.
 
-Current integration build: **0.12.1-stage16c** (version code 17).
+Current integration build: **0.14.0-stage19c** (version code 19).
 
 ## What works
 
@@ -66,3 +66,7 @@ Support > Integration readiness now opens a separate hosted prototype screen. It
 ## Stage 18B hosted communication feed
 
 Hosted Prototype Sync now displays active Doctor announcements and DO-LO Admin broadcasts. The feed is server-authoritative and in-app only; local Patient data remains isolated and external providers remain disabled.
+
+## Stage 19C approved hosted Doctor profiles
+
+Hosted Doctor cards now open a dedicated profile page showing only Admin-approved registration, qualification, experience, about, clinic and consultation-fee details. Search includes the approved metadata, while booking continues through the accepted authoritative Hosted Prototype Sync flow. Pending/rejected Doctor edits and Admin review notes are not consumed or displayed. Existing local Patient data is untouched.

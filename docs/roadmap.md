@@ -182,3 +182,18 @@ Recommended next phase: Stage 16D Doctor App hosted integration. Connect a seede
 - [x] stable APK in-place upgrade and cross-app physical-device acceptance
 
 SMS and Push remain disabled; this stage renders in-app server messages only.
+
+## Stage 19C - Approved hosted Doctor profile display
+
+- [x] parse approved public Doctor registration, qualification, experience and about fields
+- [x] add a dedicated hosted Doctor profile route and mobile-first screen
+- [x] extend hosted search across approved profile metadata
+- [x] keep authoritative booking on the accepted hosted sync route
+- [x] show a safe unavailable state if Admin removes the Doctor during navigation
+- [x] preserve local profile, family, favourites, reviews and appointments
+- [x] add JSON/discovery regression tests
+- [ ] GitHub Actions compile, lint and unit tests
+- [ ] stable APK in-place upgrade
+- [ ] cross-app Admin approval/rejection physical-device checks
+
+Maps, Payments, SMS and Push remain disabled.

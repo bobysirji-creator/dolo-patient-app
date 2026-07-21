@@ -115,7 +115,7 @@ fun DoctorListScreen(
     platform: PlatformConnectionState,
     onSearch: (String) -> Unit,
     onDoctor: (String) -> Unit,
-    onHostedDoctor: () -> Unit,
+    onHostedDoctor: (String) -> Unit,
     onRefreshHosted: () -> Unit,
     onFavourite: (String) -> Unit,
     onHome: () -> Unit,
@@ -155,7 +155,7 @@ fun DoctorListScreen(
             if (hostedClinics.isNotEmpty()) {
                 item { Text("Hosted doctors", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
                 items(hostedClinics, key = { "hosted-${it.id}" }) { clinic ->
-                    HostedDoctorCard(clinic, onHostedDoctor)
+                    HostedDoctorCard(clinic) { onHostedDoctor(clinic.id) }
                 }
             }
             if (state.doctors.isNotEmpty()) {
@@ -197,6 +197,46 @@ private fun HostedDoctorCard(clinic: PlatformClinic, onOpen: () -> Unit) {
                 Spacer(Modifier.weight(1f))
                 Button(onClick = onOpen) { Text("View & Book") }
             }
+        }
+    }
+}
+
+@Composable
+fun HostedDoctorDetailsScreen(
+    clinic: PlatformClinic?,
+    onBack: () -> Unit,
+    onRefresh: () -> Unit,
+    onBook: () -> Unit
+) {
+    LazyColumn(page.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        item { ScreenTitle("Doctor Profile", onBack) }
+        if (clinic == null) {
+            item { EmptyCard("This approved hosted Doctor profile is unavailable. Refresh discovery and try again.") }
+            item { PrimaryButton("Refresh hosted doctors", onRefresh) }
+        } else {
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth().shadow(10.dp, RoundedCornerShape(24.dp)),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F7F1)),
+                    shape = RoundedCornerShape(24.dp)
+                ) {
+                    Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Surface(shape = CircleShape, color = Color.White, shadowElevation = 6.dp, modifier = Modifier.size(88.dp)) {
+                            Icon(Icons.Outlined.MedicalServices, null, tint = DoloTeal, modifier = Modifier.padding(22.dp))
+                        }
+                        Spacer(Modifier.height(12.dp))
+                        Text(clinic.doctorName, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = DoloNavy, textAlign = TextAlign.Center)
+                        Text(clinic.specialty, color = DoloTeal, fontWeight = FontWeight.Bold)
+                        Text("Approved by DO-LO Admin", color = DoloTeal, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+            }
+            item { InfoCard("Qualification and experience", listOfNotNull(clinic.qualification.takeIf { it.isNotBlank() }, clinic.experienceYears.takeIf { it > 0 }?.let { "$it years of experience" }).ifEmpty { listOf("Approved details not provided") }.joinToString("\n")) }
+            item { InfoCard("Registration", clinic.registrationNumber.ifBlank { "Approved registration detail not provided" }) }
+            item { InfoCard("About", clinic.about.ifBlank { "Approved profile description not provided" }) }
+            item { InfoCard("Clinic", "${clinic.name}\n${clinic.city}\nConsultation fee paid at clinic: INR ${clinic.consultationFeeMinor / 100}") }
+            item { Text("Only the currently approved profile is shown. Pending or rejected Doctor edits are never displayed here.", color = DoloMuted, fontSize = 12.sp) }
+            item { PrimaryButton("Book hosted appointment", onBook) }
         }
     }
 }

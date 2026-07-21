@@ -208,3 +208,9 @@ Expired, future or draft messages are filtered by the server. The app does not u
 ## Stage 18B acceptance
 
 Patient App `0.13.0-stage18b` passed GitHub Actions, stable in-place APK upgrade and all Stage 18B cross-app physical-device checks on 21 July 2026. Doctor announcements and Admin broadcasts appeared and disappeared correctly with published/draft state, automatic refresh, restart restoration and offline recovery; all local Patient data remained intact. External providers remain disabled.
+
+## Stage 19C implementation checkpoint
+
+Patient App `0.14.0-stage19c` (version code 19) adds a dedicated hosted Doctor profile page. It renders the approved registration number, qualification, experience, about text, clinic and clinic-direct consultation fee returned by Platform API public discovery. Hosted search also matches approved registration, qualification and about metadata.
+
+The UI never reads pending/rejected profile revisions or Admin review notes. Selecting Book continues to the already accepted authoritative Hosted Prototype Sync flow. Missing Doctor data fails safely with a refresh action, and all local Patient data remains unchanged. GitHub Actions is the Android compiler/lint gate because this PC has no local JDK/SDK.

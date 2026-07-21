@@ -34,6 +34,10 @@ data class PlatformClinic(
     val doctorId: String,
     val doctorName: String,
     val specialty: String,
+    val registrationNumber: String,
+    val qualification: String,
+    val experienceYears: Int,
+    val about: String,
     val consultationFeeMinor: Int
 )
 
@@ -47,6 +51,9 @@ object PlatformDiscovery {
         val queryMatches = normalizedQuery.isBlank() || listOf(
             clinic.doctorName,
             clinic.specialty,
+            clinic.registrationNumber,
+            clinic.qualification,
+            clinic.about,
             clinic.name,
             clinic.city
         ).any { it.contains(normalizedQuery, true) }
@@ -114,7 +121,7 @@ class HttpPlatformApi(
             connectTimeout = connectTimeoutMillis
             readTimeout = readTimeoutMillis
             setRequestProperty("Accept", "application/json")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage16A")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage19C")
             useCaches = false
         }
         return try {
@@ -186,6 +193,10 @@ object PlatformJson {
                         doctorId = doctorId,
                         doctorName = doctor.optString("name", "Doctor"),
                         specialty = doctor.optString("specialty", "General Medicine"),
+                        registrationNumber = doctor.optString("registrationNumber"),
+                        qualification = doctor.optString("qualification"),
+                        experienceYears = doctor.optInt("experienceYears", 0).coerceAtLeast(0),
+                        about = doctor.optString("about"),
                         consultationFeeMinor = clinic.optInt("consultationFeeMinor", 0).coerceAtLeast(0)
                     )
                 )

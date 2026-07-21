@@ -46,7 +46,7 @@ class PlatformJsonTest {
                     "timeZone":"Asia/Kolkata",
                     "city":"Mumbai",
                     "active":true,
-                    "doctor":{"id":"doctor-1","name":"Dr Demo","specialty":"General Medicine"},
+                    "doctor":{"id":"doctor-1","name":"Dr Demo","specialty":"General Medicine","registrationNumber":"MMC-12345","qualification":"MBBS, MD","experienceYears":12,"about":"Patient-focused family physician."},
                     "consultationFeeMinor":50000
                 }]
             }""".trimIndent()
@@ -55,7 +55,13 @@ class PlatformJsonTest {
         assertEquals(1, clinics.size)
         assertEquals("DO-LO Test Clinic", clinics.single().name)
         assertEquals("Dr Demo", clinics.single().doctorName)
+        assertEquals("MMC-12345", clinics.single().registrationNumber)
+        assertEquals("MBBS, MD", clinics.single().qualification)
+        assertEquals(12, clinics.single().experienceYears)
+        assertEquals("Patient-focused family physician.", clinics.single().about)
         assertEquals(50000, clinics.single().consultationFeeMinor)
+        assertTrue(PlatformDiscovery.matches(clinics.single(), "All", "MMC-12345"))
+        assertTrue(PlatformDiscovery.matches(clinics.single(), "All", "family physician"))
     }
 
     @Test
