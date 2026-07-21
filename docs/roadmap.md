@@ -169,5 +169,5 @@ Recommended next phase: Stage 16D Doctor App hosted integration. Connect a seede
 - [x] clear stale hosted Doctor data on `DOCTOR_UNAVAILABLE`
 - [x] retain safe prior hosted data on ordinary offline failure
 - [x] preserve all local Patient data and local test catalogue entries
-- [ ] GitHub Actions validation
-- [ ] physical-device Admin-to-Patient verification
+- [x] GitHub Actions validation
+- [x] physical-device Admin-to-Patient verification
