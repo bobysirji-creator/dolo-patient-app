@@ -67,6 +67,17 @@ class PlatformJsonTest {
         assertTrue(clinics.isEmpty())
     }
 
+    @Test
+    fun adminControlledDiscoveryRemovesAndRestoresTheHostedDoctor() {
+        val available = PlatformJson.parseClinics(
+            """{"clinics":[{"id":"clinic-1","name":"DO-LO Prototype Clinic","city":"Mumbai","timeZone":"Asia/Kolkata","doctor":{"id":"doctor-1","name":"Dr. Ananya Mehta","specialty":"General Medicine"},"consultationFeeMinor":50000}]}"""
+        )
+        val unavailable = PlatformJson.parseClinics("""{"clinics":[]}""")
+
+        assertEquals(1, available.size)
+        assertTrue(PlatformDiscovery.matches(available.single(), "General Physician", "Ananya"))
+        assertTrue(unavailable.isEmpty())
+    }
     @Test(expected = IllegalArgumentException::class)
     fun rejectsNonHttpsPlatformBaseUrl() {
         HttpPlatformApi("http://example.test")

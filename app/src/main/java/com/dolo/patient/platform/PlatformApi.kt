@@ -37,6 +37,22 @@ data class PlatformClinic(
     val consultationFeeMinor: Int
 )
 
+object PlatformDiscovery {
+    fun matches(clinic: PlatformClinic, category: String, query: String): Boolean {
+        val normalizedCategory = category.trim()
+        val categoryMatches = normalizedCategory.equals("All", true) ||
+            clinic.specialty.equals(normalizedCategory, true) ||
+            (normalizedCategory.equals("General Physician", true) && clinic.specialty.equals("General Medicine", true))
+        val normalizedQuery = query.trim()
+        val queryMatches = normalizedQuery.isBlank() || listOf(
+            clinic.doctorName,
+            clinic.specialty,
+            clinic.name,
+            clinic.city
+        ).any { it.contains(normalizedQuery, true) }
+        return categoryMatches && queryMatches
+    }
+}
 data class PlatformSnapshot(
     val serviceVersion: String,
     val capabilities: PlatformCapabilities,

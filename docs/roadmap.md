@@ -18,7 +18,7 @@ Only the dedicated Patient App is changed in this repository. The Doctor App and
 - [ ] Stage 10 - iterative UI/UX polish from physical-device feedback
 - [x] Stage 16A - Patient App public hosted-API connection, capability status and clinic-discovery preview with local fallback
 - [x] Stage 16B - controlled prototype identity/authentication and Android Keystore-encrypted token storage (accepted on physical device)
-- [ ] Stage 16C - server-authoritative Patient booking, token and live-queue synchronization behind an explicit migration switch
+- [x] Stage 16C - server-authoritative Patient booking, token and live-queue synchronization behind an explicit migration switch
 - [x] Ecosystem - Dedicated Doctor App created in a separate repository
 - [ ] Future - Create the separate Admin App, reusing contracts/design tokens without coupling app builds
 
@@ -160,3 +160,14 @@ Only the dedicated Patient App is changed in this repository. The Doctor App and
 Accepted on 20 July 2026. The stable APK upgraded in place; all eleven Stage 16C device checks passed, including hosted login, authoritative booking/token allocation, duplicate protection, history and session restoration, automatic refresh, offline safety, local-data preservation and reconnection recovery.
 
 Recommended next phase: Stage 16D Doctor App hosted integration. Connect a seeded Doctor/Assistant prototype to the existing protected appointment, admission and queue-command APIs so Patient live-queue movement can be verified end to end. Keep the accepted Patient local workflow and all external providers unchanged.
+
+## Stage 17B cross-app Doctor visibility correction
+
+- [x] display the active VERIFIED seeded hosted Doctor in normal discovery
+- [x] remove the hosted card when public clinic discovery omits the Doctor
+- [x] route the hosted card to the separate authoritative booking flow
+- [x] clear stale hosted Doctor data on `DOCTOR_UNAVAILABLE`
+- [x] retain safe prior hosted data on ordinary offline failure
+- [x] preserve all local Patient data and local test catalogue entries
+- [ ] GitHub Actions validation
+- [ ] physical-device Admin-to-Patient verification

@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dolo.patient.platform.PlatformConnectionState
 import com.dolo.patient.platform.PlatformConnectionStatus
+import com.dolo.patient.platform.PlatformDiscovery
+import com.dolo.patient.platform.PlatformClinic
 import com.dolo.patient.auth.AuthStep
 import com.dolo.patient.auth.AuthViewModel
 import com.dolo.patient.data.*
@@ -105,7 +107,99 @@ private fun CategoryCard(category:com.dolo.patient.data.model.DoctorCategory,onS
   }
  }
 }
-@Composable fun DoctorListScreen(category:String,onBack:()->Unit,state:PatientUiState,onSearch:(String)->Unit,onDoctor:(String)->Unit,onFavourite:(String)->Unit,onHome:()->Unit,onAppointments:()->Unit,onBook:()->Unit){var q by remember(category){mutableStateOf(if(category=="All")state.query else "")};LaunchedEffect(category){onSearch(q)};Scaffold(containerColor=DoloBackground,bottomBar={DoloBottomBar(selected=PatientBottomDestination.BOOK,onHome=onHome,onAppointments=onAppointments,onBook=onBook)}){p->LazyColumn(Modifier.padding(p).padding(20.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){item{ScreenTitle(if(category=="All")"Search Doctors" else category,onBack)};item{OutlinedTextField(q,{q=it;onSearch(it)},Modifier.fillMaxWidth(),placeholder={Text("Search doctors or clinics")},leadingIcon={Icon(Icons.Outlined.Search,null)},singleLine=true,shape=RoundedCornerShape(18.dp))};if(state.doctors.isEmpty())item{EmptyCard("No doctors match your search.")}else items(state.doctors){d->DoctorCard(d,d.id in state.favouriteIds,{onDoctor(d.id)},{onFavourite(d.id)})}}}}
+@Composable
+fun DoctorListScreen(
+    category: String,
+    onBack: () -> Unit,
+    state: PatientUiState,
+    platform: PlatformConnectionState,
+    onSearch: (String) -> Unit,
+    onDoctor: (String) -> Unit,
+    onHostedDoctor: () -> Unit,
+    onRefreshHosted: () -> Unit,
+    onFavourite: (String) -> Unit,
+    onHome: () -> Unit,
+    onAppointments: () -> Unit,
+    onBook: () -> Unit
+) {
+    var query by remember(category) { mutableStateOf(if (category == "All") state.query else "") }
+    LaunchedEffect(category) {
+        onSearch(query)
+        onRefreshHosted()
+    }
+    val hostedClinics = if (platform.status == PlatformConnectionStatus.CONNECTED) {
+        platform.clinics.filter { PlatformDiscovery.matches(it, category, query) }
+    } else {
+        emptyList()
+    }
+    Scaffold(
+        containerColor = DoloBackground,
+        bottomBar = { DoloBottomBar(selected = PatientBottomDestination.BOOK, onHome = onHome, onAppointments = onAppointments, onBook = onBook) }
+    ) { padding ->
+        LazyColumn(
+            Modifier.padding(padding).padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            item { ScreenTitle(if (category == "All") "Search Doctors" else category, onBack) }
+            item {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it; onSearch(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text("Search doctors or clinics") },
+                    leadingIcon = { Icon(Icons.Outlined.Search, null) },
+                    singleLine = true,
+                    shape = RoundedCornerShape(18.dp)
+                )
+            }
+            if (hostedClinics.isNotEmpty()) {
+                item { Text("Hosted doctors", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
+                items(hostedClinics, key = { "hosted-${it.id}" }) { clinic ->
+                    HostedDoctorCard(clinic, onHostedDoctor)
+                }
+            }
+            if (state.doctors.isNotEmpty()) {
+                if (hostedClinics.isNotEmpty()) item { Text("Local test catalogue", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
+                items(state.doctors, key = { it.id }) { doctor ->
+                    DoctorCard(doctor, doctor.id in state.favouriteIds, { onDoctor(doctor.id) }, { onFavourite(doctor.id) })
+                }
+            }
+            if (state.doctors.isEmpty() && hostedClinics.isEmpty()) {
+                item { EmptyCard("No doctors match your search.") }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HostedDoctorCard(clinic: PlatformClinic, onOpen: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth().shadow(10.dp, RoundedCornerShape(24.dp)).clickable(onClick = onOpen),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F7F1)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp, pressedElevation = 2.dp),
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(shape = CircleShape, color = Color.White, shadowElevation = 6.dp, modifier = Modifier.size(64.dp)) {
+                    Icon(Icons.Outlined.CloudDone, null, tint = DoloTeal, modifier = Modifier.padding(15.dp))
+                }
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(clinic.doctorName, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp, color = DoloNavy)
+                    Text(clinic.specialty, color = DoloTeal, fontWeight = FontWeight.SemiBold)
+                    Text("${clinic.name}, ${clinic.city}", color = DoloMuted, fontSize = 12.sp)
+                }
+            }
+            Text("Hosted availability controlled by DO-LO Admin", color = DoloTeal, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Consultation fee at clinic: INR ${clinic.consultationFeeMinor / 100}", fontWeight = FontWeight.Bold, color = DoloNavy)
+                Spacer(Modifier.weight(1f))
+                Button(onClick = onOpen) { Text("View & Book") }
+            }
+        }
+    }
+}
 
 @Composable
 fun DoctorCard(d:Doctor,favourite:Boolean,onOpen:()->Unit,onFavourite:()->Unit){

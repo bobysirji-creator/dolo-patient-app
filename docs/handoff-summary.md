@@ -189,3 +189,9 @@ Accepted on 20 July 2026. GitHub Actions passed and the stable APK upgraded the 
 The Platform API validation correction in commit `4035cfb` permits the deterministic canonical PostgreSQL UUID used by the seeded Prototype Patient; all 81 API tests passed. No Patient APK change was required for that server-side correction.
 
 Recommended next phase: Stage 16D Doctor App hosted integration using seeded identities and the existing protected appointment, clinic-fee admission and queue-command boundaries. This will allow end-to-end Patient live-queue movement without enabling real identities, payments, SMS, maps or push providers.
+
+## Stage 17B cross-app Doctor visibility correction
+
+Patient App `0.12.1-stage16c` (version code 17) consumes the existing public hosted clinic discovery in the normal Doctor list without replacing the local test catalogue. The seeded hosted Doctor appears as a clearly labelled hosted card only while the Platform API publishes an active VERIFIED clinic; selecting it opens the separate authoritative hosted flow. Admin PENDING, REJECTED or inactive states remove that hosted card after refresh.
+
+The hosted synchronization adapter now preserves a previous snapshot for ordinary offline failures but clears it for the explicit `DOCTOR_UNAVAILABLE` contract and shows `This doctor is temporarily unavailable for appointments.` Local profiles, family members, favourites, reviews and appointments are unchanged. JVM tests cover public discovery removal/restoration, error parsing, unavailable snapshot clearing and offline snapshot retention. GitHub Actions remains the Android compiler/lint verifier.
