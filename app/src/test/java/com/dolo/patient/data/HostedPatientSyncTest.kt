@@ -19,6 +19,16 @@ class HostedPatientSyncTest {
     )
 
     @Test
+    fun parsesActiveHostedCommunications() {
+        val communications = HostedCommunicationJson.parse(
+            """{"communications":[{"id":"message-1","audience":"ALL_PATIENTS","kind":"ADMIN_BROADCAST","title":"Platform update","message":"Appointments are operating normally.","startsOn":"2026-07-21","endsOn":"2026-07-22"}]}"""
+        )
+
+        assertEquals(1, communications.size)
+        assertEquals("ADMIN_BROADCAST", communications.single().kind)
+        assertEquals("Platform update", communications.single().title)
+    }
+    @Test
     fun parsesExplicitDoctorUnavailableContract() {
         val error = HostedErrorJson.parse(
             """{"error":{"code":"DOCTOR_UNAVAILABLE","message":"This doctor is temporarily unavailable for appointments."}}""",

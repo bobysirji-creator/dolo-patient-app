@@ -171,3 +171,14 @@ Recommended next phase: Stage 16D Doctor App hosted integration. Connect a seede
 - [x] preserve all local Patient data and local test catalogue entries
 - [x] GitHub Actions validation
 - [x] physical-device Admin-to-Patient verification
+
+## Stage 18B - Hosted Patient communication feed
+
+- [x] fetch active bounded communications from the authoritative Platform API
+- [x] distinguish DO-LO Admin broadcasts from Doctor availability, camp, offer and general announcements
+- [x] refresh communication state with the existing visible-screen hosted polling
+- [x] preserve all local profile, family, favourites, reviews and appointment data
+- [ ] GitHub Actions compile, lint and unit tests
+- [ ] stable APK in-place upgrade and cross-app physical-device acceptance
+
+SMS and Push remain disabled; this stage renders in-app server messages only.

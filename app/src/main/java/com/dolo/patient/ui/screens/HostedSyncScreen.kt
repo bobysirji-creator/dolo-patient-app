@@ -43,7 +43,7 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
         item {
             Card(colors = CardDefaults.cardColors(containerColor = if (state.error) MaterialTheme.colorScheme.errorContainer else DoloSurfaceAlt)) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Stage 16C - seeded dummy only", fontWeight = FontWeight.Bold)
+                    Text("Stage 18B - hosted communication feed", fontWeight = FontWeight.Bold)
                     Text(state.message)
                     Text(
                         "Your local profile, family, favourites, reviews and existing appointments are not uploaded.",
@@ -64,6 +64,31 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                     "Prototype patient: ${snapshot.bootstrap.profile.name} | Clinic fee paid separately at clinic",
                     style = MaterialTheme.typography.bodySmall
                 )
+            }
+            item { Text("Updates for you", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
+            if (snapshot.communications.isEmpty()) {
+                item { Text("No active Doctor announcements or DO-LO broadcasts today.") }
+            } else {
+                items(snapshot.communications, key = { "communication-${it.id}" }) { communication ->
+                    val adminBroadcast = communication.audience == "ALL_PATIENTS"
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (adminBroadcast) MaterialTheme.colorScheme.primaryContainer else DoloSurfaceAlt
+                        )
+                    ) {
+                        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                if (adminBroadcast) "DO-LO broadcast" else communicationLabel(communication.kind),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = DoloTeal,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(communication.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Text(communication.message)
+                            Text("Active ${communication.startsOn} to ${communication.endsOn}", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
             }
             item { Text("Available server sessions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
             items(snapshot.bootstrap.sessions, key = { it.id }) { session ->
@@ -102,4 +127,10 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
             }
         }
     }
+}
+private fun communicationLabel(kind: String): String = when (kind) {
+    "DOCTOR_AVAILABILITY" -> "Doctor availability"
+    "DOCTOR_CAMP" -> "Health camp"
+    "DOCTOR_OFFER" -> "Doctor offer"
+    else -> "Doctor announcement"
 }

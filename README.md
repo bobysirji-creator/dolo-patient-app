@@ -62,3 +62,7 @@ The Doctor App and platform API are separate projects. The future Admin App will
 ## Stage 16C authoritative dummy flow
 
 Support > Integration readiness now opens a separate hosted prototype screen. It uses only seeded dummy records and the protected Platform API for server-authoritative booking, token history and live-queue polling. Existing local Patient data is not migrated or uploaded, and the local workflow remains available when the prototype service is offline. See `docs/stage16c-device-test.md`.
+
+## Stage 18B hosted communication feed
+
+Hosted Prototype Sync now displays active Doctor announcements and DO-LO Admin broadcasts. The feed is server-authoritative and in-app only; local Patient data remains isolated and external providers remain disabled.

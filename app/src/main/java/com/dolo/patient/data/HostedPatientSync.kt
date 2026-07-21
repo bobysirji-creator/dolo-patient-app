@@ -20,8 +20,9 @@ data class HostedClinic(val id: String, val name: String, val city: String, val 
 data class HostedSession(val id: String, val date: String, val name: String, val startsAt: String, val endsAt: String, val available: Int, val enabled: Boolean)
 data class HostedAppointment(val id: String, val sessionId: String, val doctorName: String, val clinicName: String, val patientName: String, val date: String, val session: String, val token: Int, val status: String)
 data class HostedLiveQueue(val appointmentId: String, val token: Int, val currentToken: Int?, val patientsAhead: Int?, val estimatedMinutes: Int?, val status: String, val countdownState: String)
+data class HostedCommunication(val id: String, val audience: String, val kind: String, val title: String, val message: String, val startsOn: String, val endsOn: String)
 data class HostedBootstrap(val profile: HostedProfile, val clinic: HostedClinic, val sessions: List<HostedSession>)
-data class HostedSyncSnapshot(val bootstrap: HostedBootstrap, val appointments: List<HostedAppointment>, val live: List<HostedLiveQueue>)
+data class HostedSyncSnapshot(val bootstrap: HostedBootstrap, val appointments: List<HostedAppointment>, val live: List<HostedLiveQueue>, val communications: List<HostedCommunication> = emptyList())
 data class HostedServerError(val code: String, val message: String)
 
 sealed interface HostedResult<out T> {
@@ -44,6 +45,27 @@ object HostedErrorJson {
     }.getOrDefault(HostedServerError("HTTP_$status", "Hosted API returned HTTP $status"))
 }
 
+object HostedCommunicationJson {
+    fun parse(json: String): List<HostedCommunication> {
+        val items = JSONObject(json).getJSONArray("communications")
+        return buildList {
+            for (index in 0 until items.length()) {
+                val item = items.getJSONObject(index)
+                add(
+                    HostedCommunication(
+                        id = item.getString("id"),
+                        audience = item.getString("audience"),
+                        kind = item.getString("kind"),
+                        title = item.getString("title"),
+                        message = item.getString("message"),
+                        startsOn = item.getString("startsOn"),
+                        endsOn = item.getString("endsOn")
+                    )
+                )
+            }
+        }
+    }
+}
 private class HostedRequestException(
     val code: String,
     message: String
@@ -79,7 +101,8 @@ class HttpHostedPatientSyncApi(
         val bootstrap = parseBootstrap(request("POST", "/api/v1/patient/sync/bootstrap", "{}"))
         val appointments = parseAppointments(request("GET", "/api/v1/appointments"))
         val live = parseLive(request("GET", "/api/v1/patient/live-appointments"))
-        return HostedSyncSnapshot(bootstrap, appointments, live)
+        val communications = HostedCommunicationJson.parse(request("GET", "/api/v1/patient/communications?clinicId=${bootstrap.clinic.id}"))
+        return HostedSyncSnapshot(bootstrap, appointments, live, communications)
     }
 
     private fun <T> guarded(block: () -> T): HostedResult<T> = runCatching(block).fold(
@@ -110,7 +133,7 @@ class HttpHostedPatientSyncApi(
             readTimeout = 25_000
             setRequestProperty("Accept", "application/json")
             setRequestProperty("Authorization", "Bearer $token")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage16C")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage18B")
             headers.forEach { (key, value) -> setRequestProperty(key, value) }
             if (body != null) {
                 doOutput = true
