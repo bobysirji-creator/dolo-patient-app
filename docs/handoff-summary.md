@@ -203,3 +203,8 @@ Accepted on 21 July 2026. GitHub Actions passed, Render deployed the corrected A
 Patient App `0.13.0-stage18b` (version code 18) extends Hosted Prototype Sync with the authoritative active communication feed. It reads Doctor announcements for the selected clinic and Admin broadcasts for all Patients, labels the source/type, and refreshes through the existing 15-second visible-screen loop.
 
 Expired, future or draft messages are filtered by the server. The app does not upload or replace local profile, family, favourites, reviews or appointment data. SMS, Push, Maps and Payments remain disabled. GitHub Actions is the authoritative Android build gate because this PC has no local JDK/SDK.
+
+
+## Stage 18B acceptance
+
+Patient App `0.13.0-stage18b` passed GitHub Actions, stable in-place APK upgrade and all Stage 18B cross-app physical-device checks on 21 July 2026. Doctor announcements and Admin broadcasts appeared and disappeared correctly with published/draft state, automatic refresh, restart restoration and offline recovery; all local Patient data remained intact. External providers remain disabled.

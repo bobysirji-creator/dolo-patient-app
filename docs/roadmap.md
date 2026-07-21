@@ -178,7 +178,7 @@ Recommended next phase: Stage 16D Doctor App hosted integration. Connect a seede
 - [x] distinguish DO-LO Admin broadcasts from Doctor availability, camp, offer and general announcements
 - [x] refresh communication state with the existing visible-screen hosted polling
 - [x] preserve all local profile, family, favourites, reviews and appointment data
-- [ ] GitHub Actions compile, lint and unit tests
-- [ ] stable APK in-place upgrade and cross-app physical-device acceptance
+- [x] GitHub Actions compile, lint and unit tests
+- [x] stable APK in-place upgrade and cross-app physical-device acceptance
 
 SMS and Push remain disabled; this stage renders in-app server messages only.
