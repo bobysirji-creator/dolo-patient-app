@@ -246,6 +246,21 @@ Maps, Payments, SMS and Push remain disabled.
 - [x] add deterministic hosted-home presentation coverage and stable version increment
 - [x] GitHub Actions compile, lint, unit tests and stable APK
 - [x] stable APK in-place upgrade
-- [ ] physical-device Home refresh and cross-app queue acceptance
+- [x] physical-device Home refresh and cross-app queue acceptance
 
 No Platform API migration or deployment is required. Maps, Payments, SMS and Push remain disabled.
+## Stages 25A-25B - hosted Patient reviews
+
+- [x] completion-gated, owner-scoped review contract in PostgreSQL
+- [x] one review per hosted appointment with idempotent retry handling
+- [x] initial PENDING state and immutable Patient-facing moderation status
+- [x] protected Patient submit and own-review list endpoints
+- [x] Patient rating/comment form only on completed hosted appointments
+- [x] pending moderation display after submission and restart
+- [x] preserve every unrelated local Patient record
+- [x] API check and 108-test local suite
+- [ ] API PostgreSQL integration in GitHub Actions and Render deployment
+- [ ] Patient GitHub Actions build and stable APK
+- [ ] physical-device completed-appointment review checklist
+
+Doctor review visibility and Admin moderation actions are deliberately reserved for Stages 25C-25D. Maps, Payments, SMS and Push remain disabled.

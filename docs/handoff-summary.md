@@ -257,3 +257,12 @@ Hosted and local test appointments remain explicitly separated. Tapping a hosted
 The initial Stage 24A device run passed Home loading, hosted appointment identity/token/queue data, automatic refresh, navigation, completion/history, offline recovery, local fallback and disabled-provider checks. It exposed one presentation flaw: Home selected only the first communication, so an Admin broadcast could hide an active Doctor update.
 
 Patient App `0.18.1-stage24a` (version code 24) now renders a bounded three-card Home feed that prioritizes one Doctor update and one Admin broadcast when both exist, then fills any remaining position from the server order. The full Hosted Prototype Sync feed is unchanged. Regression coverage verifies simultaneous Doctor and Admin messages.
+## Stage 24A acceptance
+
+Patient App `0.18.1-stage24a` passed the final bounded Home communication retest on 22 July 2026. Active Doctor announcement and Admin broadcast appeared together, completing the Stage 24A physical-device checklist.
+
+## Stages 25A-25B implementation checkpoint
+
+Patient App `0.19.0-stage25b` (version code 25) consumes the new owner-scoped hosted review endpoints. Only COMPLETED hosted appointments expose a 1-5 rating and optional 500-character comment. A successful submission is reloaded from the server and displayed with PENDING moderation state; a stable appointment-scoped idempotency key protects retries.
+
+The hosted review flow does not upload or merge local profile, family, favourites, notifications, appointments or local reviews. Doctor visibility and Admin moderation are reserved for Stages 25C-25D. GitHub Actions remains the Android compiler/lint/unit/APK gate; follow `docs/stage25ab-device-test.md` only after API `0.15.0-stage25ab` is deployed.

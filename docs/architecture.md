@@ -51,3 +51,6 @@ The bootstrap distinguishes ordinary booking sessions from `rescheduleSessions` 
 ## Stage 24A hosted Home projection
 
 `HostedPatientSyncViewModel` remains the only owner of server snapshots. While a hosted Patient session is on Home, the navigation host triggers the existing bounded 15-second refresh; leaving Home cancels that loop. `HostedHomePresentation` deterministically filters terminal appointments, orders active records, associates each record with its owner-scoped live queue projection, and bounds Home communications to three cards while reserving visibility for one Doctor update and one Admin broadcast when both exist. Compose receives this read-only state but never writes it into `LocalPatientRepository`, so installed local data and hosted server data cannot silently merge.
+## Stages 25A-25B hosted review boundary
+
+The Patient client lists reviews only through the authenticated hosted account and exposes submission only for an appointment already reported as COMPLETED. The UI rule improves usability; PostgreSQL remains authoritative for ownership, completion, one-review uniqueness and retry idempotency. New reviews remain PENDING and are not treated as public Doctor ratings. No local Patient review or other local record is synchronized.

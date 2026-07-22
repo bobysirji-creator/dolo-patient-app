@@ -150,4 +150,19 @@ class HostedPatientSyncTest {
         assertEquals(live, HostedHomePresentation.liveQueue(homeSnapshot, "a1"))
         assertEquals(listOf(doctorUpdate, update), HostedHomePresentation.homeCommunications(homeSnapshot))
     }
-}
+
+    @Test
+    fun parsesPendingHostedReviewAndKeepsOneRetryKeyPerAppointment() {
+        val review = HostedReviewJson.parse(
+            """{"reviews":[{"id":"review-1","appointmentId":"appointment-1","patientName":"Prototype Patient","doctorName":"Dr. Ananya Mehta","clinicName":"Prototype Clinic","rating":5,"comment":"Very helpful.","status":"PENDING","submittedAt":"2026-07-22T08:00:00.000Z"}]}"""
+        ).single()
+
+        assertEquals(5, review.rating)
+        assertEquals("PENDING", review.status)
+        assertEquals("appointment-1", review.appointmentId)
+        assertEquals(
+            HostedReviewKeys.preferenceKey("appointment-1"),
+            HostedReviewKeys.preferenceKey("appointment-1")
+        )
+        assertFalse(HostedReviewKeys.preferenceKey("appointment-1") == HostedReviewKeys.preferenceKey("appointment-2"))
+    }}

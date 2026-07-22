@@ -23,8 +23,8 @@ android {
         applicationId = "com.dolo.patient"
         minSdk = 26
         targetSdk = 35
-        versionCode = 24
-        versionName = "0.18.1-stage24a"
+        versionCode = 25
+        versionName = "0.19.0-stage25b"
         buildConfigField(
             "String",
             "DOLO_API_BASE_URL",

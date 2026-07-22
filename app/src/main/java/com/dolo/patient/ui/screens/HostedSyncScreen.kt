@@ -2,6 +2,7 @@ package com.dolo.patient.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,6 +15,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,10 +59,10 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
         item {
             Card(colors = CardDefaults.cardColors(containerColor = if (state.error) MaterialTheme.colorScheme.errorContainer else DoloSurfaceAlt)) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Stage 23A - clinic receipt visibility", fontWeight = FontWeight.Bold)
+                    Text("Stages 25A-25B - hosted Patient reviews", fontWeight = FontWeight.Bold)
                     Text(state.message)
                     Text(
-                        "Your local profile, family, favourites, reviews and existing appointments are not uploaded.",
+                        "Your local profile, family, favourites and local appointments are not uploaded. Only reviews submitted here belong to the hosted dummy flow.",
                         style = MaterialTheme.typography.bodySmall
                     )
                     Button(viewModel::refresh, enabled = !state.loading, modifier = Modifier.fillMaxWidth()) {
@@ -153,6 +155,22 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                                 Text("Patients ahead: ${it.patientsAhead?.toString() ?: "Not available"} | Estimated wait: ${it.estimatedMinutes?.let { minutes -> "$minutes min" } ?: "Not available"}")
                                 Text("Countdown: ${it.countdownState}")
                             }
+                            if (appointment.status == "COMPLETED") {
+                                val hostedReview = snapshot.reviews.firstOrNull { it.appointmentId == appointment.id }
+                                if (hostedReview != null) {
+                                    Text("Your rating: ${hostedReview.rating}/5", fontWeight = FontWeight.Bold)
+                                    if (hostedReview.comment.isNotBlank()) Text(hostedReview.comment)
+                                    Text(
+                                        if (hostedReview.status == "PENDING") "Submitted - pending Admin moderation" else "Moderation: ${hostedReview.status}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = DoloTeal
+                                    )
+                                } else {
+                                    HostedReviewEditor(appointment.id, state.loading) { rating, comment ->
+                                        viewModel.submitReview(appointment.id, rating, comment)
+                                    }
+                                }
+                            }
                             val targets = HostedReschedulePolicy.eligibleSessions(appointment, snapshot.bootstrap.rescheduleSessions, snapshot.bootstrap.rescheduleWindowDays)
                             if (appointment.status == "ABSENT" && !appointment.rescheduleUsed) {
                                 Button(
@@ -200,4 +218,30 @@ private fun communicationLabel(kind: String): String = when (kind) {
     "DOCTOR_CAMP" -> "Health camp"
     "DOCTOR_OFFER" -> "Doctor offer"
     else -> "Doctor announcement"
+}
+
+@Composable
+private fun HostedReviewEditor(appointmentId: String, loading: Boolean, onSubmit: (Int, String) -> Unit) {
+    var rating by rememberSaveable(appointmentId) { mutableStateOf(5) }
+    var comment by rememberSaveable(appointmentId) { mutableStateOf("") }
+    Column(Modifier.fillMaxWidth().padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("Rate this completed consultation", fontWeight = FontWeight.Bold)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            (1..5).forEach { value ->
+                FilterChip(selected = rating == value, onClick = { rating = value }, label = { Text(value.toString()) })
+            }
+        }
+        OutlinedTextField(
+            value = comment,
+            onValueChange = { if (it.length <= 500) comment = it },
+            label = { Text("Comment (optional)") },
+            supportingText = { Text("${comment.length}/500") },
+            maxLines = 4,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text("Your review is private until Admin moderation is completed.", style = MaterialTheme.typography.bodySmall)
+        Button(onClick = { onSubmit(rating, comment) }, enabled = !loading, modifier = Modifier.fillMaxWidth()) {
+            Text("Submit hosted review")
+        }
+    }
 }
