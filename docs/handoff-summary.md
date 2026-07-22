@@ -234,3 +234,12 @@ Patient App `0.15.0-stage21b`, Platform API `0.12.0-stage21a` and the existing D
 Patient App `0.16.0-stage22a` (version code 21) adds the protected one-time missed-appointment reschedule flow to Hosted Prototype Sync. Only an authoritative ABSENT appointment with unused eligibility shows the action. The screen reads the server's separate reschedule horizon, lets the Patient choose an eligible candidate, sends an appointment/target-scoped idempotency key, then reloads authoritative history and live state.
 
 The server remains authoritative for ownership, deadline, clinic, capacity and one-time enforcement. The original and replacement lineage are displayed, and no local profile, family member, appointment, favourite or review is uploaded or replaced. GitHub Actions is the Android compiler/lint/unit/APK gate on this PC. Platform API Stage 22A must deploy before following `docs/stage22a-device-test.md`.
+## Stage 22A acceptance
+
+Patient App `0.16.0-stage22a` and Platform API `0.13.0-stage22a` passed the full Stage 22A cross-app device checklist on 22 July 2026. One-time ABSENT rescheduling, bounded targets, duplicate protection, history/lineage, current-day-only ordinary booking independence, restart/offline recovery and local-data isolation passed. An additional observation retest is planned for 23 July without blocking this checkpoint.
+
+## Stage 23A implementation checkpoint
+
+Patient App `0.17.0-stage23a` (version code 22) now displays the authoritative clinic consultation-fee record on every hosted history card. PENDING explains that no receipt exists yet; PAID shows the clinic-recorded INR amount and receipt reference; WAIVED shows its receipt reference. Every confirmed state explicitly says it is not an online DO-LO payment.
+
+The API response and UI omit payment method, gateway data and provider details. Receipt state remains attached to the original or replacement appointment after queue completion, absence, rescheduling, refresh and restart. Local profile, family, favourites, reviews and appointments remain untouched. GitHub Actions is the Android build gate; follow `docs/stage23a-device-test.md` only after API `0.14.0-stage23a` is live.

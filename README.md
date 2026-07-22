@@ -78,3 +78,6 @@ Hosted Prototype Sync now lets the user select either the fixed `Prototype Patie
 ## Stage 22A hosted missed-appointment rescheduling
 
 An authoritative ABSENT hosted appointment can now be rescheduled once to a server-provided eligible session. The original history entry becomes RESCHEDULED, the replacement retains the same seeded patient name with a new token, and retry keys prevent duplicate replacement allocation. The reschedule horizon remains available even when the Doctor permits ordinary bookings only for the current day. Local Patient data and external providers remain unchanged.
+## Stage 23A clinic receipt visibility
+
+Hosted appointment history now shows whether the clinic consultation fee is pending, paid directly at the clinic, or waived, together with the generated receipt reference and clinic-recorded amount where applicable. This is a clinic receipt record—not online DO-LO payment processing—and no payment method or gateway data is consumed.

@@ -45,3 +45,6 @@ Stage 16C adds a separate hosted adapter rather than replacing `LocalPatientRepo
 ## Stage 22A hosted reschedule boundary
 
 The bootstrap distinguishes ordinary booking sessions from `rescheduleSessions` and publishes the bounded `rescheduleWindowDays`. `HostedReschedulePolicy` only presents enabled candidates inside the original appointment's server-configured deadline, but this is a usability filter rather than an authorization control. The protected API independently verifies Patient ownership, ABSENT state, one-time eligibility, same-clinic target, deadline, capacity and idempotency. Appointment/target retry keys remain in local preferences until the authoritative server accepts or consistently returns the command result.
+## Stage 23A receipt presentation boundary
+
+`HostedAppointmentJson` maps only the owner-scoped clinic fee status, amount and receipt number returned by appointment history. `HostedReceiptPresentation` renders PENDING, PAID and WAIVED without inferring a payment method. Missing fields remain backward-compatible as PENDING. The local Patient repository is not read or updated by this hosted projection, and no gateway/provider SDK is present.

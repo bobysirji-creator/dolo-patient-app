@@ -110,4 +110,26 @@ class HostedPatientSyncTest {
                 HostedRescheduleKeys.preferenceKey("appointment-1", "session-3")
         )
     }
+    @Test
+    fun parsesClinicReceiptFieldsFromHostedHistory() {
+        val appointment = HostedAppointmentJson.parse(
+            """{"appointments":[{"id":"appointment-1","clinicSessionId":"session-1","clinicName":"Prototype Clinic","patientName":"Prototype Patient","serviceDate":"2026-07-22","session":"MORNING","tokenNumber":4,"status":"COMPLETED","clinicFeeStatus":"PAID","clinicFeeAmountMinor":50000,"receiptNumber":"DLO-20260722-0004","rescheduleUsed":false,"rescheduledFromAppointmentId":null}]}"""
+        ).single()
+
+        assertEquals("PAID", appointment.clinicFeeStatus)
+        assertEquals(50000, appointment.clinicFeeAmountMinor)
+        assertEquals("DLO-20260722-0004", appointment.receiptNumber)
+    }
+
+    @Test
+    fun receiptPresentationSeparatesClinicPaymentFromDoloPayments() {
+        val pending = HostedAppointment("a1", "s1", "Doctor", "Clinic", "Patient", "2026-07-22", "MORNING", 1, "BOOKED")
+        val paid = pending.copy(clinicFeeStatus = "PAID", clinicFeeAmountMinor = 50000, receiptNumber = "DLO-1")
+        val waived = pending.copy(clinicFeeStatus = "WAIVED", receiptNumber = "DLO-2")
+
+        assertTrue(HostedReceiptPresentation.text(pending).contains("Pending at clinic"))
+        assertTrue(HostedReceiptPresentation.text(paid).contains("INR 500 paid directly at clinic"))
+        assertTrue(HostedReceiptPresentation.text(paid).contains("Not an online DO-LO payment"))
+        assertTrue(HostedReceiptPresentation.text(waived).contains("Waived at clinic"))
+    }
 }

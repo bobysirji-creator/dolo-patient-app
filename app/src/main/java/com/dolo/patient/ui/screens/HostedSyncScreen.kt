@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dolo.patient.data.HostedPatientSyncViewModel
 import com.dolo.patient.data.HostedReschedulePolicy
+import com.dolo.patient.data.HostedReceiptPresentation
 import com.dolo.patient.ui.components.ScreenTitle
 import com.dolo.patient.ui.theme.DoloSurfaceAlt
 import com.dolo.patient.ui.theme.DoloTeal
@@ -56,7 +57,7 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
         item {
             Card(colors = CardDefaults.cardColors(containerColor = if (state.error) MaterialTheme.colorScheme.errorContainer else DoloSurfaceAlt)) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Stage 22A - hosted missed-appointment rescheduling", fontWeight = FontWeight.Bold)
+                    Text("Stage 23A - clinic receipt visibility", fontWeight = FontWeight.Bold)
                     Text(state.message)
                     Text(
                         "Your local profile, family, favourites, reviews and existing appointments are not uploaded.",
@@ -143,6 +144,7 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                             Text("${appointment.patientName} - ${appointment.date} - ${appointment.session}")
                             Text("${appointment.doctorName} - ${appointment.clinicName}")
                             Text("Status: ${appointment.status}")
+                            Text(HostedReceiptPresentation.text(appointment), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
                             if (appointment.rescheduledFromAppointmentId != null) {
                                 Text("One-time replacement appointment", style = MaterialTheme.typography.bodySmall)
                             }

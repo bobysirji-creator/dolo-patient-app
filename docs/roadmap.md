@@ -219,6 +219,18 @@ Maps, Payments, SMS and Push remain disabled.
 - [x] display original RESCHEDULED state and replacement lineage/name/token
 - [x] preserve local profile, family, favourites, reviews and appointments
 - [x] add policy/retry-key unit coverage and stable version increment
+- [x] GitHub Actions compile, lint, unit tests and stable APK
+- [x] stable APK in-place upgrade
+- [x] Patient/Doctor cross-app physical-device acceptance
+## Stage 23A - hosted clinic receipt visibility
+
+- [x] parse clinic fee status, recorded amount and receipt reference from authoritative history
+- [x] distinguish PENDING, PAID and WAIVED clinic records
+- [x] clearly state that the consultation fee is handled directly at the clinic
+- [x] retain receipt state after completion, absence, rescheduling and refresh
+- [x] expose no clinic payment method or platform payment data
+- [x] add history JSON and presentation regression coverage
+- [x] preserve all local Patient data and disabled-provider boundaries
 - [ ] GitHub Actions compile, lint, unit tests and stable APK
 - [ ] stable APK in-place upgrade
 - [ ] Patient/Doctor cross-app physical-device acceptance
