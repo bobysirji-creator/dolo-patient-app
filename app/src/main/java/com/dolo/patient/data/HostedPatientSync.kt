@@ -26,6 +26,21 @@ data class HostedBootstrap(val profile: HostedProfile, val clinic: HostedClinic,
 data class HostedSyncSnapshot(val bootstrap: HostedBootstrap, val appointments: List<HostedAppointment>, val live: List<HostedLiveQueue>, val communications: List<HostedCommunication> = emptyList())
 data class HostedServerError(val code: String, val message: String)
 
+object HostedHomePresentation {
+    private val terminalStatuses = setOf("COMPLETED", "ABSENT", "RESCHEDULED", "EXPIRED")
+
+    fun activeAppointments(snapshot: HostedSyncSnapshot): List<HostedAppointment> =
+        snapshot.appointments.filter { it.status !in terminalStatuses }.sortedWith(
+            compareBy<HostedAppointment> { it.date }.thenBy { it.session }.thenBy { it.token }
+        )
+
+    fun liveQueue(snapshot: HostedSyncSnapshot, appointmentId: String): HostedLiveQueue? =
+        snapshot.live.firstOrNull { it.appointmentId == appointmentId }
+
+    fun latestCommunication(snapshot: HostedSyncSnapshot): HostedCommunication? =
+        snapshot.communications.firstOrNull()
+}
+
 sealed interface HostedResult<out T> {
     data class Success<T>(val value: T) : HostedResult<T>
     data class Failure(val message: String, val doctorUnavailable: Boolean = false) : HostedResult<Nothing>
@@ -250,7 +265,7 @@ class HttpHostedPatientSyncApi(
             readTimeout = 25_000
             setRequestProperty("Accept", "application/json")
             setRequestProperty("Authorization", "Bearer $token")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage23A")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage24A")
             headers.forEach { (key, value) -> setRequestProperty(key, value) }
             if (body != null) {
                 doOutput = true

@@ -55,7 +55,7 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
 @Composable fun SplashScreen(onContinue:()->Unit){Box(page.padding(28.dp),contentAlignment=Alignment.Center){Column(horizontalAlignment=Alignment.CenterHorizontally){BrandLogo();Spacer(Modifier.height(28.dp));Icon(Icons.Outlined.HealthAndSafety,null,tint=DoloTeal,modifier=Modifier.size(130.dp));Text("Book. Track. Visit.",style=MaterialTheme.typography.headlineMedium);Text("Worry less.",color=DoloTeal,fontSize=22.sp,fontWeight=FontWeight.Bold);Spacer(Modifier.height(34.dp));PrimaryButton("Get started",onContinue)}}}
 @Composable fun LoginScreen(auth:AuthViewModel,onLogin:()->Unit){val s=auth.uiState;LaunchedEffect(s.step){if(s.step==AuthStep.AUTHENTICATED)onLogin()};Column(page.padding(24.dp),verticalArrangement=Arrangement.Center){BrandLogo();Spacer(Modifier.height(30.dp));Text(if(s.step==AuthStep.OTP)"Verify OTP" else "Welcome Back!",style=MaterialTheme.typography.headlineMedium);Text(if(s.step==AuthStep.OTP)"Code sent to +91 "+s.phone else "Login using your mobile number",color=DoloMuted);Spacer(Modifier.height(20.dp));if(s.step==AuthStep.PHONE){OutlinedTextField(s.phone,auth::updatePhone,Modifier.fillMaxWidth(),label={Text("Mobile number")},prefix={Text("+91 ")},keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Phone),singleLine=true);Spacer(Modifier.height(16.dp));PrimaryButton("Send OTP",auth::requestOtp,s.phone.length==10)}else{OutlinedTextField(s.otp,auth::updateOtp,Modifier.fillMaxWidth(),label={Text("6-digit OTP")},keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.NumberPassword),singleLine=true);Text("Demo OTP: 123456",color=DoloTeal,modifier=Modifier.padding(vertical=12.dp));PrimaryButton(if(s.isLoading)"Connecting..." else "Verify & Continue",auth::verifyOtp,s.otp.length==6&&!s.isLoading);TextButton(auth::editPhone){Text("Change mobile number")}};s.error?.let{Text(it,color=MaterialTheme.colorScheme.error)}}}
 
-@Composable fun HomeScreen(onCategories:()->Unit,onDoctor:(String)->Unit,onHistory:()->Unit,onFavourites:()->Unit,onQueue:(String)->Unit,onProfile:()->Unit,onNotifications:()->Unit,onSupport:()->Unit,onLogout:()->Unit,state:PatientUiState,onSearch:(String)->Unit,onRefreshQueues:()->Unit,authStatus:String){
+@Composable fun HomeScreen(onCategories:()->Unit,onDoctor:(String)->Unit,onHistory:()->Unit,onFavourites:()->Unit,onQueue:(String)->Unit,onProfile:()->Unit,onNotifications:()->Unit,onSupport:()->Unit,onLogout:()->Unit,state:PatientUiState,onSearch:(String)->Unit,onRefreshQueues:()->Unit,authStatus:String,hostedState:HostedSyncUiState?=null,onRefreshHosted:()->Unit={},onHostedSync:()->Unit={}){
  var q by remember{mutableStateOf("")}
  var nowMillis by remember{mutableStateOf(System.currentTimeMillis())}
  val activeAppointments=state.appointments.filter{it.status in listOf(AppointmentStatus.BOOKED,AppointmentStatus.WAITING,AppointmentStatus.IN_CONSULTATION)}
@@ -66,7 +66,17 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
    item{Row(verticalAlignment=Alignment.CenterVertically){BrandLogo();Spacer(Modifier.weight(1f));IconButton(onNotifications){BadgedBox({if(state.notifications.any{!it.isRead})Badge()}){Icon(Icons.Outlined.Notifications,"Notifications")}};IconButton(onProfile){Icon(Icons.Outlined.Person,"Profile")};IconButton(onLogout){Icon(Icons.Outlined.Logout,"Logout")}}}
    item{Column{Text(state.profile.name+" ("+state.profile.city+")",fontSize=26.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal);Text("Identity: "+authStatus,color=if(authStatus=="Hosted prototype")DoloTeal else DoloMuted,fontSize=12.sp,fontWeight=FontWeight.SemiBold)}}
    item{OutlinedTextField(q,{q=it},Modifier.fillMaxWidth(),placeholder={Text("Search doctor, specialty or clinic")},leadingIcon={Icon(Icons.Outlined.Search,null)},trailingIcon={IconButton({onSearch(q)}){Icon(Icons.Outlined.ArrowForward,null)}},singleLine=true,shape=RoundedCornerShape(18.dp))}
-   item{Text(if(activeAppointments.size==1)"Live Appointment" else "Live Appointments",style=MaterialTheme.typography.titleLarge)}
+   hostedState?.let{hosted->
+    val snapshot=hosted.snapshot
+    val hostedAppointments=snapshot?.let { HostedHomePresentation.activeAppointments(it) }.orEmpty()
+    item{Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically){Text("Hosted appointments",style=MaterialTheme.typography.titleLarge,modifier=Modifier.weight(1f));TextButton(onHostedSync){Text("View all")}}}
+    if(hosted.error)item{Card(colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.errorContainer),shape=RoundedCornerShape(18.dp)){Column(Modifier.padding(14.dp)){Text("Hosted refresh needs attention",fontWeight=FontWeight.Bold);Text(hosted.message,fontSize=12.sp);TextButton(onRefreshHosted,enabled=!hosted.loading){Text("Retry")}}}}
+    snapshot?.let{server->HostedHomePresentation.latestCommunication(server)?.let{update->item{HostedHomeUpdateCard(update,onHostedSync)}}}
+    if(snapshot==null&&!hosted.error)item{EmptyCard(if(hosted.loading)"Loading hosted appointments..." else "Hosted appointments are not loaded yet.")}
+    else if(hostedAppointments.isEmpty())item{EmptyCard("No active hosted appointment. Completed and missed visits remain in hosted history.")}
+    else items(hostedAppointments,key={"hosted-home-${it.id}"}){appointment->HostedHomeAppointmentCard(appointment,snapshot?.let{HostedHomePresentation.liveQueue(it,appointment.id)},onHostedSync)}
+   }
+   item{Text(if(activeAppointments.size==1)"Local Test Appointment" else "Local Test Appointments",style=MaterialTheme.typography.titleLarge)}
    if(activeAppointments.isEmpty())item{EmptyCard("Your active appointment and live queue will appear here.")}
    else items(activeAppointments,key={it.id}){appointment->HomeAppointmentQueueCard(appointment,state.queues[appointment.id],nowMillis){onQueue(appointment.id)}}
    item{PrimaryButton("Browse doctor categories",onCategories)}
@@ -405,6 +415,66 @@ private fun QueueConnectionBanner(
                     Text("Retry")
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun HostedHomeUpdateCard(update: HostedCommunication, onClick: () -> Unit) {
+    Card(
+        Modifier.fillMaxWidth().shadow(7.dp, RoundedCornerShape(20.dp)).clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Column(Modifier.padding(15.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(if (update.audience == "ALL_PATIENTS") "DO-LO update" else "Doctor update", color = DoloTeal, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+            Text(update.title, fontWeight = FontWeight.ExtraBold)
+            Text(update.message, maxLines = 2, color = DoloMuted, fontSize = 13.sp)
+        }
+    }
+}
+
+@Composable
+private fun HostedHomeAppointmentCard(
+    appointment: HostedAppointment,
+    live: HostedLiveQueue?,
+    onClick: () -> Unit
+) {
+    Card(
+        Modifier.fillMaxWidth().shadow(10.dp, RoundedCornerShape(24.dp)).clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFEAFBF7)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp, pressedElevation = 2.dp),
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Outlined.CloudDone, null, tint = DoloTeal, modifier = Modifier.size(38.dp))
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(appointment.doctorName, fontWeight = FontWeight.ExtraBold)
+                    Text("Patient: ${appointment.patientName}", color = DoloMuted)
+                    Text("${appointment.date} - ${appointment.session.lowercase().replaceFirstChar(Char::uppercase)}", fontSize = 12.sp, color = DoloMuted)
+                }
+                Surface(color = DoloTeal.copy(alpha = 0.12f), shape = RoundedCornerShape(12.dp)) { Text("HOSTED", Modifier.padding(horizontal = 9.dp, vertical = 5.dp), color = DoloTeal, fontSize = 10.sp, fontWeight = FontWeight.Bold) }
+            }
+            HorizontalDivider()
+            Row(Modifier.fillMaxWidth()) {
+                QueueMetric("Your token", appointment.token.toString(), Modifier.weight(1f), Color(0xFFE94F64))
+                QueueMetric("Current token", live?.currentToken?.toString() ?: "--", Modifier.weight(1f))
+                QueueMetric("Patients ahead", live?.patientsAhead?.toString() ?: "--", Modifier.weight(1f))
+            }
+            Surface(color = DoloBackground, shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
+                Row(Modifier.padding(13.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Outlined.Timer, null, tint = DoloTeal)
+                    Spacer(Modifier.width(10.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text("Authoritative estimated wait", fontSize = 12.sp, color = DoloMuted)
+                        Text(live?.estimatedMinutes?.let { "$it min" } ?: "Not available", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = DoloTeal)
+                    }
+                    Text(live?.countdownState?.replace('_', ' ') ?: appointment.status.replace('_', ' '), fontSize = 11.sp, color = DoloMuted)
+                }
+            }
+            Text("Clinic fee: ${appointment.clinicFeeStatus} • Tap for receipt, booking and reschedule details", fontSize = 12.sp, color = DoloMuted)
         }
     }
 }

@@ -48,3 +48,6 @@ The bootstrap distinguishes ordinary booking sessions from `rescheduleSessions` 
 ## Stage 23A receipt presentation boundary
 
 `HostedAppointmentJson` maps only the owner-scoped clinic fee status, amount and receipt number returned by appointment history. `HostedReceiptPresentation` renders PENDING, PAID and WAIVED without inferring a payment method. Missing fields remain backward-compatible as PENDING. The local Patient repository is not read or updated by this hosted projection, and no gateway/provider SDK is present.
+## Stage 24A hosted Home projection
+
+`HostedPatientSyncViewModel` remains the only owner of server snapshots. While a hosted Patient session is on Home, the navigation host triggers the existing bounded 15-second refresh; leaving Home cancels that loop. `HostedHomePresentation` deterministically filters terminal appointments, orders active records and associates each record with its owner-scoped live queue projection. Compose receives this read-only state but never writes it into `LocalPatientRepository`, so installed local data and hosted server data cannot silently merge.

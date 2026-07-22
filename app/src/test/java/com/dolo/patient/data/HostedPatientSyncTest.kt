@@ -132,4 +132,21 @@ class HostedPatientSyncTest {
         assertTrue(HostedReceiptPresentation.text(paid).contains("Not an online DO-LO payment"))
         assertTrue(HostedReceiptPresentation.text(waived).contains("Waived at clinic"))
     }
+    @Test
+    fun hostedHomeShowsOnlyActiveAppointmentsInStableOrder() {
+        val later = HostedAppointment("a2", "s2", "Doctor", "Clinic", "Family", "2026-07-24", "EVENING", 2, "BOOKED")
+        val earlier = HostedAppointment("a1", "s1", "Doctor", "Clinic", "Patient", "2026-07-23", "MORNING", 4, "WAITING")
+        val completed = HostedAppointment("a3", "s1", "Doctor", "Clinic", "Patient", "2026-07-22", "MORNING", 1, "COMPLETED")
+        val live = HostedLiveQueue("a1", 4, 2, 1, 12, "WAITING", "COUNTING_DOWN")
+        val update = HostedCommunication("c1", "ALL_PATIENTS", "ADMIN_BROADCAST", "Clinic update", "Open normally", "2026-07-22", "2026-07-23")
+        val homeSnapshot = snapshot.copy(
+            appointments = listOf(later, completed, earlier),
+            live = listOf(live),
+            communications = listOf(update)
+        )
+
+        assertEquals(listOf("a1", "a2"), HostedHomePresentation.activeAppointments(homeSnapshot).map { it.id })
+        assertEquals(live, HostedHomePresentation.liveQueue(homeSnapshot, "a1"))
+        assertEquals(update, HostedHomePresentation.latestCommunication(homeSnapshot))
+    }
 }

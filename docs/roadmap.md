@@ -231,6 +231,21 @@ Maps, Payments, SMS and Push remain disabled.
 - [x] expose no clinic payment method or platform payment data
 - [x] add history JSON and presentation regression coverage
 - [x] preserve all local Patient data and disabled-provider boundaries
+- [x] GitHub Actions compile, lint, unit tests and stable APK
+- [x] stable APK in-place upgrade
+- [x] Patient/Doctor cross-app physical-device acceptance
+## Stage 24A - authoritative hosted Patient Home
+
+- [x] automatically refresh hosted data while an authenticated Patient is on Home
+- [x] show active hosted SELF/FAMILY appointments separately from local test appointments
+- [x] display Doctor, patient, date, session, token, current token and patients ahead
+- [x] display the server-authoritative estimated wait and countdown state
+- [x] surface the latest active Doctor/Admin in-app update
+- [x] retain a clear route to the complete hosted booking/history workspace
+- [x] keep local Patient data isolated and preserve hosted snapshots during ordinary offline failures
+- [x] add deterministic hosted-home presentation coverage and stable version increment
 - [ ] GitHub Actions compile, lint, unit tests and stable APK
 - [ ] stable APK in-place upgrade
-- [ ] Patient/Doctor cross-app physical-device acceptance
+- [ ] physical-device Home refresh and cross-app queue acceptance
+
+No Platform API migration or deployment is required. Maps, Payments, SMS and Push remain disabled.

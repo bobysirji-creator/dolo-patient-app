@@ -243,3 +243,12 @@ Patient App `0.16.0-stage22a` and Platform API `0.13.0-stage22a` passed the full
 Patient App `0.17.0-stage23a` (version code 22) now displays the authoritative clinic consultation-fee record on every hosted history card. PENDING explains that no receipt exists yet; PAID shows the clinic-recorded INR amount and receipt reference; WAIVED shows its receipt reference. Every confirmed state explicitly says it is not an online DO-LO payment.
 
 The API response and UI omit payment method, gateway data and provider details. Receipt state remains attached to the original or replacement appointment after queue completion, absence, rescheduling, refresh and restart. Local profile, family, favourites, reviews and appointments remain untouched. GitHub Actions is the Android build gate; follow `docs/stage23a-device-test.md` only after API `0.14.0-stage23a` is live.
+## Stage 23A acceptance
+
+Patient App `0.17.0-stage23a`, Doctor App `0.20.0-stage23a` and Platform API `0.14.0-stage23a` passed the complete clinic-receipt checklist on 22 July 2026. Existing current-day SELF/FAMILY records verified PENDING, PAID and WAIVED presentation, matching receipt references, consultation/history retention, restart/offline safety and local-data isolation. A next-clinic-day observation retest is planned for 23 July without blocking acceptance.
+
+## Stage 24A implementation checkpoint
+
+Patient App `0.18.0-stage24a` (version code 23) moves active authoritative hosted appointments onto the normal Home screen. Hosted mode refreshes every 15 seconds while Home is visible and presents Doctor/patient identity, date/session, patient token, current token, patients ahead, estimated wait, countdown state and clinic-fee status. The latest active Doctor announcement or Admin broadcast is also surfaced.
+
+Hosted and local test appointments remain explicitly separated. Tapping a hosted card or View all opens the existing full hosted booking/history workspace. Ordinary offline failures retain the last hosted snapshot; no local profile, family, favourite, review, notification or appointment is uploaded or replaced. GitHub Actions remains the Android compiler/lint/test gate.

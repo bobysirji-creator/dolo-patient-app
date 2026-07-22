@@ -11,6 +11,7 @@ import com.dolo.patient.auth.*
 import com.dolo.patient.data.*
 import com.dolo.patient.platform.*
 import com.dolo.patient.ui.screens.*
+import kotlinx.coroutines.delay
 
 object Routes{const val Splash="splash";const val Login="login";const val Home="home";const val Categories="categories";const val Doctors="doctors/{category}";const val DoctorDetails="doctor/{doctorId}";const val Booking="booking/{doctorId}";const val Confirmation="confirmation/{doctorId}/{session}";const val History="history";const val Favourites="favourites";const val Queue="queue/{appointmentId}";const val Profile="profile";const val Notifications="notifications";const val Support="support";const val Integrations="integrations";const val HostedSync="hosted-sync";const val HostedDoctorDetails="hosted-doctor/{clinicId}";const val Review="review/{doctorId}/{appointmentId}"}
 @Composable fun DoloPatientApp(authRepository:AuthRepository,patientRepository:PatientRepository,platformApi:PlatformApi,hostedSyncApi:HostedPatientSyncApi){
@@ -18,7 +19,11 @@ object Routes{const val Splash="splash";const val Login="login";const val Home="
  NavHost(nav,startDestination=Routes.Splash){
   composable(Routes.Splash){SplashScreen{nav.navigate(if(auth.uiState.step==AuthStep.AUTHENTICATED)Routes.Home else Routes.Login){popUpTo(Routes.Splash){inclusive=true}}}}
   composable(Routes.Login){LoginScreen(auth){nav.navigate(Routes.Home){popUpTo(Routes.Login){inclusive=true}}}}
-  composable(Routes.Home){HomeScreen(onCategories={nav.navigate(Routes.Categories)},onDoctor={nav.navigate("doctor/"+it)},onHistory={nav.navigate(Routes.History)},onFavourites={nav.navigate(Routes.Favourites)},onQueue={nav.navigate("queue/"+it)},onProfile={nav.navigate(Routes.Profile)},onNotifications={nav.navigate(Routes.Notifications)},onSupport={nav.navigate(Routes.Support)},onLogout={auth.logout();nav.navigate(Routes.Login){popUpTo(Routes.Home){inclusive=true}}},state=patient.uiState,onSearch={patient.search(it);nav.navigate("doctors/All")},onRefreshQueues=patient::refreshAllQueues,authStatus=auth.uiState.session?.mode?.label ?: "Local fallback")}
+  composable(Routes.Home){
+   val hostedMode=auth.uiState.session?.mode==PatientAuthMode.HOSTED_PROTOTYPE
+   androidx.compose.runtime.LaunchedEffect(hostedMode){if(hostedMode){while(true){hosted.refresh();delay(15_000)}}}
+   HomeScreen(onCategories={nav.navigate(Routes.Categories)},onDoctor={nav.navigate("doctor/"+it)},onHistory={nav.navigate(Routes.History)},onFavourites={nav.navigate(Routes.Favourites)},onQueue={nav.navigate("queue/"+it)},onProfile={nav.navigate(Routes.Profile)},onNotifications={nav.navigate(Routes.Notifications)},onSupport={nav.navigate(Routes.Support)},onLogout={auth.logout();nav.navigate(Routes.Login){popUpTo(Routes.Home){inclusive=true}}},state=patient.uiState,onSearch={patient.search(it);nav.navigate("doctors/All")},onRefreshQueues=patient::refreshAllQueues,authStatus=auth.uiState.session?.mode?.label ?: "Local fallback",hostedState=if(hostedMode)hosted.uiState else null,onRefreshHosted=hosted::refresh,onHostedSync={nav.navigate(Routes.HostedSync)})
+  }
   composable(Routes.Categories){CategoriesScreen(nav::popBackStack){nav.navigate("doctors/"+it)}}
   composable(Routes.Doctors,arguments=listOf(navArgument("category"){type=NavType.StringType})){e->val c=e.arguments?.getString("category").orEmpty();DoctorListScreen(c,nav::popBackStack,patient.uiState,platform.uiState,{patient.search(it,if(c=="All")null else c)},{nav.navigate("doctor/"+it)},{nav.navigate("hosted-doctor/"+it)},platform::refresh,patient::toggleFavourite,{nav.navigate(Routes.Home){launchSingleTop=true}},{nav.navigate(Routes.History){launchSingleTop=true}},{nav.navigate(Routes.Categories){launchSingleTop=true}})}
   composable(Routes.HostedDoctorDetails,arguments=listOf(navArgument("clinicId"){type=NavType.StringType})){e->val id=e.arguments?.getString("clinicId").orEmpty();HostedDoctorDetailsScreen(platform.uiState.clinics.firstOrNull{it.id==id},nav::popBackStack,platform::refresh){nav.navigate(Routes.HostedSync)}}
