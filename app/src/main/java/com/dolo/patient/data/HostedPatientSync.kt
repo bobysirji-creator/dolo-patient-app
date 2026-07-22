@@ -15,19 +15,25 @@ import java.net.URL
 import java.util.UUID
 import java.util.concurrent.Executors
 
-data class HostedProfile(val id: String, val name: String)
+data class HostedProfile(val id: String, val name: String, val relationship: String = "SELF")
 data class HostedClinic(val id: String, val name: String, val city: String, val doctorName: String, val specialty: String, val feeMinor: Int)
 data class HostedSession(val id: String, val date: String, val name: String, val startsAt: String, val endsAt: String, val available: Int, val enabled: Boolean)
 data class HostedAppointment(val id: String, val sessionId: String, val doctorName: String, val clinicName: String, val patientName: String, val date: String, val session: String, val token: Int, val status: String)
 data class HostedLiveQueue(val appointmentId: String, val token: Int, val currentToken: Int?, val patientsAhead: Int?, val estimatedMinutes: Int?, val status: String, val countdownState: String)
 data class HostedCommunication(val id: String, val audience: String, val kind: String, val title: String, val message: String, val startsOn: String, val endsOn: String)
-data class HostedBootstrap(val profile: HostedProfile, val clinic: HostedClinic, val sessions: List<HostedSession>)
+data class HostedBootstrap(val profile: HostedProfile, val clinic: HostedClinic, val sessions: List<HostedSession>, val profiles: List<HostedProfile> = listOf(profile))
 data class HostedSyncSnapshot(val bootstrap: HostedBootstrap, val appointments: List<HostedAppointment>, val live: List<HostedLiveQueue>, val communications: List<HostedCommunication> = emptyList())
 data class HostedServerError(val code: String, val message: String)
 
 sealed interface HostedResult<out T> {
     data class Success<T>(val value: T) : HostedResult<T>
     data class Failure(val message: String, val doctorUnavailable: Boolean = false) : HostedResult<Nothing>
+}
+
+object HostedBookingKeys {
+    const val SEEDED_PRIMARY_PROFILE_ID = "10000000-0000-0000-0000-000000000016"
+    fun preferenceKey(sessionId: String, profileId: String): String = "hosted_booking_key_${sessionId}_$profileId"
+    fun legacyPreferenceKey(sessionId: String): String = "hosted_booking_key_$sessionId"
 }
 
 interface HostedPatientSyncApi {
@@ -66,6 +72,42 @@ object HostedCommunicationJson {
         }
     }
 }
+
+object HostedBootstrapJson {
+    fun parse(json: String): HostedBootstrap {
+        val root = JSONObject(json)
+        require(root.optBoolean("authoritative"))
+        val primary = root.getJSONObject("profile")
+        val clinic = root.getJSONObject("clinic")
+        val doctor = clinic.getJSONObject("doctor")
+        val profileArray = root.optJSONArray("profiles")
+        val profiles = if (profileArray == null) {
+            listOf(HostedProfile(primary.getString("id"), primary.getString("displayName"), primary.optString("relationship", "SELF")))
+        } else {
+            buildList {
+                for (index in 0 until profileArray.length()) {
+                    val profile = profileArray.getJSONObject(index)
+                    add(HostedProfile(profile.getString("id"), profile.getString("displayName"), profile.optString("relationship", "FAMILY")))
+                }
+            }
+        }
+        val sessionArray = root.getJSONArray("sessions")
+        val sessions = buildList {
+            for (index in 0 until sessionArray.length()) {
+                val session = sessionArray.getJSONObject(index)
+                add(HostedSession(session.getString("id"), session.getString("serviceDate"), session.getString("name"), session.getString("startsAt"), session.getString("endsAt"), session.optInt("availableTokens"), session.optBoolean("bookingEnabled")))
+            }
+        }
+        val primaryProfile = profiles.firstOrNull { it.id == primary.getString("id") }
+            ?: HostedProfile(primary.getString("id"), primary.getString("displayName"), primary.optString("relationship", "SELF"))
+        return HostedBootstrap(
+            primaryProfile,
+            HostedClinic(clinic.getString("id"), clinic.getString("name"), clinic.optString("city"), doctor.getString("name"), doctor.optString("specialty"), clinic.optInt("consultationFeeMinor")),
+            sessions,
+            profiles
+        )
+    }
+}
 private class HostedRequestException(
     val code: String,
     message: String
@@ -85,9 +127,13 @@ class HttpHostedPatientSyncApi(
     override fun refresh(): HostedResult<HostedSyncSnapshot> = guarded { load() }
 
     override fun book(sessionId: String, profileId: String): HostedResult<HostedSyncSnapshot> = guarded {
-        val keyName = "hosted_booking_key_$sessionId"
+        val keyName = HostedBookingKeys.preferenceKey(sessionId, profileId)
+        val legacy = if (profileId == HostedBookingKeys.SEEDED_PRIMARY_PROFILE_ID) {
+            preferences.getString(HostedBookingKeys.legacyPreferenceKey(sessionId), null)
+        } else null
         val idempotency = preferences.getString(keyName, null)
-            ?: ("android16c-" + UUID.randomUUID()).also { preferences.edit().putString(keyName, it).apply() }
+            ?: legacy?.also { preferences.edit().putString(keyName, it).apply() }
+            ?: ("android21b-" + UUID.randomUUID()).also { preferences.edit().putString(keyName, it).apply() }
         request(
             "POST",
             "/api/v1/appointments",
@@ -98,7 +144,7 @@ class HttpHostedPatientSyncApi(
     }
 
     private fun load(): HostedSyncSnapshot {
-        val bootstrap = parseBootstrap(request("POST", "/api/v1/patient/sync/bootstrap", "{}"))
+        val bootstrap = HostedBootstrapJson.parse(request("POST", "/api/v1/patient/sync/bootstrap", "{}"))
         val appointments = parseAppointments(request("GET", "/api/v1/appointments"))
         val live = parseLive(request("GET", "/api/v1/patient/live-appointments"))
         val communications = HostedCommunicationJson.parse(request("GET", "/api/v1/patient/communications?clinicId=${bootstrap.clinic.id}"))
@@ -133,7 +179,7 @@ class HttpHostedPatientSyncApi(
             readTimeout = 25_000
             setRequestProperty("Accept", "application/json")
             setRequestProperty("Authorization", "Bearer $token")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage18B")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage21B")
             headers.forEach { (key, value) -> setRequestProperty(key, value) }
             if (body != null) {
                 doOutput = true
@@ -154,26 +200,6 @@ class HttpHostedPatientSyncApi(
         } finally {
             connection.disconnect()
         }
-    }
-
-    private fun parseBootstrap(json: String): HostedBootstrap {
-        val root = JSONObject(json)
-        require(root.optBoolean("authoritative"))
-        val profile = root.getJSONObject("profile")
-        val clinic = root.getJSONObject("clinic")
-        val doctor = clinic.getJSONObject("doctor")
-        val sessionArray = root.getJSONArray("sessions")
-        val sessions = buildList {
-            for (index in 0 until sessionArray.length()) {
-                val session = sessionArray.getJSONObject(index)
-                add(HostedSession(session.getString("id"), session.getString("serviceDate"), session.getString("name"), session.getString("startsAt"), session.getString("endsAt"), session.optInt("availableTokens"), session.optBoolean("bookingEnabled")))
-            }
-        }
-        return HostedBootstrap(
-            HostedProfile(profile.getString("id"), profile.getString("displayName")),
-            HostedClinic(clinic.getString("id"), clinic.getString("name"), clinic.optString("city"), doctor.getString("name"), doctor.optString("specialty"), clinic.optInt("consultationFeeMinor")),
-            sessions
-        )
     }
 
     private fun parseAppointments(json: String): List<HostedAppointment> {

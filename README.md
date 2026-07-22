@@ -70,3 +70,7 @@ Hosted Prototype Sync now displays active Doctor announcements and DO-LO Admin b
 ## Stage 19C approved hosted Doctor profiles
 
 Hosted Doctor cards now open a dedicated profile page showing only Admin-approved registration, qualification, experience, about, clinic and consultation-fee details. Search includes the approved metadata, while booking continues through the accepted authoritative Hosted Prototype Sync flow. Pending/rejected Doctor edits and Admin review notes are not consumed or displayed. Existing local Patient data is untouched.
+
+## Stage 21B seeded family booking
+
+Hosted Prototype Sync now lets the user select either the fixed `Prototype Patient` or `Prototype Family Member` before booking. Each profile uses an independent retry key, while legacy SELF retry keys remain compatible so an in-place upgrade cannot silently duplicate a prior booking. These are server-seeded dummy profiles only; the existing local profile and family list remain private and unchanged.

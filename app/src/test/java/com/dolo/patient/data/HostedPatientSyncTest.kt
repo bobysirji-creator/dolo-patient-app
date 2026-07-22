@@ -62,4 +62,24 @@ class HostedPatientSyncTest {
         assertTrue(result.error)
         assertFalse(result.doctorUnavailable)
     }
+
+    @Test
+    fun parsesSeededSelfAndFamilyProfiles() {
+        val bootstrap = HostedBootstrapJson.parse(
+            """{"authoritative":true,"profile":{"id":"self-1","displayName":"Prototype Patient","relationship":"SELF"},"profiles":[{"id":"self-1","displayName":"Prototype Patient","relationship":"SELF"},{"id":"family-1","displayName":"Prototype Family Member","relationship":"FAMILY"}],"clinic":{"id":"clinic-1","name":"Prototype Clinic","city":"Mumbai","consultationFeeMinor":50000,"doctor":{"name":"Dr. Ananya Mehta","specialty":"General Medicine"}},"sessions":[]}"""
+        )
+
+        assertEquals(listOf("SELF", "FAMILY"), bootstrap.profiles.map { it.relationship })
+        assertEquals("Prototype Patient", bootstrap.profile.name)
+    }
+
+    @Test
+    fun bookingRetryKeysAreIndependentForEachPatientProfile() {
+        val self = HostedBookingKeys.preferenceKey("session-1", "self-1")
+        val family = HostedBookingKeys.preferenceKey("session-1", "family-1")
+
+        assertFalse(self == family)
+        assertEquals(self, HostedBookingKeys.preferenceKey("session-1", "self-1"))
+        assertEquals("hosted_booking_key_session-1", HostedBookingKeys.legacyPreferenceKey("session-1"))
+    }
 }

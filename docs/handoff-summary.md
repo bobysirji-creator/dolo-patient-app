@@ -218,3 +218,9 @@ The UI never reads pending/rejected profile revisions or Admin review notes. Sel
 ## Stage 19C acceptance
 
 Patient App `0.14.0-stage19c` passed GitHub Actions, stable in-place upgrade and hosted physical-device checks on 21 July 2026. Approved Doctor details, search, Admin PENDING/VERIFIED/DISABLED propagation, fresh hosted login/session recovery and local-data isolation all passed. Pending/rejected review data remained private; Maps, Payments, SMS and Push remained disabled.
+
+## Stage 21B implementation checkpoint
+
+Patient App `0.15.0-stage21b` (version code 20) adds a selector for the fixed server-seeded SELF and FAMILY profiles inside Hosted Prototype Sync. Booking sends only the selected dummy profile ID. Retry keys now include both session and profile, allowing independent tokens for two household members while retaining the legacy SELF key after an in-place upgrade.
+
+No local profile, local family member, age, phone or appointment is uploaded or merged. Real hosted family creation remains disabled. GitHub Actions is the Android compiler/lint/test gate on this PC; follow `docs/stage21b-device-test.md` after Platform API Stage 21A is live.

@@ -197,3 +197,15 @@ SMS and Push remain disabled; this stage renders in-app server messages only.
 - [x] cross-app Admin approval/rejection physical-device checks
 
 Maps, Payments, SMS and Push remain disabled.
+
+## Stage 21B - seeded hosted family booking
+
+- [x] parse backward-compatible SELF/FAMILY hosted profile list
+- [x] mobile-safe seeded profile selector before appointment booking
+- [x] profile-scoped idempotency keys with legacy SELF-key compatibility
+- [x] family patient name retained in history and live queue
+- [x] local profile and family list remain private and unchanged
+- [x] JSON and retry-key unit coverage; stable version increment
+- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [ ] stable APK in-place upgrade
+- [ ] Patient/Doctor cross-app physical-device acceptance

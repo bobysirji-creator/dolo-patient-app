@@ -12,10 +12,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -28,6 +33,11 @@ import kotlinx.coroutines.delay
 @Composable
 fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) {
     val state = viewModel.uiState
+    var selectedProfileId by rememberSaveable { mutableStateOf<String?>(null) }
+    LaunchedEffect(state.snapshot?.bootstrap?.profiles) {
+        val profiles = state.snapshot?.bootstrap?.profiles.orEmpty()
+        if (profiles.none { it.id == selectedProfileId }) selectedProfileId = profiles.firstOrNull()?.id
+    }
     LaunchedEffect(Unit) {
         viewModel.refresh()
         while (true) {
@@ -43,7 +53,7 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
         item {
             Card(colors = CardDefaults.cardColors(containerColor = if (state.error) MaterialTheme.colorScheme.errorContainer else DoloSurfaceAlt)) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Stage 18B - hosted communication feed", fontWeight = FontWeight.Bold)
+                    Text("Stage 21B - seeded family booking", fontWeight = FontWeight.Bold)
                     Text(state.message)
                     Text(
                         "Your local profile, family, favourites, reviews and existing appointments are not uploaded.",
@@ -61,7 +71,7 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                 Text(snapshot.bootstrap.clinic.doctorName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Text("${snapshot.bootstrap.clinic.specialty} - ${snapshot.bootstrap.clinic.name}, ${snapshot.bootstrap.clinic.city}")
                 Text(
-                    "Prototype patient: ${snapshot.bootstrap.profile.name} | Clinic fee paid separately at clinic",
+                    "Seeded dummy household | Clinic fee paid separately at clinic",
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -90,6 +100,20 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                     }
                 }
             }
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text("Book for", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    snapshot.bootstrap.profiles.forEach { profile ->
+                        FilterChip(
+                            selected = selectedProfileId == profile.id,
+                            onClick = { selectedProfileId = profile.id },
+                            label = { Text("${profile.name} (${profile.relationship.lowercase()})") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    Text("These are fixed dummy server profiles. Your real local family list is not uploaded.", style = MaterialTheme.typography.bodySmall)
+                }
+            }
             item { Text("Available server sessions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
             items(snapshot.bootstrap.sessions, key = { it.id }) { session ->
                 Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
@@ -97,8 +121,8 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                         Text("${session.date} - ${session.name}", fontWeight = FontWeight.Bold)
                         Text("${session.startsAt.take(5)} to ${session.endsAt.take(5)} | ${session.available} tokens available")
                         Button(
-                            onClick = { viewModel.book(session.id, snapshot.bootstrap.profile.id) },
-                            enabled = session.enabled && !state.loading,
+                            onClick = { selectedProfileId?.let { profileId -> viewModel.book(session.id, profileId) } },
+                            enabled = session.enabled && selectedProfileId != null && !state.loading,
                             modifier = Modifier.fillMaxWidth()
                         ) { Text(if (session.enabled) "Book authoritative token" else "Booking closed") }
                     }
