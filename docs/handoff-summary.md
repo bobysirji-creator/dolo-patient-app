@@ -224,3 +224,13 @@ Patient App `0.14.0-stage19c` passed GitHub Actions, stable in-place upgrade and
 Patient App `0.15.0-stage21b` (version code 20) adds a selector for the fixed server-seeded SELF and FAMILY profiles inside Hosted Prototype Sync. Booking sends only the selected dummy profile ID. Retry keys now include both session and profile, allowing independent tokens for two household members while retaining the legacy SELF key after an in-place upgrade.
 
 No local profile, local family member, age, phone or appointment is uploaded or merged. Real hosted family creation remains disabled. GitHub Actions is the Android compiler/lint/test gate on this PC; follow `docs/stage21b-device-test.md` after Platform API Stage 21A is live.
+
+## Stage 21B acceptance
+
+Patient App `0.15.0-stage21b`, Platform API `0.12.0-stage21a` and the existing Doctor hosted queue passed the complete physical-device checklist on 22 July 2026. SELF and FAMILY bookings, independent tokens, duplicate protection, Doctor visibility, history/live queue, restart restoration, offline safety and local-data isolation all passed. Maps, Payments, SMS and Push remained disabled.
+
+## Stage 22A implementation checkpoint
+
+Patient App `0.16.0-stage22a` (version code 21) adds the protected one-time missed-appointment reschedule flow to Hosted Prototype Sync. Only an authoritative ABSENT appointment with unused eligibility shows the action. The screen reads the server's separate reschedule horizon, lets the Patient choose an eligible candidate, sends an appointment/target-scoped idempotency key, then reloads authoritative history and live state.
+
+The server remains authoritative for ownership, deadline, clinic, capacity and one-time enforcement. The original and replacement lineage are displayed, and no local profile, family member, appointment, favourite or review is uploaded or replaced. GitHub Actions is the Android compiler/lint/unit/APK gate on this PC. Platform API Stage 22A must deploy before following `docs/stage22a-device-test.md`.

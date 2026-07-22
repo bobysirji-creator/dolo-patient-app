@@ -206,6 +206,19 @@ Maps, Payments, SMS and Push remain disabled.
 - [x] family patient name retained in history and live queue
 - [x] local profile and family list remain private and unchanged
 - [x] JSON and retry-key unit coverage; stable version increment
+- [x] GitHub Actions compile, lint, unit tests and stable APK
+- [x] stable APK in-place upgrade
+- [x] Patient/Doctor cross-app physical-device acceptance
+
+## Stage 22A - hosted missed-appointment rescheduling
+
+- [x] consume the protected one-time reschedule endpoint
+- [x] display reschedule action only for eligible ABSENT appointments
+- [x] use the server's independent reschedule horizon rather than ordinary future-booking dates
+- [x] persist appointment/target-scoped retry keys
+- [x] display original RESCHEDULED state and replacement lineage/name/token
+- [x] preserve local profile, family, favourites, reviews and appointments
+- [x] add policy/retry-key unit coverage and stable version increment
 - [ ] GitHub Actions compile, lint, unit tests and stable APK
 - [ ] stable APK in-place upgrade
 - [ ] Patient/Doctor cross-app physical-device acceptance

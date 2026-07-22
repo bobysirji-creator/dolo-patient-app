@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.dolo.patient.data.HostedPatientSyncViewModel
+import com.dolo.patient.data.HostedReschedulePolicy
 import com.dolo.patient.ui.components.ScreenTitle
 import com.dolo.patient.ui.theme.DoloSurfaceAlt
 import com.dolo.patient.ui.theme.DoloTeal
@@ -34,6 +35,8 @@ import kotlinx.coroutines.delay
 fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) {
     val state = viewModel.uiState
     var selectedProfileId by rememberSaveable { mutableStateOf<String?>(null) }
+    var rescheduleAppointmentId by rememberSaveable { mutableStateOf<String?>(null) }
+    var rescheduleSessionId by rememberSaveable { mutableStateOf<String?>(null) }
     LaunchedEffect(state.snapshot?.bootstrap?.profiles) {
         val profiles = state.snapshot?.bootstrap?.profiles.orEmpty()
         if (profiles.none { it.id == selectedProfileId }) selectedProfileId = profiles.firstOrNull()?.id
@@ -53,7 +56,7 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
         item {
             Card(colors = CardDefaults.cardColors(containerColor = if (state.error) MaterialTheme.colorScheme.errorContainer else DoloSurfaceAlt)) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Stage 21B - seeded family booking", fontWeight = FontWeight.Bold)
+                    Text("Stage 22A - hosted missed-appointment rescheduling", fontWeight = FontWeight.Bold)
                     Text(state.message)
                     Text(
                         "Your local profile, family, favourites, reviews and existing appointments are not uploaded.",
@@ -140,10 +143,48 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                             Text("${appointment.patientName} - ${appointment.date} - ${appointment.session}")
                             Text("${appointment.doctorName} - ${appointment.clinicName}")
                             Text("Status: ${appointment.status}")
+                            if (appointment.rescheduledFromAppointmentId != null) {
+                                Text("One-time replacement appointment", style = MaterialTheme.typography.bodySmall)
+                            }
                             live?.let {
                                 Text("Current token: ${it.currentToken?.toString() ?: "Not started"}")
                                 Text("Patients ahead: ${it.patientsAhead?.toString() ?: "Not available"} | Estimated wait: ${it.estimatedMinutes?.let { minutes -> "$minutes min" } ?: "Not available"}")
                                 Text("Countdown: ${it.countdownState}")
+                            }
+                            val targets = HostedReschedulePolicy.eligibleSessions(appointment, snapshot.bootstrap.rescheduleSessions, snapshot.bootstrap.rescheduleWindowDays)
+                            if (appointment.status == "ABSENT" && !appointment.rescheduleUsed) {
+                                Button(
+                                    onClick = {
+                                        rescheduleAppointmentId = if (rescheduleAppointmentId == appointment.id) null else appointment.id
+                                        rescheduleSessionId = null
+                                    },
+                                    enabled = !state.loading,
+                                    modifier = Modifier.fillMaxWidth()
+                                ) { Text(if (rescheduleAppointmentId == appointment.id) "Cancel reschedule" else "Reschedule missed appointment") }
+                                if (rescheduleAppointmentId == appointment.id) {
+                                    if (targets.isEmpty()) {
+                                        Text("No eligible replacement session is currently available.", style = MaterialTheme.typography.bodySmall)
+                                    } else {
+                                        Text("Choose one available replacement session:", fontWeight = FontWeight.SemiBold)
+                                        targets.forEach { target ->
+                                            FilterChip(
+                                                selected = rescheduleSessionId == target.id,
+                                                onClick = { rescheduleSessionId = target.id },
+                                                label = { Text("${target.date} - ${target.name}") },
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                        }
+                                        Button(
+                                            onClick = {
+                                                rescheduleSessionId?.let { targetId -> viewModel.reschedule(appointment.id, targetId) }
+                                                rescheduleAppointmentId = null
+                                                rescheduleSessionId = null
+                                            },
+                                            enabled = rescheduleSessionId != null && !state.loading,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) { Text("Confirm one-time reschedule") }
+                                    }
+                                }
                             }
                         }
                     }

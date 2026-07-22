@@ -12,16 +12,17 @@ import com.dolo.patient.auth.PrototypeSessionManager
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import java.time.LocalDate
 import java.util.UUID
 import java.util.concurrent.Executors
 
 data class HostedProfile(val id: String, val name: String, val relationship: String = "SELF")
 data class HostedClinic(val id: String, val name: String, val city: String, val doctorName: String, val specialty: String, val feeMinor: Int)
 data class HostedSession(val id: String, val date: String, val name: String, val startsAt: String, val endsAt: String, val available: Int, val enabled: Boolean)
-data class HostedAppointment(val id: String, val sessionId: String, val doctorName: String, val clinicName: String, val patientName: String, val date: String, val session: String, val token: Int, val status: String)
+data class HostedAppointment(val id: String, val sessionId: String, val doctorName: String, val clinicName: String, val patientName: String, val date: String, val session: String, val token: Int, val status: String, val rescheduleUsed: Boolean = false, val rescheduledFromAppointmentId: String? = null)
 data class HostedLiveQueue(val appointmentId: String, val token: Int, val currentToken: Int?, val patientsAhead: Int?, val estimatedMinutes: Int?, val status: String, val countdownState: String)
 data class HostedCommunication(val id: String, val audience: String, val kind: String, val title: String, val message: String, val startsOn: String, val endsOn: String)
-data class HostedBootstrap(val profile: HostedProfile, val clinic: HostedClinic, val sessions: List<HostedSession>, val profiles: List<HostedProfile> = listOf(profile))
+data class HostedBootstrap(val profile: HostedProfile, val clinic: HostedClinic, val sessions: List<HostedSession>, val profiles: List<HostedProfile> = listOf(profile), val rescheduleWindowDays: Int = 10, val rescheduleSessions: List<HostedSession> = sessions)
 data class HostedSyncSnapshot(val bootstrap: HostedBootstrap, val appointments: List<HostedAppointment>, val live: List<HostedLiveQueue>, val communications: List<HostedCommunication> = emptyList())
 data class HostedServerError(val code: String, val message: String)
 
@@ -36,9 +37,27 @@ object HostedBookingKeys {
     fun legacyPreferenceKey(sessionId: String): String = "hosted_booking_key_$sessionId"
 }
 
+object HostedRescheduleKeys {
+    fun preferenceKey(appointmentId: String, targetSessionId: String): String =
+        "hosted_reschedule_key_${appointmentId}_$targetSessionId"
+}
+
+object HostedReschedulePolicy {
+    fun eligibleSessions(appointment: HostedAppointment, sessions: List<HostedSession>, windowDays: Int): List<HostedSession> {
+        if (appointment.status != "ABSENT" || appointment.rescheduleUsed || windowDays !in 1..30) return emptyList()
+        val originalDate = runCatching { LocalDate.parse(appointment.date) }.getOrNull() ?: return emptyList()
+        val lastDate = originalDate.plusDays(windowDays.toLong())
+        return sessions.filter { session ->
+            val targetDate = runCatching { LocalDate.parse(session.date) }.getOrNull()
+            session.enabled && session.id != appointment.sessionId && targetDate != null && !targetDate.isBefore(originalDate) && !targetDate.isAfter(lastDate)
+        }
+    }
+}
+
 interface HostedPatientSyncApi {
     fun refresh(): HostedResult<HostedSyncSnapshot>
     fun book(sessionId: String, profileId: String): HostedResult<HostedSyncSnapshot>
+    fun reschedule(appointmentId: String, targetSessionId: String): HostedResult<HostedSyncSnapshot>
 }
 
 object HostedErrorJson {
@@ -91,20 +110,26 @@ object HostedBootstrapJson {
                 }
             }
         }
-        val sessionArray = root.getJSONArray("sessions")
-        val sessions = buildList {
-            for (index in 0 until sessionArray.length()) {
-                val session = sessionArray.getJSONObject(index)
-                add(HostedSession(session.getString("id"), session.getString("serviceDate"), session.getString("name"), session.getString("startsAt"), session.getString("endsAt"), session.optInt("availableTokens"), session.optBoolean("bookingEnabled")))
+        fun parseSessions(key: String): List<HostedSession> {
+            val values = root.getJSONArray(key)
+            return buildList {
+                for (index in 0 until values.length()) {
+                    val session = values.getJSONObject(index)
+                    add(HostedSession(session.getString("id"), session.getString("serviceDate"), session.getString("name"), session.getString("startsAt"), session.getString("endsAt"), session.optInt("availableTokens"), session.optBoolean("bookingEnabled")))
+                }
             }
         }
+        val sessions = parseSessions("sessions")
+        val rescheduleSessions = if (root.has("rescheduleSessions")) parseSessions("rescheduleSessions") else sessions
         val primaryProfile = profiles.firstOrNull { it.id == primary.getString("id") }
             ?: HostedProfile(primary.getString("id"), primary.getString("displayName"), primary.optString("relationship", "SELF"))
         return HostedBootstrap(
             primaryProfile,
             HostedClinic(clinic.getString("id"), clinic.getString("name"), clinic.optString("city"), doctor.getString("name"), doctor.optString("specialty"), clinic.optInt("consultationFeeMinor")),
             sessions,
-            profiles
+            profiles,
+            root.optInt("rescheduleWindowDays", 10),
+            rescheduleSessions
         )
     }
 }
@@ -138,6 +163,19 @@ class HttpHostedPatientSyncApi(
             "POST",
             "/api/v1/appointments",
             JSONObject().put("clinicSessionId", sessionId).put("patientProfileId", profileId).toString(),
+            mapOf("Idempotency-Key" to idempotency)
+        )
+        load()
+    }
+
+    override fun reschedule(appointmentId: String, targetSessionId: String): HostedResult<HostedSyncSnapshot> = guarded {
+        val keyName = HostedRescheduleKeys.preferenceKey(appointmentId, targetSessionId)
+        val idempotency = preferences.getString(keyName, null)
+            ?: ("android22a-" + UUID.randomUUID()).also { preferences.edit().putString(keyName, it).apply() }
+        request(
+            "POST",
+            "/api/v1/appointments/$appointmentId/reschedule",
+            JSONObject().put("targetClinicSessionId", targetSessionId).toString(),
             mapOf("Idempotency-Key" to idempotency)
         )
         load()
@@ -179,7 +217,7 @@ class HttpHostedPatientSyncApi(
             readTimeout = 25_000
             setRequestProperty("Accept", "application/json")
             setRequestProperty("Authorization", "Bearer $token")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage21B")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage22A")
             headers.forEach { (key, value) -> setRequestProperty(key, value) }
             if (body != null) {
                 doOutput = true
@@ -207,7 +245,7 @@ class HttpHostedPatientSyncApi(
         return buildList {
             for (index in 0 until appointments.length()) {
                 val item = appointments.getJSONObject(index)
-                add(HostedAppointment(item.getString("id"), item.getString("clinicSessionId"), "Dr. Ananya Mehta", item.getString("clinicName"), item.getString("patientName"), item.getString("serviceDate"), item.getString("session"), item.getInt("tokenNumber"), item.getString("status")))
+                add(HostedAppointment(item.getString("id"), item.getString("clinicSessionId"), "Dr. Ananya Mehta", item.getString("clinicName"), item.getString("patientName"), item.getString("serviceDate"), item.getString("session"), item.getInt("tokenNumber"), item.getString("status"), item.optBoolean("rescheduleUsed"), item.optStringOrNull("rescheduledFromAppointmentId")))
             }
         }
     }
@@ -223,6 +261,7 @@ class HttpHostedPatientSyncApi(
     }
 
     private fun JSONObject.optIntOrNull(key: String): Int? = if (isNull(key) || !has(key)) null else getInt(key)
+    private fun JSONObject.optStringOrNull(key: String): String? = if (isNull(key) || !has(key)) null else getString(key)
 }
 
 data class HostedSyncUiState(
@@ -250,6 +289,7 @@ class HostedPatientSyncViewModel(private val api: HostedPatientSyncApi) : ViewMo
 
     fun refresh() { execute { api.refresh() } }
     fun book(sessionId: String, profileId: String) { execute { api.book(sessionId, profileId) } }
+    fun reschedule(appointmentId: String, targetSessionId: String) { execute { api.reschedule(appointmentId, targetSessionId) } }
 
     private fun execute(call: () -> HostedResult<HostedSyncSnapshot>) {
         if (uiState.loading) return

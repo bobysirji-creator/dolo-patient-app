@@ -66,11 +66,13 @@ class HostedPatientSyncTest {
     @Test
     fun parsesSeededSelfAndFamilyProfiles() {
         val bootstrap = HostedBootstrapJson.parse(
-            """{"authoritative":true,"profile":{"id":"self-1","displayName":"Prototype Patient","relationship":"SELF"},"profiles":[{"id":"self-1","displayName":"Prototype Patient","relationship":"SELF"},{"id":"family-1","displayName":"Prototype Family Member","relationship":"FAMILY"}],"clinic":{"id":"clinic-1","name":"Prototype Clinic","city":"Mumbai","consultationFeeMinor":50000,"doctor":{"name":"Dr. Ananya Mehta","specialty":"General Medicine"}},"sessions":[]}"""
+            """{"authoritative":true,"profile":{"id":"self-1","displayName":"Prototype Patient","relationship":"SELF"},"profiles":[{"id":"self-1","displayName":"Prototype Patient","relationship":"SELF"},{"id":"family-1","displayName":"Prototype Family Member","relationship":"FAMILY"}],"clinic":{"id":"clinic-1","name":"Prototype Clinic","city":"Mumbai","consultationFeeMinor":50000,"doctor":{"name":"Dr. Ananya Mehta","specialty":"General Medicine"}},"sessions":[],"rescheduleWindowDays":10,"rescheduleSessions":[{"id":"later-1","serviceDate":"2026-07-24","name":"MORNING","startsAt":"09:00:00","endsAt":"11:00:00","availableTokens":5,"bookingEnabled":true}]}"""
         )
 
         assertEquals(listOf("SELF", "FAMILY"), bootstrap.profiles.map { it.relationship })
         assertEquals("Prototype Patient", bootstrap.profile.name)
+        assertEquals(10, bootstrap.rescheduleWindowDays)
+        assertEquals(listOf("later-1"), bootstrap.rescheduleSessions.map { it.id })
     }
 
     @Test
@@ -81,5 +83,31 @@ class HostedPatientSyncTest {
         assertFalse(self == family)
         assertEquals(self, HostedBookingKeys.preferenceKey("session-1", "self-1"))
         assertEquals("hosted_booking_key_session-1", HostedBookingKeys.legacyPreferenceKey("session-1"))
+    }
+    @Test
+    fun missedAppointmentOffersOnlyLaterEnabledReplacementSessions() {
+        val appointment = HostedAppointment("appointment-1", "session-old", "Doctor", "Clinic", "Patient", "2026-07-22", "MORNING", 3, "ABSENT")
+        val sessions = listOf(
+            HostedSession("session-old", "2026-07-22", "MORNING", "09:00", "11:00", 2, true),
+            HostedSession("session-closed", "2026-07-23", "MORNING", "09:00", "11:00", 2, false),
+            HostedSession("session-new", "2026-07-23", "EVENING", "17:00", "19:00", 2, true),
+            HostedSession("session-too-late", "2026-08-10", "MORNING", "09:00", "11:00", 2, true)
+        )
+
+        assertEquals(listOf("session-new"), HostedReschedulePolicy.eligibleSessions(appointment, sessions, 10).map { it.id })
+        assertTrue(HostedReschedulePolicy.eligibleSessions(appointment.copy(rescheduleUsed = true), sessions, 10).isEmpty())
+        assertTrue(HostedReschedulePolicy.eligibleSessions(appointment.copy(status = "COMPLETED"), sessions, 10).isEmpty())
+    }
+
+    @Test
+    fun rescheduleRetryKeyIsStableForOneAppointmentAndTarget() {
+        assertEquals(
+            HostedRescheduleKeys.preferenceKey("appointment-1", "session-2"),
+            HostedRescheduleKeys.preferenceKey("appointment-1", "session-2")
+        )
+        assertFalse(
+            HostedRescheduleKeys.preferenceKey("appointment-1", "session-2") ==
+                HostedRescheduleKeys.preferenceKey("appointment-1", "session-3")
+        )
     }
 }

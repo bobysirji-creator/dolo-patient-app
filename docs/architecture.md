@@ -41,3 +41,7 @@ If the hosted service is offline or cold-starting, login deliberately falls back
 ## Stage 16C authoritative dummy synchronization boundary
 
 Stage 16C adds a separate hosted adapter rather than replacing `LocalPatientRepository`. Only the fixed seeded Patient profile returned by the protected bootstrap can be booked through this adapter. The server owns token allocation, capacity, appointment history and queue estimates. A per-session idempotency key is persisted locally so network retries resolve to the original appointment. The Compose screen polls only while visible; failures are surfaced without converting a failed server write into a local booking.
+
+## Stage 22A hosted reschedule boundary
+
+The bootstrap distinguishes ordinary booking sessions from `rescheduleSessions` and publishes the bounded `rescheduleWindowDays`. `HostedReschedulePolicy` only presents enabled candidates inside the original appointment's server-configured deadline, but this is a usability filter rather than an authorization control. The protected API independently verifies Patient ownership, ABSENT state, one-time eligibility, same-clinic target, deadline, capacity and idempotency. Appointment/target retry keys remain in local preferences until the authoritative server accepts or consistently returns the command result.

@@ -74,3 +74,7 @@ Hosted Doctor cards now open a dedicated profile page showing only Admin-approve
 ## Stage 21B seeded family booking
 
 Hosted Prototype Sync now lets the user select either the fixed `Prototype Patient` or `Prototype Family Member` before booking. Each profile uses an independent retry key, while legacy SELF retry keys remain compatible so an in-place upgrade cannot silently duplicate a prior booking. These are server-seeded dummy profiles only; the existing local profile and family list remain private and unchanged.
+
+## Stage 22A hosted missed-appointment rescheduling
+
+An authoritative ABSENT hosted appointment can now be rescheduled once to a server-provided eligible session. The original history entry becomes RESCHEDULED, the replacement retains the same seeded patient name with a new token, and retry keys prevent duplicate replacement allocation. The reschedule horizon remains available even when the Doctor permits ordinary bookings only for the current day. Local Patient data and external providers remain unchanged.
