@@ -244,8 +244,8 @@ Maps, Payments, SMS and Push remain disabled.
 - [x] retain a clear route to the complete hosted booking/history workspace
 - [x] keep local Patient data isolated and preserve hosted snapshots during ordinary offline failures
 - [x] add deterministic hosted-home presentation coverage and stable version increment
-- [ ] GitHub Actions compile, lint, unit tests and stable APK
-- [ ] stable APK in-place upgrade
+- [x] GitHub Actions compile, lint, unit tests and stable APK
+- [x] stable APK in-place upgrade
 - [ ] physical-device Home refresh and cross-app queue acceptance
 
 No Platform API migration or deployment is required. Maps, Payments, SMS and Push remain disabled.

@@ -37,8 +37,13 @@ object HostedHomePresentation {
     fun liveQueue(snapshot: HostedSyncSnapshot, appointmentId: String): HostedLiveQueue? =
         snapshot.live.firstOrNull { it.appointmentId == appointmentId }
 
-    fun latestCommunication(snapshot: HostedSyncSnapshot): HostedCommunication? =
-        snapshot.communications.firstOrNull()
+    fun homeCommunications(snapshot: HostedSyncSnapshot): List<HostedCommunication> {
+        val messages = snapshot.communications
+        val doctorUpdate = messages.firstOrNull { it.audience != "ALL_PATIENTS" }
+        val adminBroadcast = messages.firstOrNull { it.audience == "ALL_PATIENTS" }
+        val priorityIds = setOfNotNull(doctorUpdate?.id, adminBroadcast?.id)
+        return (listOfNotNull(doctorUpdate, adminBroadcast) + messages.filterNot { it.id in priorityIds }).take(3)
+    }
 }
 
 sealed interface HostedResult<out T> {

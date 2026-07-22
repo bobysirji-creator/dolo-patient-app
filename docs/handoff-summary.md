@@ -252,3 +252,8 @@ Patient App `0.17.0-stage23a`, Doctor App `0.20.0-stage23a` and Platform API `0.
 Patient App `0.18.0-stage24a` (version code 23) moves active authoritative hosted appointments onto the normal Home screen. Hosted mode refreshes every 15 seconds while Home is visible and presents Doctor/patient identity, date/session, patient token, current token, patients ahead, estimated wait, countdown state and clinic-fee status. The latest active Doctor announcement or Admin broadcast is also surfaced.
 
 Hosted and local test appointments remain explicitly separated. Tapping a hosted card or View all opens the existing full hosted booking/history workspace. Ordinary offline failures retain the last hosted snapshot; no local profile, family, favourite, review, notification or appointment is uploaded or replaced. GitHub Actions remains the Android compiler/lint/test gate.
+## Stage 24A device-feedback correction
+
+The initial Stage 24A device run passed Home loading, hosted appointment identity/token/queue data, automatic refresh, navigation, completion/history, offline recovery, local fallback and disabled-provider checks. It exposed one presentation flaw: Home selected only the first communication, so an Admin broadcast could hide an active Doctor update.
+
+Patient App `0.18.1-stage24a` (version code 24) now renders a bounded three-card Home feed that prioritizes one Doctor update and one Admin broadcast when both exist, then fills any remaining position from the server order. The full Hosted Prototype Sync feed is unchanged. Regression coverage verifies simultaneous Doctor and Admin messages.

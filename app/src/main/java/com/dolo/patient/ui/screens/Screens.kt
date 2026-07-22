@@ -69,9 +69,10 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
    hostedState?.let{hosted->
     val snapshot=hosted.snapshot
     val hostedAppointments=snapshot?.let { HostedHomePresentation.activeAppointments(it) }.orEmpty()
+    val hostedUpdates=snapshot?.let { HostedHomePresentation.homeCommunications(it) }.orEmpty()
     item{Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically){Text("Hosted appointments",style=MaterialTheme.typography.titleLarge,modifier=Modifier.weight(1f));TextButton(onHostedSync){Text("View all")}}}
     if(hosted.error)item{Card(colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.errorContainer),shape=RoundedCornerShape(18.dp)){Column(Modifier.padding(14.dp)){Text("Hosted refresh needs attention",fontWeight=FontWeight.Bold);Text(hosted.message,fontSize=12.sp);TextButton(onRefreshHosted,enabled=!hosted.loading){Text("Retry")}}}}
-    snapshot?.let{server->HostedHomePresentation.latestCommunication(server)?.let{update->item{HostedHomeUpdateCard(update,onHostedSync)}}}
+    items(hostedUpdates,key={"hosted-home-update-${it.id}"}){update->HostedHomeUpdateCard(update,onHostedSync)}
     if(snapshot==null&&!hosted.error)item{EmptyCard(if(hosted.loading)"Loading hosted appointments..." else "Hosted appointments are not loaded yet.")}
     else if(hostedAppointments.isEmpty())item{EmptyCard("No active hosted appointment. Completed and missed visits remain in hosted history.")}
     else items(hostedAppointments,key={"hosted-home-${it.id}"}){appointment->HostedHomeAppointmentCard(appointment,snapshot?.let{HostedHomePresentation.liveQueue(it,appointment.id)},onHostedSync)}
