@@ -298,7 +298,7 @@ External chat, attachments, SMS, Push, Maps and Payments remain disabled.
 - [x] mark through the newest displayed server cursor without changing local notifications
 - [x] preserve hosted snapshot and all local data during ordinary offline failures
 - [x] JSON contract coverage and stable version increment
-- [ ] GitHub Actions compile, lint, unit tests and stable APK
-- [ ] physical-device notification/read-cursor acceptance
+- [x] GitHub Actions compile, lint, unit tests and stable APK
+- [x] physical-device notification/read-cursor acceptance
 
 External Android Push and SMS are not enabled. Maps and Payments also remain disabled.

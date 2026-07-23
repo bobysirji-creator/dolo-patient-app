@@ -294,3 +294,7 @@ Patient App `0.21.0-stage26b`, Admin App `0.7.0-stage26a` and Platform API `0.17
 Patient App `0.22.0-stage27b` (version code 28) consumes the owner-scoped in-app notification feed from Platform API `0.18.0-stage27ab`. Hosted appointment and queue updates appear in the existing Notifications screen with Patient/family identity and token. The Home bell badge includes unread hosted events, and opening the screen advances the monotonic server read cursor through the newest displayed event while local notifications remain independent.
 
 GitHub Actions remains the Android compiler/lint/unit/APK gate on this PC. Deploy API migration 023 first, then install the stable Patient APK and follow `docs/stage27ab-device-test.md`. External Push, SMS, Maps and Payments remain disabled.
+
+## Stages 27A-27B acceptance
+
+Patient App `0.22.0-stage27b` and Platform API `0.18.0-stage27ab` passed GitHub Actions, Render deployment, stable APK upgrade and the complete notification checklist on 23 July 2026. Hosted SELF/FAMILY identity and token copy, Home badge, server-persisted read state, new Doctor event refresh, restart/offline recovery, non-duplication and all local-data isolation checks passed.
