@@ -6,15 +6,15 @@ Only the dedicated Patient App is changed in this repository. The Doctor App and
 
 ## Stages
 
-- [x] Stage 1 — Lean Android project, Compose theme, navigation skeleton, placeholder screens, reusable components, dummy models, documentation
-- [x] Stage 2 — Local state architecture, validation, fake OTP contract, persisted session and authentication repository
-- [x] Stage 3 — API-ready contracts, offline repository, persisted appointments, generated tokens and repository tests
-- [x] Stage 4 — Doctor search, filters, profiles, clinics and favourites
-- [x] Stage 5 — Live queue simulation, lifecycle states, waiting estimates and one-time rescheduling
-- [x] Stage 6 — Live queue tracking, estimates and foreground/background refresh strategy
-- [x] Stage 7 — Favourites, reviews, missed-appointment rescheduling
-- [x] Stage 8 — Provider-ready maps, payments, SMS and push-notification foundations
-- [x] Stage 9 — accessibility, offline/error states, tests, performance and release hardening
+- [x] Stage 1 â€” Lean Android project, Compose theme, navigation skeleton, placeholder screens, reusable components, dummy models, documentation
+- [x] Stage 2 â€” Local state architecture, validation, fake OTP contract, persisted session and authentication repository
+- [x] Stage 3 â€” API-ready contracts, offline repository, persisted appointments, generated tokens and repository tests
+- [x] Stage 4 â€” Doctor search, filters, profiles, clinics and favourites
+- [x] Stage 5 â€” Live queue simulation, lifecycle states, waiting estimates and one-time rescheduling
+- [x] Stage 6 â€” Live queue tracking, estimates and foreground/background refresh strategy
+- [x] Stage 7 â€” Favourites, reviews, missed-appointment rescheduling
+- [x] Stage 8 â€” Provider-ready maps, payments, SMS and push-notification foundations
+- [x] Stage 9 â€” accessibility, offline/error states, tests, performance and release hardening
 - [ ] Stage 10 - iterative UI/UX polish from physical-device feedback
 - [x] Stage 16A - Patient App public hosted-API connection, capability status and clinic-discovery preview with local fallback
 - [x] Stage 16B - controlled prototype identity/authentication and Android Keystore-encrypted token storage (accepted on physical device)
@@ -57,7 +57,7 @@ Only the dedicated Patient App is changed in this repository. The Doctor App and
 - Real backend and secure server access tokens: intentionally deferred
 
 
-## Stage 4 — Patient discovery and engagement (complete)
+## Stage 4 â€” Patient discovery and engagement (complete)
 
 - Doctor search by name, specialty, and clinic is connected to PatientViewModel.
 - Category filtering and empty search states are implemented.
@@ -67,7 +67,7 @@ Only the dedicated Patient App is changed in this repository. The Doctor App and
 - GitHub Actions tests and debug APK assembly passed in run 29201170208.
 
 
-## Stage 5 — Live queue and appointment lifecycle (complete)
+## Stage 5 â€” Live queue and appointment lifecycle (complete)
 
 - Queue snapshot persists current token for each appointment.
 - Patients-ahead and estimated waiting time use a 12-minute configurable prototype average.
@@ -79,7 +79,7 @@ Only the dedicated Patient App is changed in this repository. The Doctor App and
 - GitHub Actions tests and debug APK assembly passed in run 29226964239.
 
 
-## Stages 6 and 7 — Queue synchronization and patient engagement (complete)
+## Stages 6 and 7 â€” Queue synchronization and patient engagement (complete)
 
 - Live queue refreshes automatically every 15 seconds while the screen is open and also supports manual refresh.
 - Queue sync exposes fresh, syncing and offline demonstration states while preserving the provider-neutral repository boundary.
@@ -93,7 +93,7 @@ Only the dedicated Patient App is changed in this repository. The Doctor App and
 - GitHub Actions unit tests and debug APK assembly passed in run 29230262592.
 
 
-## Stage 8 — Provider integration foundations (complete)
+## Stage 8 â€” Provider integration foundations (complete)
 
 - Provider-neutral contracts exist for maps/navigation, payment order creation and verification, SMS OTP/reminders, and push registration/queue alerts.
 - Disabled provider implementations fail safely and never create navigation links, payment orders, messages or device registrations.
@@ -105,7 +105,7 @@ Only the dedicated Patient App is changed in this repository. The Doctor App and
 - GitHub Actions unit tests and debug APK assembly passed in run 29232911280.
 
 
-## Stage 9 — Patient release hardening (complete)
+## Stage 9 â€” Patient release hardening (complete)
 
 - Release candidate version is 0.9.0-rc1 (version code 9).
 - Core controls have accessible descriptions, button roles and minimum 48 dp touch targets.
@@ -271,7 +271,21 @@ Doctor review visibility and Admin moderation actions are deliberately reserved 
 - [x] expose no Patient identity or comment in public discovery
 - [x] retain zero-review empty state
 - [x] JSON regression coverage and stable version increment
-- [ ] GitHub Actions compile, lint, unit tests and stable APK
-- [ ] combined Admin/Doctor/Patient physical-device acceptance
+- [x] GitHub Actions compile, lint, unit tests and stable APK
+- [x] combined Admin/Doctor/Patient physical-device acceptance
 
 Admin moderation and Doctor feed are delivered by the paired Stage 25C-25D repositories. Maps, Payments, SMS and Push remain disabled.
+
+## Stage 26B - authoritative Patient support requests
+
+- [x] replace the Support placeholder with a hosted request form
+- [x] fixed APPOINTMENT, DOCTOR, BILLING, APP and OTHER categories
+- [x] bounded subject/message validation and retry-safe idempotency
+- [x] owner-scoped authoritative status and Admin-response history
+- [x] OPEN, IN_PROGRESS, RESOLVED and CLOSED presentation
+- [x] preserve all unrelated local Patient data
+- [x] JSON contract coverage and stable version increment
+- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [ ] paired Patient/Admin physical-device acceptance
+
+External chat, attachments, SMS, Push, Maps and Payments remain disabled.

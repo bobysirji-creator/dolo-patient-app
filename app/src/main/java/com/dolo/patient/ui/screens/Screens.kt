@@ -703,47 +703,29 @@ fun ReviewScreen(
 
 @Composable
 fun SupportScreen(
-    onBack: () -> Unit,
-    onIntegrations: () -> Unit
-) {
-    LazyColumn(
-        modifier = page.padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        item { ScreenTitle("Help & Support", onBack) }
-        item {
-            InfoCard(
-                "How does the live queue work?",
-                "Your token, patients ahead and estimated wait refresh while this screen is open."
-            )
-        }
-        item {
-            InfoCard(
-                "What if I miss my turn?",
-                "A missed appointment can be rescheduled once within 10 days."
-            )
-        }
-        item {
-            InfoCard(
-                "Need more help?",
-                "Complaint and chat provider hooks are reserved for a later stage."
-            )
-        }
-        item {
-            OutlinedButton(
-                onClick = onIntegrations,
-                modifier = Modifier.fillMaxWidth().shadow(7.dp, RoundedCornerShape(20.dp))
-            ) {
-                Icon(Icons.Outlined.Settings, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text("Integration readiness")
-            }
-        }
-        item {
-            OutlinedButton(onClick = {}, modifier = Modifier.fillMaxWidth().shadow(7.dp, RoundedCornerShape(20.dp))) {
-                Text("Create Support Request (Coming Soon)")
-            }
-        }
+    onBack:()->Unit,
+    onIntegrations:()->Unit,
+    hosted:HostedSyncUiState,
+    onRefresh:()->Unit,
+    onSubmit:(String,String,String)->Unit
+){
+    var category by remember{mutableStateOf("APP")};var subject by remember{mutableStateOf("")};var message by remember{mutableStateOf("")}
+    val categories=listOf("APPOINTMENT","DOCTOR","BILLING","APP","OTHER")
+    LaunchedEffect(Unit){if(hosted.snapshot==null)onRefresh()}
+    LazyColumn(modifier=page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){
+        item{ScreenTitle("Help & Support",onBack)}
+        item{InfoCard("How does the live queue work?","Your token, patients ahead and estimated wait refresh while the hosted screen is open.")}
+        item{InfoCard("Authoritative support","Requests are visible only to this seeded Patient account and DO-LO Admin. No external chat, SMS or Push provider is enabled.")}
+        item{OutlinedButton(onClick=onIntegrations,modifier=Modifier.fillMaxWidth().shadow(7.dp,RoundedCornerShape(20.dp))){Icon(Icons.Outlined.Settings,null);Spacer(Modifier.width(8.dp));Text("Integration readiness")}}
+        item{Text("Create support request",style=MaterialTheme.typography.titleLarge,fontWeight=FontWeight.Bold)}
+        items(categories.chunked(3)){row->Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(6.dp)){row.forEach{value->FilterChip(selected=category==value,onClick={category=value},label={Text(value.lowercase().replaceFirstChar { it.uppercase() })},modifier=Modifier.weight(1f))};repeat(3-row.size){Spacer(Modifier.weight(1f))}}}
+        item{OutlinedTextField(subject,{subject=it.take(120)},label={Text("Subject (8-120 characters)")},modifier=Modifier.fillMaxWidth(),enabled=!hosted.loading)}
+        item{OutlinedTextField(message,{message=it.take(1000)},label={Text("Describe the issue (20-1000 characters)")},modifier=Modifier.fillMaxWidth(),minLines=4,enabled=!hosted.loading)}
+        item{PrimaryButton(if(hosted.loading)"Sending..." else "Submit Support Request",{onSubmit(category,subject,message)},enabled=!hosted.loading&&subject.trim().length in 8..120&&message.trim().length in 20..1000)}
+        item{Text(hosted.message,color=if(hosted.error)MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)}
+        item{Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,verticalAlignment=Alignment.CenterVertically){Text("Your requests",style=MaterialTheme.typography.titleLarge,fontWeight=FontWeight.Bold);TextButton(onRefresh,enabled=!hosted.loading){Text("Refresh")}}}
+        val requests=hosted.snapshot?.supportRequests.orEmpty()
+        if(requests.isEmpty())item{EmptyCard("No hosted support requests yet.")}else items(requests,key={it.id}){request->Card(Modifier.fillMaxWidth().shadow(6.dp,RoundedCornerShape(20.dp)),shape=RoundedCornerShape(20.dp)){Column(Modifier.padding(15.dp),verticalArrangement=Arrangement.spacedBy(6.dp)){Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween){Text(request.category,fontWeight=FontWeight.Bold);Text(request.status,color=if(request.status=="RESOLVED")DoloTeal else DoloBlue,fontWeight=FontWeight.Bold)};Text(request.subject,style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.Bold);Text(request.message);if(request.adminNote.isNotBlank())InfoCard("DO-LO Admin response",request.adminNote);Text("Updated ${request.updatedAt}",color=MaterialTheme.colorScheme.onSurfaceVariant,style=MaterialTheme.typography.bodySmall)}}}
     }
 }
 

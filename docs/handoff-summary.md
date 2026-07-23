@@ -28,7 +28,7 @@ The repository does not include a generated Gradle wrapper JAR because it is a b
 
 ## Next recommended task
 
-Stage 2: introduce feature ViewModels/repositories, proper phone validation, OTP request/verify interfaces, session persistence, and unit tests—using a fake provider until the backend/API contract is agreed.
+Stage 2: introduce feature ViewModels/repositories, proper phone validation, OTP request/verify interfaces, session persistence, and unit testsâ€”using a fake provider until the backend/API contract is agreed.
 
 
 
@@ -275,3 +275,13 @@ Patient App 0.19.0-stage25b passed the complete Stage 25AB device checklist on 2
 Patient App 0.20.0-stage25d (version code 26) consumes only the public published-review count and one-decimal average returned for each clinic. Hosted Doctor cards and profiles show the aggregate or an explicit no-published-reviews state. Patient names and comments are never exposed by discovery; PENDING, HIDDEN and REJECTED reviews do not contribute.
 
 Build only after API 0.16.0-stage25cd is deployed. GitHub Actions remains the Android compiler/lint/test gate on this PC. Use docs/stage25cd-device-test.md with the paired Admin and Doctor APKs.
+
+## Stage 25D acceptance
+
+Patient App `0.20.0-stage25d` passed GitHub Actions, stable in-place upgrade and the complete Stage 25C-25D checklist on 23 July 2026. Published-only count/average, hidden/rejected exclusion, zero-review presentation, privacy boundaries, restart/offline safety and local-data preservation passed.
+
+## Stage 26B implementation checkpoint
+
+Patient App `0.21.0-stage26b` (version code 27) activates the existing Help & Support placeholder for the hosted seeded account. The Patient selects a fixed category, enters a bounded subject and message, and submits through an idempotent protected endpoint. The same screen displays authoritative OPEN, IN_PROGRESS, RESOLVED and CLOSED history plus the bounded DO-LO Admin response.
+
+No local profile, family member, favourite, notification, appointment or review is uploaded or replaced. Build only after API `0.17.0-stage26ab` is deployed, then follow `docs/stage26ab-device-test.md` with Admin App `0.7.0-stage26a`. External chat, attachments, SMS, Push, Maps and Payments remain disabled.

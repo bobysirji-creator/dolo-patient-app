@@ -123,7 +123,7 @@ class HttpPlatformApi(
             connectTimeout = connectTimeoutMillis
             readTimeout = readTimeoutMillis
             setRequestProperty("Accept", "application/json")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage25D")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage26B")
             useCaches = false
         }
         return try {

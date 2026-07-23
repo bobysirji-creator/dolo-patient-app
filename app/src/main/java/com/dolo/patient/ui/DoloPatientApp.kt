@@ -33,7 +33,7 @@ object Routes{const val Splash="splash";const val Login="login";const val Home="
   composable(Routes.Queue,arguments=listOf(navArgument("appointmentId"){type=NavType.StringType})){e->val id=e.arguments?.getString("appointmentId").orEmpty();LiveQueueScreen(patient.uiState,id,nav::popBackStack,{patient.refreshQueue(id)},{patient.refreshQueue(id,false)},{patient.advanceQueue(id)},{patient.markMissed(id)},{patient.completeAppointment(id)},{patient.reschedule(id)},patient::canReschedule)}
   composable(Routes.Profile){ProfileScreen(patient.uiState,nav::popBackStack,{name,phone,city->patient.updateProfile(name,phone,city)},{name,relation,age->patient.addFamilyMember(name,relation,age)})}
   composable(Routes.Notifications){NotificationsScreen(patient.uiState,nav::popBackStack,patient::markNotificationsRead)}
-  composable(Routes.Support){SupportScreen(nav::popBackStack){nav.navigate(Routes.Integrations)}}
+  composable(Routes.Support){SupportScreen(nav::popBackStack,{nav.navigate(Routes.Integrations)},hosted.uiState,hosted::refresh,hosted::submitSupportRequest)}
   composable(Routes.Integrations){IntegrationStatusScreen(nav::popBackStack,platform.uiState,platform::refresh){nav.navigate(Routes.HostedSync)}}
   composable(Routes.HostedSync){HostedSyncScreen(nav::popBackStack,hosted)}
   composable(Routes.Review,arguments=listOf(navArgument("doctorId"){type=NavType.StringType},navArgument("appointmentId"){type=NavType.StringType})){e->val doctorId=e.arguments?.getString("doctorId").orEmpty();val appointmentId=e.arguments?.getString("appointmentId").orEmpty();ReviewScreen(patient.uiState,doctorId,appointmentId,nav::popBackStack){rating,comment->patient.addReview(appointmentId,rating,comment)}}

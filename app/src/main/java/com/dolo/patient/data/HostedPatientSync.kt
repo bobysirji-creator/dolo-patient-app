@@ -23,8 +23,9 @@ data class HostedAppointment(val id: String, val sessionId: String, val doctorNa
 data class HostedLiveQueue(val appointmentId: String, val token: Int, val currentToken: Int?, val patientsAhead: Int?, val estimatedMinutes: Int?, val status: String, val countdownState: String)
 data class HostedCommunication(val id: String, val audience: String, val kind: String, val title: String, val message: String, val startsOn: String, val endsOn: String)
 data class HostedReview(val id: String, val appointmentId: String, val patientName: String, val doctorName: String, val clinicName: String, val rating: Int, val comment: String, val status: String, val submittedAt: String)
+data class HostedSupportRequest(val id:String,val category:String,val subject:String,val message:String,val status:String,val adminNote:String,val submittedAt:String,val updatedAt:String)
 data class HostedBootstrap(val profile: HostedProfile, val clinic: HostedClinic, val sessions: List<HostedSession>, val profiles: List<HostedProfile> = listOf(profile), val rescheduleWindowDays: Int = 10, val rescheduleSessions: List<HostedSession> = sessions)
-data class HostedSyncSnapshot(val bootstrap: HostedBootstrap, val appointments: List<HostedAppointment>, val live: List<HostedLiveQueue>, val communications: List<HostedCommunication> = emptyList(), val reviews: List<HostedReview> = emptyList())
+data class HostedSyncSnapshot(val bootstrap: HostedBootstrap, val appointments: List<HostedAppointment>, val live: List<HostedLiveQueue>, val communications: List<HostedCommunication> = emptyList(), val reviews: List<HostedReview> = emptyList(), val supportRequests: List<HostedSupportRequest> = emptyList())
 data class HostedServerError(val code: String, val message: String)
 
 object HostedHomePresentation {
@@ -69,6 +70,8 @@ object HostedReceiptPresentation {
     }
 }
 
+object HostedSupportKeys { fun preferenceKey(subject:String,message:String):String="hosted_support_key_${subject.hashCode()}_${message.hashCode()}" }
+
 object HostedReviewKeys {
     fun preferenceKey(appointmentId: String): String = "hosted_review_key_$appointmentId"
 }
@@ -95,6 +98,7 @@ interface HostedPatientSyncApi {
     fun book(sessionId: String, profileId: String): HostedResult<HostedSyncSnapshot>
     fun reschedule(appointmentId: String, targetSessionId: String): HostedResult<HostedSyncSnapshot>
     fun submitReview(appointmentId: String, rating: Int, comment: String): HostedResult<HostedSyncSnapshot>
+    fun submitSupportRequest(category:String,subject:String,message:String):HostedResult<HostedSyncSnapshot>
 }
 
 object HostedErrorJson {
@@ -140,7 +144,9 @@ object HostedReviewJson {
         }
     }
 }
-object HostedAppointmentJson {
+object HostedSupportJson {
+    fun parse(json:String):List<HostedSupportRequest>{val root=JSONObject(json);require(root.optBoolean("authoritative"));val items=root.getJSONArray("supportRequests");return buildList{for(index in 0 until items.length()){val item=items.getJSONObject(index);val status=item.getString("status");require(status in setOf("OPEN","IN_PROGRESS","RESOLVED","CLOSED"));add(HostedSupportRequest(item.getString("id"),item.getString("category"),item.getString("subject"),item.getString("message"),status,item.optString("adminNote"),item.getString("submittedAt"),item.getString("updatedAt")))}}}
+}object HostedAppointmentJson {
     fun parse(json: String): List<HostedAppointment> {
         val appointments = JSONObject(json).getJSONArray("appointments")
         return buildList {
@@ -259,13 +265,19 @@ class HttpHostedPatientSyncApi(
         request("POST", "/api/v1/appointments/$appointmentId/review", JSONObject().put("rating", rating).put("comment", comment.trim()).toString(), mapOf("Idempotency-Key" to idempotency))
         load()
     }
+    override fun submitSupportRequest(category:String,subject:String,message:String):HostedResult<HostedSyncSnapshot> = guarded {
+        require(category in setOf("APPOINTMENT","DOCTOR","BILLING","APP","OTHER")&&subject.trim().length in 8..120&&message.trim().length in 20..1000){"Complete the support category, subject and message."}
+        val keyName=HostedSupportKeys.preferenceKey(subject.trim(),message.trim());val idempotency=preferences.getString(keyName,null)?: ("android26b-"+UUID.randomUUID()).also{preferences.edit().putString(keyName,it).apply()}
+        request("POST","/api/v1/patient/support-requests",JSONObject().put("category",category).put("subject",subject.trim()).put("message",message.trim()).toString(),mapOf("Idempotency-Key" to idempotency));load()
+    }
     private fun load(): HostedSyncSnapshot {
         val bootstrap = HostedBootstrapJson.parse(request("POST", "/api/v1/patient/sync/bootstrap", "{}"))
         val appointments = HostedAppointmentJson.parse(request("GET", "/api/v1/appointments"))
         val live = parseLive(request("GET", "/api/v1/patient/live-appointments"))
         val communications = HostedCommunicationJson.parse(request("GET", "/api/v1/patient/communications?clinicId=${bootstrap.clinic.id}"))
         val reviews = HostedReviewJson.parse(request("GET", "/api/v1/patient/reviews"))
-        return HostedSyncSnapshot(bootstrap, appointments, live, communications, reviews)
+        val supportRequests = HostedSupportJson.parse(request("GET", "/api/v1/patient/support-requests"))
+        return HostedSyncSnapshot(bootstrap, appointments, live, communications, reviews, supportRequests)
     }
 
     private fun <T> guarded(block: () -> T): HostedResult<T> = runCatching(block).fold(
@@ -296,7 +308,7 @@ class HttpHostedPatientSyncApi(
             readTimeout = 25_000
             setRequestProperty("Accept", "application/json")
             setRequestProperty("Authorization", "Bearer $token")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage25B")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage26B")
             headers.forEach { (key, value) -> setRequestProperty(key, value) }
             if (body != null) {
                 doOutput = true
@@ -360,6 +372,7 @@ class HostedPatientSyncViewModel(private val api: HostedPatientSyncApi) : ViewMo
     fun book(sessionId: String, profileId: String) { execute { api.book(sessionId, profileId) } }
     fun reschedule(appointmentId: String, targetSessionId: String) { execute { api.reschedule(appointmentId, targetSessionId) } }
     fun submitReview(appointmentId: String, rating: Int, comment: String) { execute { api.submitReview(appointmentId, rating, comment) } }
+    fun submitSupportRequest(category:String,subject:String,message:String){execute{api.submitSupportRequest(category,subject,message)}}
 
     private fun execute(call: () -> HostedResult<HostedSyncSnapshot>) {
         if (uiState.loading) return
