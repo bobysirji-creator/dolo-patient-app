@@ -19,6 +19,18 @@ class HostedPatientSyncTest {
     )
 
     @Test
+    fun parsesAuthoritativeHostedNotificationsAndReadState() {
+        val notifications = HostedNotificationJson.parse(
+            """{"authoritative":true,"notifications":[{"cursor":"18","appointmentId":"appointment-1","patientName":"Prototype Patient","tokenNumber":4,"kind":"TURN","title":"Consultation started","message":"Prototype Patient's Token 4 is now in consultation.","occurredAt":"2026-07-23T04:00:00.000Z","read":false}]}"""
+        )
+
+        assertEquals(1, notifications.size)
+        assertEquals("18", notifications.single().cursor)
+        assertEquals("Consultation started", notifications.single().title)
+        assertFalse(notifications.single().read)
+    }
+
+    @Test
     fun parsesActiveHostedCommunications() {
         val communications = HostedCommunicationJson.parse(
             """{"communications":[{"id":"message-1","audience":"ALL_PATIENTS","kind":"ADMIN_BROADCAST","title":"Platform update","message":"Appointments are operating normally.","startsOn":"2026-07-21","endsOn":"2026-07-22"}]}"""

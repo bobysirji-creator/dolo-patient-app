@@ -63,7 +63,7 @@ private val page=Modifier.fillMaxSize().background(DoloBackground)
  LaunchedEffect(Unit){while(true){delay(ReleaseReadiness.QUEUE_REFRESH_INTERVAL_MILLIS);onRefreshQueues()}}
  Scaffold(containerColor=DoloBackground,bottomBar={DoloBottomBar(selected=PatientBottomDestination.HOME,onHome={},onAppointments=onHistory,onBook=onCategories)}){p->
   LazyColumn(Modifier.padding(p).padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){
-   item{Row(verticalAlignment=Alignment.CenterVertically){BrandLogo();Spacer(Modifier.weight(1f));IconButton(onNotifications){BadgedBox({if(state.notifications.any{!it.isRead})Badge()}){Icon(Icons.Outlined.Notifications,"Notifications")}};IconButton(onProfile){Icon(Icons.Outlined.Person,"Profile")};IconButton(onLogout){Icon(Icons.Outlined.Logout,"Logout")}}}
+   item{Row(verticalAlignment=Alignment.CenterVertically){BrandLogo();Spacer(Modifier.weight(1f));IconButton(onNotifications){BadgedBox({if(state.notifications.any{!it.isRead}||hostedState?.snapshot?.notifications?.any{!it.read}==true)Badge()}){Icon(Icons.Outlined.Notifications,"Notifications")}};IconButton(onProfile){Icon(Icons.Outlined.Person,"Profile")};IconButton(onLogout){Icon(Icons.Outlined.Logout,"Logout")}}}
    item{Column{Text(state.profile.name+" ("+state.profile.city+")",fontSize=26.sp,fontWeight=FontWeight.ExtraBold,color=DoloTeal);Text("Identity: "+authStatus,color=if(authStatus=="Hosted prototype")DoloTeal else DoloMuted,fontSize=12.sp,fontWeight=FontWeight.SemiBold)}}
    item{OutlinedTextField(q,{q=it},Modifier.fillMaxWidth(),placeholder={Text("Search doctor, specialty or clinic")},leadingIcon={Icon(Icons.Outlined.Search,null)},trailingIcon={IconButton({onSearch(q)}){Icon(Icons.Outlined.ArrowForward,null)}},singleLine=true,shape=RoundedCornerShape(18.dp))}
    hostedState?.let{hosted->
@@ -609,16 +609,29 @@ fun ProfileScreen(
 @Composable
 fun NotificationsScreen(
     state: PatientUiState,
+    hostedState: HostedSyncUiState?,
     onBack: () -> Unit,
-    onMarkRead: () -> Unit
+    onMarkRead: () -> Unit,
+    onMarkHostedRead: (String) -> Unit
 ) {
-    LaunchedEffect(Unit) { onMarkRead() }
+    val hostedNotifications=hostedState?.snapshot?.notifications.orEmpty()
+    val newestHostedCursor=hostedNotifications.maxByOrNull{runCatching{it.cursor.toLong()}.getOrDefault(0L)}?.cursor
+    var requestedHostedCursor by remember{mutableStateOf<String?>(null)}
+    LaunchedEffect(newestHostedCursor,hostedState?.loading) { onMarkRead();if(hostedState?.loading!=true&&newestHostedCursor!=null&&requestedHostedCursor!=newestHostedCursor){requestedHostedCursor=newestHostedCursor;onMarkHostedRead(newestHostedCursor)} }
     LazyColumn(
         modifier = page.padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item { ScreenTitle("Notifications", onBack) }
-        if (state.notifications.isEmpty()) {
+        if (hostedNotifications.isNotEmpty()) {
+            item { Text("Hosted appointment updates",style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.Bold) }
+            items(items=hostedNotifications,key={"hosted-${it.cursor}"}){notification->
+                Card(modifier=Modifier.fillMaxWidth().shadow(8.dp,RoundedCornerShape(18.dp)),colors=CardDefaults.cardColors(containerColor=if(notification.read)Color.White else DoloSurfaceAlt),shape=RoundedCornerShape(18.dp)){
+                    Column(Modifier.padding(16.dp)){Text(notification.title,fontWeight=FontWeight.Bold);Text(notification.message,color=DoloMuted);Text("${notification.patientName} - Token ${notification.tokenNumber}",fontSize=12.sp,color=DoloTeal)}
+                }
+            }
+        }
+        if (state.notifications.isEmpty() && hostedNotifications.isEmpty()) {
             item { EmptyCard("Queue and appointment updates will appear here.") }
         } else {
             items(items = state.notifications, key = { notification -> notification.id }) { notification ->

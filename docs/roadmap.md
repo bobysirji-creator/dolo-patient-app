@@ -285,7 +285,20 @@ Admin moderation and Doctor feed are delivered by the paired Stage 25C-25D repos
 - [x] OPEN, IN_PROGRESS, RESOLVED and CLOSED presentation
 - [x] preserve all unrelated local Patient data
 - [x] JSON contract coverage and stable version increment
-- [ ] GitHub Actions compile, lint, unit tests and stable APK
-- [ ] paired Patient/Admin physical-device acceptance
+- [x] GitHub Actions compile, lint, unit tests and stable APK
+- [x] paired Patient/Admin physical-device acceptance
 
 External chat, attachments, SMS, Push, Maps and Payments remain disabled.
+## Stage 27B - authoritative hosted in-app notifications
+
+- [x] load the Patient-owned hosted notification feed with existing authoritative sync
+- [x] show hosted appointment/queue updates in the existing notification screen
+- [x] display the matching SELF/FAMILY patient and token on each hosted card
+- [x] include hosted unread state in the Home bell badge
+- [x] mark through the newest displayed server cursor without changing local notifications
+- [x] preserve hosted snapshot and all local data during ordinary offline failures
+- [x] JSON contract coverage and stable version increment
+- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [ ] physical-device notification/read-cursor acceptance
+
+External Android Push and SMS are not enabled. Maps and Payments also remain disabled.

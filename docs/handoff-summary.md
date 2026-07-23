@@ -285,3 +285,12 @@ Patient App `0.20.0-stage25d` passed GitHub Actions, stable in-place upgrade and
 Patient App `0.21.0-stage26b` (version code 27) activates the existing Help & Support placeholder for the hosted seeded account. The Patient selects a fixed category, enters a bounded subject and message, and submits through an idempotent protected endpoint. The same screen displays authoritative OPEN, IN_PROGRESS, RESOLVED and CLOSED history plus the bounded DO-LO Admin response.
 
 No local profile, family member, favourite, notification, appointment or review is uploaded or replaced. Build only after API `0.17.0-stage26ab` is deployed, then follow `docs/stage26ab-device-test.md` with Admin App `0.7.0-stage26a`. External chat, attachments, SMS, Push, Maps and Payments remain disabled.
+## Stages 26A-26B acceptance
+
+Patient App `0.21.0-stage26b`, Admin App `0.7.0-stage26a` and Platform API `0.17.0-stage26ab` passed the complete support-request device checklist on 23 July 2026. Submission bounds, authoritative history, Admin state/response propagation, restart/offline recovery, role denial and local-data isolation passed.
+
+## Stage 27B implementation checkpoint
+
+Patient App `0.22.0-stage27b` (version code 28) consumes the owner-scoped in-app notification feed from Platform API `0.18.0-stage27ab`. Hosted appointment and queue updates appear in the existing Notifications screen with Patient/family identity and token. The Home bell badge includes unread hosted events, and opening the screen advances the monotonic server read cursor through the newest displayed event while local notifications remain independent.
+
+GitHub Actions remains the Android compiler/lint/unit/APK gate on this PC. Deploy API migration 023 first, then install the stable Patient APK and follow `docs/stage27ab-device-test.md`. External Push, SMS, Maps and Payments remain disabled.
