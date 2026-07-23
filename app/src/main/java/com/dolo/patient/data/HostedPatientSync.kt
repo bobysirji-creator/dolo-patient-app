@@ -299,7 +299,9 @@ class HttpHostedPatientSyncApi(
     }
     override fun updatePreferences(preferences:HostedPreferences):HostedResult<HostedSyncSnapshot> = guarded {
         request("PUT","/api/v1/patient/preferences",JSONObject().put("appointmentServiceUpdates",preferences.appointmentServiceUpdates).put("healthInformation",preferences.healthInformation).put("promotionalMessages",preferences.promotionalMessages).put("inAppMessages",preferences.inAppMessages).put("preferredLanguage",preferences.preferredLanguage).put("consentVersion","2026-07").toString());load()
-    }    override fun markNotificationsRead(readThroughCursor:String):HostedResult<HostedSyncSnapshot> = guarded {
+    }
+
+    override fun markNotificationsRead(readThroughCursor:String):HostedResult<HostedSyncSnapshot> = guarded {
         require(readThroughCursor.matches(Regex("^(0|[1-9][0-9]{0,18})$"))){"Invalid notification cursor."}
         request("PUT","/api/v1/patient/notifications",JSONObject().put("readThroughCursor",readThroughCursor).toString());load()
     }
