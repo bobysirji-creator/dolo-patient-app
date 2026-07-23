@@ -314,8 +314,8 @@ External Android Push and SMS are not enabled. Maps and Payments also remain dis
 - [x] show an active Doctor announcement only on its matching Doctor/clinic profile
 - [x] retain Admin broadcasts on Patient Home
 - [x] add JSON, null-consent and Home-filter regression coverage
-- [ ] GitHub Actions compile, lint, unit tests and stable APK
-- [ ] stable APK in-place upgrade
-- [ ] API deployment and paired physical-device acceptance
+- [x] GitHub Actions compile, lint, unit tests and stable APK
+- [x] stable APK in-place upgrade
+- [x] API deployment and paired physical-device acceptance
 
 Your local Patient profile, family, favourites, appointments, reviews and notifications remain isolated. Push, Maps and Payments remain disabled; the SMS provider also remains disabled until a later OTP-only integration.
