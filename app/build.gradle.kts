@@ -23,8 +23,8 @@ android {
         applicationId = "com.dolo.patient"
         minSdk = 26
         targetSdk = 35
-        versionCode = 25
-        versionName = "0.19.0-stage25b"
+        versionCode = 26
+        versionName = "0.20.0-stage25d"
         buildConfigField(
             "String",
             "DOLO_API_BASE_URL",
@@ -83,4 +83,3 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
-

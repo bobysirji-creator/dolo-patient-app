@@ -266,3 +266,12 @@ Patient App `0.18.1-stage24a` passed the final bounded Home communication retest
 Patient App `0.19.0-stage25b` (version code 25) consumes the new owner-scoped hosted review endpoints. Only COMPLETED hosted appointments expose a 1-5 rating and optional 500-character comment. A successful submission is reloaded from the server and displayed with PENDING moderation state; a stable appointment-scoped idempotency key protects retries.
 
 The hosted review flow does not upload or merge local profile, family, favourites, notifications, appointments or local reviews. Doctor visibility and Admin moderation are reserved for Stages 25C-25D. GitHub Actions remains the Android compiler/lint/unit/APK gate; follow `docs/stage25ab-device-test.md` only after API `0.15.0-stage25ab` is deployed.
+## Stages 25A-25B acceptance
+
+Patient App 0.19.0-stage25b passed the complete Stage 25AB device checklist on 23 July 2026. Hosted completion gating, SELF/FAMILY association, pending persistence, duplicate protection, restart/offline recovery, non-public pending state and all local-data isolation checks passed.
+
+## Stage 25D implementation checkpoint
+
+Patient App 0.20.0-stage25d (version code 26) consumes only the public published-review count and one-decimal average returned for each clinic. Hosted Doctor cards and profiles show the aggregate or an explicit no-published-reviews state. Patient names and comments are never exposed by discovery; PENDING, HIDDEN and REJECTED reviews do not contribute.
+
+Build only after API 0.16.0-stage25cd is deployed. GitHub Actions remains the Android compiler/lint/test gate on this PC. Use docs/stage25cd-device-test.md with the paired Admin and Doctor APKs.

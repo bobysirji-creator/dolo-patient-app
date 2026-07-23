@@ -259,8 +259,19 @@ No Platform API migration or deployment is required. Maps, Payments, SMS and Pus
 - [x] pending moderation display after submission and restart
 - [x] preserve every unrelated local Patient record
 - [x] API check and 108-test local suite
-- [ ] API PostgreSQL integration in GitHub Actions and Render deployment
-- [ ] Patient GitHub Actions build and stable APK
-- [ ] physical-device completed-appointment review checklist
+- [x] API PostgreSQL integration in GitHub Actions and Render deployment
+- [x] Patient GitHub Actions build and stable APK
+- [x] physical-device completed-appointment review checklist
 
 Doctor review visibility and Admin moderation actions are deliberately reserved for Stages 25C-25D. Maps, Payments, SMS and Push remain disabled.
+## Stage 25D - published review summary
+
+- [x] parse published-only count and one-decimal average from public clinic discovery
+- [x] show the aggregate on hosted Doctor list/profile
+- [x] expose no Patient identity or comment in public discovery
+- [x] retain zero-review empty state
+- [x] JSON regression coverage and stable version increment
+- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [ ] combined Admin/Doctor/Patient physical-device acceptance
+
+Admin moderation and Doctor feed are delivered by the paired Stage 25C-25D repositories. Maps, Payments, SMS and Push remain disabled.

@@ -47,7 +47,9 @@ class PlatformJsonTest {
                     "city":"Mumbai",
                     "active":true,
                     "doctor":{"id":"doctor-1","name":"Dr Demo","specialty":"General Medicine","registrationNumber":"MMC-12345","qualification":"MBBS, MD","experienceYears":12,"about":"Patient-focused family physician."},
-                    "consultationFeeMinor":50000
+                    "consultationFeeMinor":50000,
+                    "publishedReviewCount":2,
+                    "publishedRatingAverage":4.5
                 }]
             }""".trimIndent()
         )
@@ -60,6 +62,8 @@ class PlatformJsonTest {
         assertEquals(12, clinics.single().experienceYears)
         assertEquals("Patient-focused family physician.", clinics.single().about)
         assertEquals(50000, clinics.single().consultationFeeMinor)
+        assertEquals(2, clinics.single().publishedReviewCount)
+        assertEquals(4.5, clinics.single().publishedRatingAverage!!, 0.0)
         assertTrue(PlatformDiscovery.matches(clinics.single(), "All", "MMC-12345"))
         assertTrue(PlatformDiscovery.matches(clinics.single(), "All", "family physician"))
     }
@@ -76,7 +80,9 @@ class PlatformJsonTest {
     @Test
     fun adminControlledDiscoveryRemovesAndRestoresTheHostedDoctor() {
         val available = PlatformJson.parseClinics(
-            """{"clinics":[{"id":"clinic-1","name":"DO-LO Prototype Clinic","city":"Mumbai","timeZone":"Asia/Kolkata","doctor":{"id":"doctor-1","name":"Dr. Ananya Mehta","specialty":"General Medicine"},"consultationFeeMinor":50000}]}"""
+            """{"clinics":[{"id":"clinic-1","name":"DO-LO Prototype Clinic","city":"Mumbai","timeZone":"Asia/Kolkata","doctor":{"id":"doctor-1","name":"Dr. Ananya Mehta","specialty":"General Medicine"},"consultationFeeMinor":50000,
+                    "publishedReviewCount":2,
+                    "publishedRatingAverage":4.5}]}"""
         )
         val unavailable = PlatformJson.parseClinics("""{"clinics":[]}""")
 

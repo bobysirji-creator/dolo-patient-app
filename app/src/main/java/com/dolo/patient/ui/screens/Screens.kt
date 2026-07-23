@@ -203,6 +203,7 @@ private fun HostedDoctorCard(clinic: PlatformClinic, onOpen: () -> Unit) {
                 }
             }
             Text("Hosted availability controlled by DO-LO Admin", color = DoloTeal, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+            Text(if(clinic.publishedReviewCount>0) "★ ${"%.1f".format(clinic.publishedRatingAverage ?: 0.0)} from ${clinic.publishedReviewCount} published review${if(clinic.publishedReviewCount==1)"" else "s"}" else "No published Patient reviews yet",color=DoloMuted,fontSize=12.sp)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Consultation fee at clinic: INR ${clinic.consultationFeeMinor / 100}", fontWeight = FontWeight.Bold, color = DoloNavy)
                 Spacer(Modifier.weight(1f))
@@ -246,6 +247,7 @@ fun HostedDoctorDetailsScreen(
             item { InfoCard("Registration", clinic.registrationNumber.ifBlank { "Approved registration detail not provided" }) }
             item { InfoCard("About", clinic.about.ifBlank { "Approved profile description not provided" }) }
             item { InfoCard("Clinic", "${clinic.name}\n${clinic.city}\nConsultation fee paid at clinic: INR ${clinic.consultationFeeMinor / 100}") }
+            item { InfoCard("Published Patient reviews", if(clinic.publishedReviewCount>0) "★ ${"%.1f".format(clinic.publishedRatingAverage ?: 0.0)} / 5" + System.lineSeparator() + "${clinic.publishedReviewCount} review${if(clinic.publishedReviewCount==1)"" else "s"} published after Admin moderation" else "No published Patient reviews yet") }
             item { Text("Only the currently approved profile is shown. Pending or rejected Doctor edits are never displayed here.", color = DoloMuted, fontSize = 12.sp) }
             item { PrimaryButton("Book hosted appointment", onBook) }
         }

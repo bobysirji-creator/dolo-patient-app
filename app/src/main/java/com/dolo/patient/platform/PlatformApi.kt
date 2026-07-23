@@ -38,7 +38,9 @@ data class PlatformClinic(
     val qualification: String,
     val experienceYears: Int,
     val about: String,
-    val consultationFeeMinor: Int
+    val consultationFeeMinor: Int,
+    val publishedReviewCount: Int,
+    val publishedRatingAverage: Double?
 )
 
 object PlatformDiscovery {
@@ -121,7 +123,7 @@ class HttpPlatformApi(
             connectTimeout = connectTimeoutMillis
             readTimeout = readTimeoutMillis
             setRequestProperty("Accept", "application/json")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage19C")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage25D")
             useCaches = false
         }
         return try {
@@ -197,7 +199,9 @@ object PlatformJson {
                         qualification = doctor.optString("qualification"),
                         experienceYears = doctor.optInt("experienceYears", 0).coerceAtLeast(0),
                         about = doctor.optString("about"),
-                        consultationFeeMinor = clinic.optInt("consultationFeeMinor", 0).coerceAtLeast(0)
+                        consultationFeeMinor = clinic.optInt("consultationFeeMinor", 0).coerceAtLeast(0),
+                        publishedReviewCount = clinic.optInt("publishedReviewCount", 0).coerceAtLeast(0),
+                        publishedRatingAverage = if (clinic.isNull("publishedRatingAverage")) null else clinic.optDouble("publishedRatingAverage").takeIf { it.isFinite() && it in 1.0..5.0 }
                     )
                 )
             }
