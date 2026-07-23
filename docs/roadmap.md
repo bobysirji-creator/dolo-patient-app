@@ -302,3 +302,20 @@ External chat, attachments, SMS, Push, Maps and Payments remain disabled.
 - [x] physical-device notification/read-cursor acceptance
 
 External Android Push and SMS are not enabled. Maps and Payments also remain disabled.
+## Stage 31B - hosted communication preferences
+
+- [x] load server-owned communication choices for the hosted seeded Patient
+- [x] independently edit appointment/service, health-information, promotional and in-app choices
+- [x] choose preferred English or Hindi and save versioned consent
+- [x] disclose that health grouping uses consulted Doctor specialty history only
+- [x] disclose that no diagnosis or disease is inferred or stored
+- [x] reserve SMS exclusively for OTP and expose no promotional SMS path
+- [x] remove Doctor announcements from Patient Home
+- [x] show an active Doctor announcement only on its matching Doctor/clinic profile
+- [x] retain Admin broadcasts on Patient Home
+- [x] add JSON, null-consent and Home-filter regression coverage
+- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [ ] stable APK in-place upgrade
+- [ ] API deployment and paired physical-device acceptance
+
+Your local Patient profile, family, favourites, appointments, reviews and notifications remain isolated. Push, Maps and Payments remain disabled; the SMS provider also remains disabled until a later OTP-only integration.

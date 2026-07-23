@@ -16,6 +16,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.dolo.patient.data.HostedPatientSyncViewModel
 import com.dolo.patient.data.HostedReschedulePolicy
 import com.dolo.patient.data.HostedReceiptPresentation
+import com.dolo.patient.data.HostedPreferences
 import com.dolo.patient.ui.components.ScreenTitle
 import com.dolo.patient.ui.theme.DoloSurfaceAlt
 import com.dolo.patient.ui.theme.DoloTeal
@@ -59,10 +61,10 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
         item {
             Card(colors = CardDefaults.cardColors(containerColor = if (state.error) MaterialTheme.colorScheme.errorContainer else DoloSurfaceAlt)) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Stages 25A-25B - hosted Patient reviews", fontWeight = FontWeight.Bold)
+                    Text("Stages 31A-31B - communication preferences", fontWeight = FontWeight.Bold)
                     Text(state.message)
                     Text(
-                        "Your local profile, family, favourites and local appointments are not uploaded. Only reviews submitted here belong to the hosted dummy flow.",
+                        "Your local profile, family, favourites and local appointments are not uploaded. These communication choices belong only to the hosted dummy Patient.",
                         style = MaterialTheme.typography.bodySmall
                     )
                     Button(viewModel::refresh, enabled = !state.loading, modifier = Modifier.fillMaxWidth()) {
@@ -81,20 +83,23 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                     style = MaterialTheme.typography.bodySmall
                 )
             }
+            snapshot.preferences?.let { preferences ->
+                item { PatientCommunicationPreferenceCard(preferences, state.loading, viewModel::updatePreferences) }
+            }
+            val patientCommunications = snapshot.communications.filter { it.audience == "ALL_PATIENTS" }
             item { Text("Updates for you", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
-            if (snapshot.communications.isEmpty()) {
-                item { Text("No active Doctor announcements or DO-LO broadcasts today.") }
+            if (patientCommunications.isEmpty()) {
+                item { Text("No active DO-LO broadcast today. Doctor announcements are shown only on that Doctor's profile.") }
             } else {
-                items(snapshot.communications, key = { "communication-${it.id}" }) { communication ->
-                    val adminBroadcast = communication.audience == "ALL_PATIENTS"
+                items(patientCommunications, key = { "communication-${it.id}" }) { communication ->
                     Card(
                         colors = CardDefaults.cardColors(
-                            containerColor = if (adminBroadcast) MaterialTheme.colorScheme.primaryContainer else DoloSurfaceAlt
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
                         )
                     ) {
                         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(
-                                if (adminBroadcast) "DO-LO broadcast" else communicationLabel(communication.kind),
+                                "DO-LO broadcast",
                                 style = MaterialTheme.typography.labelLarge,
                                 color = DoloTeal,
                                 fontWeight = FontWeight.Bold
@@ -213,11 +218,31 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
         }
     }
 }
-private fun communicationLabel(kind: String): String = when (kind) {
-    "DOCTOR_AVAILABILITY" -> "Doctor availability"
-    "DOCTOR_CAMP" -> "Health camp"
-    "DOCTOR_OFFER" -> "Doctor offer"
-    else -> "Doctor announcement"
+@Composable
+private fun PatientCommunicationPreferenceCard(current:HostedPreferences,loading:Boolean,onSave:(HostedPreferences)->Unit){
+    var appointmentUpdates by rememberSaveable(current.consentedAt){mutableStateOf(current.appointmentServiceUpdates)}
+    var healthInformation by rememberSaveable(current.consentedAt){mutableStateOf(current.healthInformation)}
+    var promotions by rememberSaveable(current.consentedAt){mutableStateOf(current.promotionalMessages)}
+    var inApp by rememberSaveable(current.consentedAt){mutableStateOf(current.inAppMessages)}
+    var language by rememberSaveable(current.consentedAt){mutableStateOf(current.preferredLanguage)}
+    Card(colors=CardDefaults.cardColors(containerColor=DoloSurfaceAlt)){Column(Modifier.padding(16.dp),verticalArrangement=Arrangement.spacedBy(10.dp)){
+        Text("Communication preferences",style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.Bold)
+        PreferenceSwitch("Appointment and service updates",appointmentUpdates){appointmentUpdates=it}
+        PreferenceSwitch("Health information",healthInformation){healthInformation=it}
+        Text("Future health grouping uses only specialties of Doctors previously consulted. No diagnosis or disease is inferred or stored.",style=MaterialTheme.typography.bodySmall)
+        PreferenceSwitch("DO-LO promotional messages",promotions){promotions=it}
+        PreferenceSwitch("In-app messages",inApp){inApp=it}
+        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){FilterChip(language=="en",{language="en"},{Text("English")});FilterChip(language=="hi",{language="hi"},{Text("Hindi")})}
+        Text("SMS is reserved only for OTP authentication and is never used for promotions.",style=MaterialTheme.typography.bodySmall,fontWeight=FontWeight.SemiBold)
+        Button({onSave(current.copy(appointmentServiceUpdates=appointmentUpdates,healthInformation=healthInformation,promotionalMessages=promotions,inAppMessages=inApp,preferredLanguage=language))},enabled=!loading,modifier=Modifier.fillMaxWidth()){Text("Save preferences")}
+    }}
+}
+@Composable
+private fun PreferenceSwitch(label: String, checked: Boolean, onChecked: (Boolean) -> Unit) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(label, modifier = Modifier.weight(1f))
+        Switch(checked = checked, onCheckedChange = onChecked)
+    }
 }
 
 @Composable

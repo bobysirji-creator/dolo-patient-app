@@ -298,3 +298,9 @@ GitHub Actions remains the Android compiler/lint/unit/APK gate on this PC. Deplo
 ## Stages 27A-27B acceptance
 
 Patient App `0.22.0-stage27b` and Platform API `0.18.0-stage27ab` passed GitHub Actions, Render deployment, stable APK upgrade and the complete notification checklist on 23 July 2026. Hosted SELF/FAMILY identity and token copy, Home badge, server-persisted read state, new Doctor event refresh, restart/offline recovery, non-duplication and all local-data isolation checks passed.
+
+## Stages 31A-31B implementation checkpoint
+
+Patient App `0.23.0-stage31b` (version code 29) adds a hosted communication-preference card backed by Platform API `0.22.0-stage31ab`. The seeded Patient can independently choose appointment/service updates, health information, promotions, in-app messages and English/Hindi. Saved values are server authoritative and retain versioned consent; unrelated local Patient data is neither uploaded nor replaced.
+
+The UI and contract state two non-expandable policy boundaries: SMS is reserved only for OTP authentication, and future health-interest grouping may use only specialties of Doctors in the Patient's completed consultation history—never a diagnosis or disease inference. Patient Home now shows only Admin broadcasts. Doctor announcements are filtered by clinic ID and appear only on the matching hosted Doctor profile. GitHub Actions remains the Android compile/lint/test/APK gate; follow `docs/stage31ab-device-test.md` after the API deployment is live.

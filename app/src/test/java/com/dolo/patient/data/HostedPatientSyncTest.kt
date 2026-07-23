@@ -33,12 +33,26 @@ class HostedPatientSyncTest {
     @Test
     fun parsesActiveHostedCommunications() {
         val communications = HostedCommunicationJson.parse(
-            """{"communications":[{"id":"message-1","audience":"ALL_PATIENTS","kind":"ADMIN_BROADCAST","title":"Platform update","message":"Appointments are operating normally.","startsOn":"2026-07-21","endsOn":"2026-07-22"}]}"""
+            """{"communications":[{"id":"message-1","audience":"DOCTOR_PROFILE","kind":"DOCTOR_GENERAL","clinicId":"clinic-1","title":"Clinic update","message":"Appointments are operating normally.","startsOn":"2026-07-21","endsOn":"2026-07-22"}]}"""
         )
 
         assertEquals(1, communications.size)
-        assertEquals("ADMIN_BROADCAST", communications.single().kind)
-        assertEquals("Platform update", communications.single().title)
+        assertEquals("DOCTOR_GENERAL", communications.single().kind)
+        assertEquals("clinic-1", communications.single().clinicId)
+        assertEquals("Clinic update", communications.single().title)
+    }
+    @Test
+    fun parsesHostedCommunicationPreferencesAndNullConsentDate() {
+        val preferences = HostedPreferencesJson.parse(
+            """{"preferences":{"appointmentServiceUpdates":true,"healthInformation":false,"promotionalMessages":false,"inAppMessages":true,"preferredLanguage":"en","consentVersion":"2026-07","consentedAt":null,"smsUsage":"OTP_ONLY","healthSegmentationBasis":"CONSULTED_DOCTOR_SPECIALTY_HISTORY"}}"""
+        )
+
+        assertTrue(preferences.appointmentServiceUpdates)
+        assertFalse(preferences.healthInformation)
+        assertFalse(preferences.promotionalMessages)
+        assertNull(preferences.consentedAt)
+        assertEquals("OTP_ONLY", preferences.smsUsage)
+        assertEquals("CONSULTED_DOCTOR_SPECIALTY_HISTORY", preferences.healthSegmentationBasis)
     }
     @Test
     fun parsesExplicitDoctorUnavailableContract() {
@@ -151,7 +165,7 @@ class HostedPatientSyncTest {
         val completed = HostedAppointment("a3", "s1", "Doctor", "Clinic", "Patient", "2026-07-22", "MORNING", 1, "COMPLETED")
         val live = HostedLiveQueue("a1", 4, 2, 1, 12, "WAITING", "COUNTING_DOWN")
         val update = HostedCommunication("c1", "ALL_PATIENTS", "ADMIN_BROADCAST", "Clinic update", "Open normally", "2026-07-22", "2026-07-23")
-        val doctorUpdate = HostedCommunication("c2", "CLINIC_PATIENTS", "DOCTOR_AVAILABILITY", "Doctor update", "Running late", "2026-07-22", "2026-07-23")
+        val doctorUpdate = HostedCommunication("c2", "DOCTOR_PROFILE", "DOCTOR_AVAILABILITY", "Doctor update", "Running late", "2026-07-22", "2026-07-23", "clinic-1")
         val homeSnapshot = snapshot.copy(
             appointments = listOf(later, completed, earlier),
             live = listOf(live),
@@ -160,7 +174,7 @@ class HostedPatientSyncTest {
 
         assertEquals(listOf("a1", "a2"), HostedHomePresentation.activeAppointments(homeSnapshot).map { it.id })
         assertEquals(live, HostedHomePresentation.liveQueue(homeSnapshot, "a1"))
-        assertEquals(listOf(doctorUpdate, update), HostedHomePresentation.homeCommunications(homeSnapshot))
+        assertEquals(listOf(update), HostedHomePresentation.homeCommunications(homeSnapshot))
     }
 
     @Test

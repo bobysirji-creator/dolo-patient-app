@@ -216,6 +216,7 @@ private fun HostedDoctorCard(clinic: PlatformClinic, onOpen: () -> Unit) {
 @Composable
 fun HostedDoctorDetailsScreen(
     clinic: PlatformClinic?,
+    announcements: List<HostedCommunication>,
     onBack: () -> Unit,
     onRefresh: () -> Unit,
     onBook: () -> Unit
@@ -247,6 +248,8 @@ fun HostedDoctorDetailsScreen(
             item { InfoCard("Registration", clinic.registrationNumber.ifBlank { "Approved registration detail not provided" }) }
             item { InfoCard("About", clinic.about.ifBlank { "Approved profile description not provided" }) }
             item { InfoCard("Clinic", "${clinic.name}\n${clinic.city}\nConsultation fee paid at clinic: INR ${clinic.consultationFeeMinor / 100}") }
+            item { Text("Doctor announcements", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
+            if(announcements.isEmpty()) item { InfoCard("Current update", "No active announcement from this Doctor.") } else items(announcements,key={"doctor-announcement-${it.id}"}){announcement->InfoCard(announcement.title,announcement.message+"\nActive ${announcement.startsOn} to ${announcement.endsOn}")}
             item { InfoCard("Published Patient reviews", if(clinic.publishedReviewCount>0) "★ ${"%.1f".format(clinic.publishedRatingAverage ?: 0.0)} / 5" + System.lineSeparator() + "${clinic.publishedReviewCount} review${if(clinic.publishedReviewCount==1)"" else "s"} published after Admin moderation" else "No published Patient reviews yet") }
             item { Text("Only the currently approved profile is shown. Pending or rejected Doctor edits are never displayed here.", color = DoloMuted, fontSize = 12.sp) }
             item { PrimaryButton("Book hosted appointment", onBook) }
