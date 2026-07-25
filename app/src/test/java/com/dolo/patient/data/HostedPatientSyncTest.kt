@@ -191,4 +191,27 @@ class HostedPatientSyncTest {
             HostedReviewKeys.preferenceKey("appointment-1")
         )
         assertFalse(HostedReviewKeys.preferenceKey("appointment-1") == HostedReviewKeys.preferenceKey("appointment-2"))
-    }}
+    }
+
+    @Test
+    fun parsesConsentRevalidatedInAppOnlyTargetedCampaigns() {
+        val campaigns = HostedTargetedCampaignJson.parse(
+            """{"authoritative":true,"delivery":"IN_APP_ONLY","providers":"DISABLED","campaigns":[{"id":"campaign-1","messageType":"PROMOTIONAL","patientPurpose":"PROMOTIONAL","title":"Free health camp","message":"A limited in-app update for the selected audience.","startsOn":"2026-07-25","endsOn":"2026-07-31"}]}"""
+        )
+
+        assertEquals(1, campaigns.size)
+        assertEquals("PROMOTIONAL", campaigns.single().purpose)
+        assertEquals("Free health camp", campaigns.single().title)
+    }
+
+    @Test
+    fun rejectsProviderBackedTargetedCampaignPayloads() {
+        val result = runCatching {
+            HostedTargetedCampaignJson.parse(
+                """{"authoritative":true,"delivery":"PUSH","providers":"ENABLED","campaigns":[]}"""
+            )
+        }
+
+        assertTrue(result.isFailure)
+    }
+}

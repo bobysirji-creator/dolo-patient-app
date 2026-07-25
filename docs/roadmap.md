@@ -319,3 +319,18 @@ External Android Push and SMS are not enabled. Maps and Payments also remain dis
 - [x] API deployment and paired physical-device acceptance
 
 Your local Patient profile, family, favourites, appointments, reviews and notifications remain isolated. Push, Maps and Payments remain disabled; the SMS provider also remains disabled until a later OTP-only integration.
+## Stage 36B - consent-aware targeted Patient messages
+
+- [x] load the authenticated Patient-only targeted campaign feed
+- [x] require authoritative, in-app-only, provider-disabled response metadata
+- [x] render matching messages in a dedicated Hosted Sync section
+- [x] keep targeted messages separate from general broadcasts and off Patient Home
+- [x] retain purpose and active-period context on each message card
+- [x] preserve the last hosted snapshot and every local Patient record during ordinary offline failures
+- [x] parser and external-provider rejection regression coverage
+- [x] stable version increment
+- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [ ] API deployment and stable APK in-place upgrade
+- [ ] paired Stage 36 physical-device acceptance
+
+The server revalidates current consent and schedule on every feed read. SMS remains OTP-only and disabled; Push, Maps and Payments remain disabled.

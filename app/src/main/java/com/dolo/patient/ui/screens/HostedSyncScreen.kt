@@ -61,7 +61,7 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
         item {
             Card(colors = CardDefaults.cardColors(containerColor = if (state.error) MaterialTheme.colorScheme.errorContainer else DoloSurfaceAlt)) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Stages 31A-31B - communication preferences", fontWeight = FontWeight.Bold)
+                    Text("Stages 36A-36B - consent-aware targeted messages", fontWeight = FontWeight.Bold)
                     Text(state.message)
                     Text(
                         "Your local profile, family, favourites and local appointments are not uploaded. These communication choices belong only to the hosted dummy Patient.",
@@ -86,10 +86,25 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
             snapshot.preferences?.let { preferences ->
                 item { PatientCommunicationPreferenceCard(preferences, state.loading, viewModel::updatePreferences) }
             }
+            item { Text("Targeted DO-LO messages", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
+            if (snapshot.targetedCampaigns.isEmpty()) {
+                item { Text("No active targeted in-app message matches this hosted Patient and the current communication preferences.") }
+            } else {
+                items(snapshot.targetedCampaigns, key = { "targeted-${it.id}" }) { campaign ->
+                    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
+                        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text("${campaign.purpose.replace('_', ' ')} - In-app only", style = MaterialTheme.typography.labelLarge, color = DoloTeal, fontWeight = FontWeight.Bold)
+                            Text(campaign.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Text(campaign.message)
+                            Text("Active ${campaign.startsOn} to ${campaign.endsOn}", style = MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                }
+            }
             val patientCommunications = snapshot.communications.filter { it.audience == "ALL_PATIENTS" }
-            item { Text("Updates for you", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
+            item { Text("General DO-LO broadcasts", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
             if (patientCommunications.isEmpty()) {
-                item { Text("No active DO-LO broadcast today. Doctor announcements are shown only on that Doctor's profile.") }
+                item { Text("No active general DO-LO broadcast today. Doctor announcements are shown only on that Doctor's profile.") }
             } else {
                 items(patientCommunications, key = { "communication-${it.id}" }) { communication ->
                     Card(

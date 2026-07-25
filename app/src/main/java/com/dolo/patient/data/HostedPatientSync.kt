@@ -35,8 +35,17 @@ data class HostedReview(val id: String, val appointmentId: String, val patientNa
 data class HostedSupportRequest(val id:String,val category:String,val subject:String,val message:String,val status:String,val adminNote:String,val submittedAt:String,val updatedAt:String)
 data class HostedNotification(val cursor:String,val appointmentId:String,val patientName:String,val tokenNumber:Int,val kind:String,val title:String,val message:String,val occurredAt:String,val read:Boolean)
 data class HostedPreferences(val appointmentServiceUpdates:Boolean,val healthInformation:Boolean,val promotionalMessages:Boolean,val inAppMessages:Boolean,val preferredLanguage:String,val consentVersion:String,val consentedAt:String?,val smsUsage:String,val healthSegmentationBasis:String)
+data class HostedTargetedCampaign(
+    val id: String,
+    val type: String,
+    val purpose: String,
+    val title: String,
+    val message: String,
+    val startsOn: String,
+    val endsOn: String
+)
 data class HostedBootstrap(val profile: HostedProfile, val clinic: HostedClinic, val sessions: List<HostedSession>, val profiles: List<HostedProfile> = listOf(profile), val rescheduleWindowDays: Int = 10, val rescheduleSessions: List<HostedSession> = sessions)
-data class HostedSyncSnapshot(val bootstrap: HostedBootstrap, val appointments: List<HostedAppointment>, val live: List<HostedLiveQueue>, val communications: List<HostedCommunication> = emptyList(), val reviews: List<HostedReview> = emptyList(), val supportRequests: List<HostedSupportRequest> = emptyList(), val notifications: List<HostedNotification> = emptyList(), val preferences: HostedPreferences? = null)
+data class HostedSyncSnapshot(val bootstrap: HostedBootstrap, val appointments: List<HostedAppointment>, val live: List<HostedLiveQueue>, val communications: List<HostedCommunication> = emptyList(), val reviews: List<HostedReview> = emptyList(), val supportRequests: List<HostedSupportRequest> = emptyList(), val notifications: List<HostedNotification> = emptyList(), val preferences: HostedPreferences? = null, val targetedCampaigns: List<HostedTargetedCampaign> = emptyList())
 data class HostedServerError(val code: String, val message: String)
 
 object HostedHomePresentation {
@@ -142,6 +151,28 @@ object HostedCommunicationJson {
     }
 }
 
+object HostedTargetedCampaignJson {
+    private val allowedTypes = setOf("INFORMATIONAL", "PROMOTIONAL", "HEALTH_INFORMATION", "SERVICE_UPDATE", "APP_UPDATE")
+    private val allowedPurposes = setOf("GENERAL", "SERVICE", "HEALTH_INFORMATION", "PROMOTIONAL")
+
+    fun parse(json: String): List<HostedTargetedCampaign> {
+        val root = JSONObject(json)
+        require(root.optBoolean("authoritative"))
+        require(root.getString("delivery") == "IN_APP_ONLY")
+        require(root.getString("providers") == "DISABLED")
+        val campaigns = root.getJSONArray("campaigns")
+        return buildList {
+            for (index in 0 until campaigns.length()) {
+                val item = campaigns.getJSONObject(index)
+                val type = item.getString("messageType")
+                val purpose = item.getString("patientPurpose")
+                require(type in allowedTypes)
+                require(purpose in allowedPurposes)
+                add(HostedTargetedCampaign(item.getString("id"), type, purpose, item.getString("title"), item.getString("message"), item.getString("startsOn"), item.getString("endsOn")))
+            }
+        }
+    }
+}
 object HostedReviewJson {
     fun parse(json: String): List<HostedReview> {
         val reviews = JSONObject(json).getJSONArray("reviews")
@@ -314,7 +345,8 @@ class HttpHostedPatientSyncApi(
         val supportRequests = HostedSupportJson.parse(request("GET", "/api/v1/patient/support-requests"))
         val notifications = HostedNotificationJson.parse(request("GET", "/api/v1/patient/notifications?after=0&limit=100"))
         val communicationPreferences = HostedPreferencesJson.parse(request("GET", "/api/v1/patient/preferences"))
-        return HostedSyncSnapshot(bootstrap, appointments, live, communications, reviews, supportRequests, notifications, communicationPreferences)
+        val targetedCampaigns = HostedTargetedCampaignJson.parse(request("GET", "/api/v1/patient/campaigns"))
+        return HostedSyncSnapshot(bootstrap, appointments, live, communications, reviews, supportRequests, notifications, communicationPreferences, targetedCampaigns)
     }
 
     private fun <T> guarded(block: () -> T): HostedResult<T> = runCatching(block).fold(
@@ -345,7 +377,7 @@ class HttpHostedPatientSyncApi(
             readTimeout = 25_000
             setRequestProperty("Accept", "application/json")
             setRequestProperty("Authorization", "Bearer $token")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage31B")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage36B")
             headers.forEach { (key, value) -> setRequestProperty(key, value) }
             if (body != null) {
                 doOutput = true
