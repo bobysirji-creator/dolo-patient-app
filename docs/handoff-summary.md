@@ -312,3 +312,6 @@ Platform API `0.22.0-stage31ab` and Patient App `0.23.0-stage31b` passed GitHub 
 Patient App `0.24.0-stage36b` (version code 30) consumes Platform API `0.27.0-stage36ab`'s authenticated, consent-revalidated Patient campaign feed. Eligible messages appear under a dedicated `Targeted DO-LO messages` heading in Hosted Prototype Sync, with purpose, active dates and explicit in-app-only copy. General broadcasts remain separate, and targeted campaigns are deliberately absent from Patient Home.
 
 The parser rejects non-authoritative or provider-backed responses. Ordinary offline failures preserve the last hosted snapshot and all local Patient data. Deploy the API before building/installing the stable Patient APK, then follow `docs/stage36ab-device-test.md`. SMS remains OTP-only and disabled; Push, Maps and Payments remain disabled.
+## Stages 36A-36B acceptance
+
+Platform API `0.27.0-stage36ab` and Patient App `0.24.0-stage36b` passed GitHub Actions, Render deployment, stable APK upgrade and every `stage36ab-device-test.md` check on 25 July 2026. Targeting, live consent changes, active-period/status exclusion, dedicated presentation, restart/offline recovery, role isolation and local-data preservation are accepted.

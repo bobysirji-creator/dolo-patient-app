@@ -329,8 +329,8 @@ Your local Patient profile, family, favourites, appointments, reviews and notifi
 - [x] preserve the last hosted snapshot and every local Patient record during ordinary offline failures
 - [x] parser and external-provider rejection regression coverage
 - [x] stable version increment
-- [ ] GitHub Actions compile, lint, unit tests and stable APK
-- [ ] API deployment and stable APK in-place upgrade
-- [ ] paired Stage 36 physical-device acceptance
+- [x] GitHub Actions compile, lint, unit tests and stable APK
+- [x] API deployment and stable APK in-place upgrade
+- [x] paired Stage 36 physical-device acceptance
 
 The server revalidates current consent and schedule on every feed read. SMS remains OTP-only and disabled; Push, Maps and Payments remain disabled.
