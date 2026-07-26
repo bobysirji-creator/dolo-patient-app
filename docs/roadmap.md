@@ -334,3 +334,19 @@ Your local Patient profile, family, favourites, appointments, reviews and notifi
 - [x] paired Stage 36 physical-device acceptance
 
 The server revalidates current consent and schedule on every feed read. SMS remains OTP-only and disabled; Push, Maps and Payments remain disabled.
+## Stage 40B - explicit Patient identity modes
+
+- [x] show Production Patient and Seeded demo as separate login choices
+- [x] consume authoritative enrollment readiness over HTTPS
+- [x] reject any contract that enables real enrollment or an OTP provider unexpectedly
+- [x] keep production account creation visibly disabled
+- [x] disclose that no real phone, profile or family data is uploaded
+- [x] disclose that the demo number stays local and the server uses `patient-demo`
+- [x] disclose that fixed demo OTP `123456` sends no SMS
+- [x] preserve hosted seeded session and local fallback behavior
+- [x] stable version increment and JSON boundary coverage
+- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [ ] API deployment and stable APK in-place upgrade
+- [ ] Stage 40AB physical-device acceptance
+
+Real Patient registration, DO-LO ID issuance and external OTP delivery remain reserved for a later provider-controlled stage.

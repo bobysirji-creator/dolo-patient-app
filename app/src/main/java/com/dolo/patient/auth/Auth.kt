@@ -21,6 +21,7 @@ data class PatientSession(val phone: String, val mode: PatientAuthMode = Patient
 
 interface AuthRepository {
     fun currentSession(): PatientSession?
+    fun enrollmentReadiness(): Result<PatientEnrollmentReadiness>
     fun requestOtp(phone: String): Result<Unit>
     fun verifyOtp(phone: String, otp: String): Result<PatientSession>
     fun logout()
@@ -28,6 +29,7 @@ interface AuthRepository {
 
 class FakeAuthRepository(private val preferences: SharedPreferences) : AuthRepository {
     override fun currentSession(): PatientSession? = preferences.getString(KEY_PHONE, null)?.let(::PatientSession)
+    override fun enrollmentReadiness()=Result.success(PatientEnrollmentReadiness("FOUNDATION_ONLY","ENABLED","DISABLED","AUTHENTICATION_ONLY","DISABLED","DISABLED","DISABLED","RESERVED","OTP_PROVIDER_NOT_CONFIGURED"))
     override fun requestOtp(phone: String): Result<Unit> = if (PhoneValidator.isValid(phone)) Result.success(Unit) else Result.failure(IllegalArgumentException("Enter a valid 10-digit mobile number"))
     override fun verifyOtp(phone: String, otp: String): Result<PatientSession> {
         if (otp != DEMO_OTP) return Result.failure(IllegalArgumentException("Incorrect OTP. Use 123456 for this demo."))
@@ -49,6 +51,7 @@ class PrototypeAuthRepository(
         val hosted = tokenStore.read()?.let { PrototypeAuthJson.hasUsableRefresh(it) } == true
         return PatientSession(phone, if (hosted) PatientAuthMode.HOSTED_PROTOTYPE else PatientAuthMode.LOCAL_FALLBACK)
     }
+    override fun enrollmentReadiness():Result<PatientEnrollmentReadiness> = when(val result=api.enrollmentReadiness()){is PrototypeAuthResult.Success->Result.success(result.value);is PrototypeAuthResult.Failure->Result.failure(IllegalStateException(result.message))}
     override fun requestOtp(phone: String): Result<Unit> = if (PhoneValidator.isValid(phone)) Result.success(Unit) else Result.failure(IllegalArgumentException("Enter a valid 10-digit mobile number"))
     override fun verifyOtp(phone: String, otp: String): Result<PatientSession> {
         if (otp != FakeAuthRepository.DEMO_OTP) return Result.failure(IllegalArgumentException("Incorrect OTP. Use 123456 for this demo."))
@@ -85,13 +88,15 @@ class PrototypeAuthRepository(
 }
 
 enum class AuthStep { PHONE, OTP, AUTHENTICATED }
-data class AuthUiState(val phone: String = "", val otp: String = "", val step: AuthStep = AuthStep.PHONE, val isLoading: Boolean = false, val error: String? = null, val session: PatientSession? = null)
+data class AuthUiState(val phone: String = "", val otp: String = "", val step: AuthStep = AuthStep.PHONE, val isLoading: Boolean = false, val error: String? = null, val session: PatientSession? = null,val enrollment:PatientEnrollmentReadiness?=null,val enrollmentMessage:String="Checking production registration status...")
 
 class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     var uiState by mutableStateOf(repository.currentSession()?.let { AuthUiState(phone = it.phone, step = AuthStep.AUTHENTICATED, session = it) } ?: AuthUiState())
         private set
     private val executor = Executors.newSingleThreadExecutor()
     private val main = Handler(Looper.getMainLooper())
+    init{refreshEnrollmentReadiness()}
+    private fun refreshEnrollmentReadiness(){executor.execute{val result=repository.enrollmentReadiness();main.post{uiState=result.fold({uiState.copy(enrollment=it,enrollmentMessage=if(it.productionPatientEnrollment=="DISABLED")"Real Patient registration is not enabled yet." else "Production registration available.")},{uiState.copy(enrollmentMessage=it.message?:"Registration status unavailable.")})}}}
     fun updatePhone(value: String) { uiState = uiState.copy(phone = PhoneValidator.normalize(value), error = null) }
     fun updateOtp(value: String) { uiState = uiState.copy(otp = value.filter(Char::isDigit).take(6), error = null) }
     fun requestOtp() {
@@ -108,7 +113,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
     fun editPhone() { uiState = uiState.copy(step = AuthStep.PHONE, otp = "", error = null) }
-    fun logout() { repository.logout(); uiState = AuthUiState() }
+    fun logout() { repository.logout(); uiState = AuthUiState();refreshEnrollmentReadiness() }
     override fun onCleared() { executor.shutdownNow(); super.onCleared() }
 }
 

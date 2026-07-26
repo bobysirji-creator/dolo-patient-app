@@ -14,6 +14,8 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
+data class PatientEnrollmentReadiness(val stage:String,val demoPatientLogin:String,val productionPatientEnrollment:String,val otpUsage:String,val otpProvider:String,val profileEnrollment:String,val familyEnrollment:String,val doloIdIssuance:String,val reason:String)
+
 data class PrototypeTokenBundle(
     val accessToken: String,
     val accessExpiresAt: String,
@@ -86,6 +88,7 @@ class PrototypeSessionManager(private val store: SecureTokenStore, private val a
 }
 
 interface PrototypeAuthApi {
+    fun enrollmentReadiness(): PrototypeAuthResult<PatientEnrollmentReadiness>
     fun createDemoSession(): PrototypeAuthResult<PrototypeTokenBundle>
     fun refresh(refreshToken: String): PrototypeAuthResult<PrototypeTokenBundle>
     fun logout(accessToken: String)
@@ -98,6 +101,8 @@ class HttpPrototypeAuthApi(
 ) : PrototypeAuthApi {
     private val baseUrl = baseUrl.trim().trimEnd('/')
     init { require(URL(this.baseUrl).protocol.equals("https", true)) { "Prototype auth requires HTTPS." } }
+
+    override fun enrollmentReadiness():PrototypeAuthResult<PatientEnrollmentReadiness> = runCatching { PrototypeAuthJson.parseEnrollmentReadiness(get("/api/v1/auth/patient-enrollment/readiness")) }.fold({PrototypeAuthResult.Success(it)},{PrototypeAuthResult.Failure("Production registration status is temporarily unavailable.")})
 
     override fun createDemoSession() = call(
         "/api/v1/auth/prototype/sessions",
@@ -122,11 +127,16 @@ class HttpPrototypeAuthApi(
         }) }
     )
 
+    private fun get(path:String):String{
+        val connection=(URL(baseUrl+path).openConnection() as HttpURLConnection).apply{requestMethod="GET";connectTimeout=connectTimeoutMillis;readTimeout=readTimeoutMillis;setRequestProperty("Accept","application/json");setRequestProperty("User-Agent","DO-LO-Patient-Android/Stage40B");useCaches=false}
+        return try{val status=connection.responseCode;val response=(if(status in 200..299)connection.inputStream else connection.errorStream)?.bufferedReader(Charsets.UTF_8)?.use(::readBounded).orEmpty();if(status !in 200..299)error("Enrollment readiness returned HTTP $status");response}finally{connection.disconnect()}
+    }
+
     private fun post(path: String, body: String, bearer: String? = null): String {
         val connection = (URL(baseUrl + path).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"; doOutput = true; connectTimeout = connectTimeoutMillis; readTimeout = readTimeoutMillis
             setRequestProperty("Content-Type", "application/json"); setRequestProperty("Accept", "application/json")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage16B")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage40B")
             bearer?.let { setRequestProperty("Authorization", "Bearer $it") }
             useCaches = false
         }
@@ -153,6 +163,8 @@ class HttpPrototypeAuthApi(
 }
 
 object PrototypeAuthJson {
+    fun parseEnrollmentReadiness(json:String):PatientEnrollmentReadiness{val root=JSONObject(json);require(root.optBoolean("authoritative")&&root.getString("privacy")=="NO_PHONE_OR_PROFILE_ACCEPTED"&&root.getString("providers")=="DISABLED");val item=root.getJSONObject("enrollment");val result=PatientEnrollmentReadiness(item.getString("stage"),item.getString("demoPatientLogin"),item.getString("productionPatientEnrollment"),item.getString("otpUsage"),item.getString("otpProvider"),item.getString("profileEnrollment"),item.getString("familyEnrollment"),item.getString("doloIdIssuance"),item.getString("reason"));require(result.stage=="FOUNDATION_ONLY"&&result.demoPatientLogin in setOf("ENABLED","DISABLED")&&result.productionPatientEnrollment=="DISABLED"&&result.otpUsage=="AUTHENTICATION_ONLY"&&result.otpProvider=="DISABLED"&&result.profileEnrollment=="DISABLED"&&result.familyEnrollment=="DISABLED"&&result.doloIdIssuance=="RESERVED"&&result.reason=="OTP_PROVIDER_NOT_CONFIGURED");return result}
+
     fun parseTokenResponse(json: String): PrototypeTokenBundle {
         val root = JSONObject(json)
         require(root.optJSONObject("identity")?.optBoolean("seededDummy") == true) { "Not a seeded dummy identity." }

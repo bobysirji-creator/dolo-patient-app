@@ -315,3 +315,8 @@ The parser rejects non-authoritative or provider-backed responses. Ordinary offl
 ## Stages 36A-36B acceptance
 
 Platform API `0.27.0-stage36ab` and Patient App `0.24.0-stage36b` passed GitHub Actions, Render deployment, stable APK upgrade and every `stage36ab-device-test.md` check on 25 July 2026. Targeting, live consent changes, active-period/status exclusion, dedicated presentation, restart/offline recovery, role isolation and local-data preservation are accepted.
+## Stage 40B implementation checkpoint
+
+Patient App `0.25.0-stage40b` (version code 31) replaces the ambiguous mobile-login presentation with two explicit modes. `Production Patient account` consumes the API's authoritative readiness but remains disabled; `Seeded demo login` preserves the tested prototype path. The UI states that no real phone, profile or family data is uploaded, that the demo number is local-only, and that OTP `123456` sends no SMS.
+
+The parser fails closed if the API unexpectedly reports real enrollment or an OTP provider as enabled. Existing secure hosted token restoration and offline local fallback are unchanged. Deploy Platform API `0.31.0-stage40ab` first, then let GitHub Actions build the stable APK and follow `docs/stage40ab-device-test.md`.
