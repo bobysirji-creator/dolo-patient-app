@@ -57,19 +57,19 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
         Modifier.fillMaxSize().padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        item { ScreenTitle("Hosted Prototype Sync", onBack) }
+        item { ScreenTitle("Connected care", onBack) }
         item {
             Card(colors = CardDefaults.cardColors(containerColor = if (state.error) MaterialTheme.colorScheme.errorContainer else DoloSurfaceAlt)) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Stages 36A-36B - consent-aware targeted messages", fontWeight = FontWeight.Bold)
+                    Text("Secure test connection", fontWeight = FontWeight.Bold)
                     Text(state.message)
                     Text(
-                        "Your local profile, family, favourites and local appointments are not uploaded. These communication choices belong only to the hosted dummy Patient.",
+                        "Your local profile, family, favourites and local appointments remain on this device. Connected test data is kept separate.",
                         style = MaterialTheme.typography.bodySmall
                     )
                     Button(viewModel::refresh, enabled = !state.loading, modifier = Modifier.fillMaxWidth()) {
                         if (state.loading) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                        else Text("Refresh server data")
+                        else Text("Refresh connected data")
                     }
                 }
             }
@@ -79,7 +79,7 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                 Text(snapshot.bootstrap.clinic.doctorName, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                 Text("${snapshot.bootstrap.clinic.specialty} - ${snapshot.bootstrap.clinic.name}, ${snapshot.bootstrap.clinic.city}")
                 Text(
-                    "Seeded dummy household | Clinic fee paid separately at clinic",
+                    "Test household • Clinic fee paid separately at clinic",
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -137,10 +137,10 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
-                    Text("These are fixed dummy server profiles. Your real local family list is not uploaded.", style = MaterialTheme.typography.bodySmall)
+                    Text("These are fixed test profiles. Your local family list remains on this device.", style = MaterialTheme.typography.bodySmall)
                 }
             }
-            item { Text("Available server sessions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
+            item { Text("Available sessions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
             items(snapshot.bootstrap.sessions, key = { it.id }) { session ->
                 Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                     Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -150,13 +150,13 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                             onClick = { selectedProfileId?.let { profileId -> viewModel.book(session.id, profileId) } },
                             enabled = session.enabled && selectedProfileId != null && !state.loading,
                             modifier = Modifier.fillMaxWidth()
-                        ) { Text(if (session.enabled) "Book authoritative token" else "Booking closed") }
+                        ) { Text(if (session.enabled) "Book appointment" else "Booking closed") }
                     }
                 }
             }
-            item { Text("Server appointment history", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
+            item { Text("Connected appointment history", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
             if (snapshot.appointments.isEmpty()) {
-                item { Text("No hosted prototype appointments yet.") }
+                item { Text("No connected appointments yet.") }
             } else {
                 items(snapshot.appointments, key = { it.id }) { appointment ->
                     val live = snapshot.live.firstOrNull { it.appointmentId == appointment.id }

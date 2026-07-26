@@ -335,3 +335,11 @@ Local profile, family, favourites, appointments, reviews and notifications remai
 ## Stage 41AB acceptance
 
 GitHub Actions, Render hosted verification, stable Patient APK upgrade and the complete physical-device checklist passed. The server-owned seeded Patient identity is accepted; production enrollment and issuance remain reserved.
+
+## Stages 45A-45B implementation checkpoint
+
+Patient App `0.27.0-stage45ab` (version code 33) begins the ecosystem UI modernization. The Patient app now uses one teal/navy Material 3 system, compact reusable components, a stable Home/Book/Appointments bottom bar, grouped account tools and short route transitions. The critical splash, login, Home, discovery, booking, confirmation, appointment and live-queue journeys were rebuilt around user tasks rather than prototype diagnostics.
+
+All existing role, booking, queue, local persistence and hosted synchronization behavior remains in place. Simulation controls are collapsed under a testing label, while connection diagnostics remain available from Help & support. Use GitHub Actions as the Android compile/lint/unit/APK gate, install the stable artifact over the existing app and complete `docs/stage45ab-device-test.md`.
+
+The complete and accepted modernization sequence is recorded in `docs/ui-modernization-roadmap.md`: Stage 46 modernizes Doctor, Stage 47 modernizes Admin and Stage 48 completes cross-app accessibility, responsive layout, dark theme and release polish.

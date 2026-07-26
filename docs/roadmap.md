@@ -366,3 +366,17 @@ Real Patient registration, DO-LO ID issuance and external OTP delivery remain re
 - [x] Stage 41AB physical-device acceptance
 
 The public ID is not an authentication secret and cannot be edited. Real Patient registration and production DO-LO ID issuance remain disabled/reserved.
+
+## Stages 45A-45B - Patient experience modernization
+
+- [x] shared modern Patient design tokens and reusable components
+- [x] compact three-destination primary navigation and grouped account tools
+- [x] smooth route transitions without changing destination contracts
+- [x] redesigned splash, login, Home, discovery, booking, confirmation, appointments and live queue
+- [x] supporting profile, support, diagnostics and connected-care language cleanup
+- [x] prototype simulation controls collapsed outside the normal queue journey
+- [x] architecture regression test and full Stages 45-48 modernization roadmap
+- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [ ] stable APK in-place upgrade and Stage 45AB physical-device acceptance
+
+See `docs/ui-modernization-roadmap.md` and `docs/stage45ab-device-test.md`. No API contract, provider status, billing rule or local-data boundary changed in this UI stage.
