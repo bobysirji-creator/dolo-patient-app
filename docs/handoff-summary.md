@@ -330,3 +330,8 @@ Platform API `0.31.0-stage40ab` and Patient App `0.25.0-stage40b` passed GitHub 
 Patient App `0.26.0-stage41b` (version code 32) adds a Hosted DO-LO Identity card to Profile. It uses the secure hosted session to load the authenticated account's server-owned `DLO-PAT-NNNNNN` identifier, display name and role. The parser requires `SELF_ONLY_NO_PHONE`, rejects an unsafe contract, and never treats the ID as an authentication secret.
 
 Local profile, family, favourites, appointments, reviews and notifications remain independent. Deploy Platform API `0.32.0-stage41ab` first, then use GitHub Actions to build the stable APK and follow `docs/stage41ab-device-test.md`.
+
+
+## Stage 41AB acceptance
+
+GitHub Actions, Render hosted verification, stable Patient APK upgrade and the complete physical-device checklist passed. The server-owned seeded Patient identity is accepted; production enrollment and issuance remain reserved.
