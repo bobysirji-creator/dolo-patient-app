@@ -345,8 +345,24 @@ The server revalidates current consent and schedule on every feed read. SMS rema
 - [x] disclose that fixed demo OTP `123456` sends no SMS
 - [x] preserve hosted seeded session and local fallback behavior
 - [x] stable version increment and JSON boundary coverage
-- [ ] GitHub Actions compile, lint, unit tests and stable APK
-- [ ] API deployment and stable APK in-place upgrade
-- [ ] Stage 40AB physical-device acceptance
+- [x] GitHub Actions compile, lint, unit tests and stable APK
+- [x] API deployment and stable APK in-place upgrade
+- [x] Stage 40AB physical-device acceptance
 
 Real Patient registration, DO-LO ID issuance and external OTP delivery remain reserved for a later provider-controlled stage.
+
+## Stage 41B - hosted public DO-LO identity card
+
+- [x] authenticated self-only identity fetch with automatic token refresh
+- [x] strict public-ID and privacy-contract validation
+- [x] Hosted DO-LO Identity card in Patient Profile
+- [x] stable ID display separate from local phone/profile data
+- [x] explicit seeded-prototype and server-owned wording
+- [x] refresh/recovery action without account creation
+- [x] preserve local fallback and every unrelated local record
+- [x] stable version increment and JSON regression coverage
+- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [ ] API deployment and stable APK in-place upgrade
+- [ ] Stage 41AB physical-device acceptance
+
+The public ID is not an authentication secret and cannot be edited. Real Patient registration and production DO-LO ID issuance remain disabled/reserved.

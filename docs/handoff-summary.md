@@ -320,3 +320,13 @@ Platform API `0.27.0-stage36ab` and Patient App `0.24.0-stage36b` passed GitHub 
 Patient App `0.25.0-stage40b` (version code 31) replaces the ambiguous mobile-login presentation with two explicit modes. `Production Patient account` consumes the API's authoritative readiness but remains disabled; `Seeded demo login` preserves the tested prototype path. The UI states that no real phone, profile or family data is uploaded, that the demo number is local-only, and that OTP `123456` sends no SMS.
 
 The parser fails closed if the API unexpectedly reports real enrollment or an OTP provider as enabled. Existing secure hosted token restoration and offline local fallback are unchanged. Deploy Platform API `0.31.0-stage40ab` first, then let GitHub Actions build the stable APK and follow `docs/stage40ab-device-test.md`.
+
+## Stages 40A-40B acceptance
+
+Platform API `0.31.0-stage40ab` and Patient App `0.25.0-stage40b` passed GitHub Actions, Render deployment, stable APK upgrade and the complete Stage 40AB checklist on 26 July 2026. The explicit Production-versus-Demo login boundary, seeded OTP flow, restart/offline behavior, local-data isolation and disabled providers are accepted.
+
+## Stage 41B implementation checkpoint
+
+Patient App `0.26.0-stage41b` (version code 32) adds a Hosted DO-LO Identity card to Profile. It uses the secure hosted session to load the authenticated account's server-owned `DLO-PAT-NNNNNN` identifier, display name and role. The parser requires `SELF_ONLY_NO_PHONE`, rejects an unsafe contract, and never treats the ID as an authentication secret.
+
+Local profile, family, favourites, appointments, reviews and notifications remain independent. Deploy Platform API `0.32.0-stage41ab` first, then use GitHub Actions to build the stable APK and follow `docs/stage41ab-device-test.md`.

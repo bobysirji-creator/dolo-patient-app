@@ -532,6 +532,9 @@ private fun HomeAppointmentQueueCard(
 @Composable
 fun ProfileScreen(
     state: PatientUiState,
+    identityCard: com.dolo.patient.auth.PublicIdentityCard?,
+    identityMessage: String,
+    onRefreshIdentity: () -> Unit,
     onBack: () -> Unit,
     onSave: (String, String, String) -> Unit,
     onAddFamily: (String, String, Int) -> Unit
@@ -548,6 +551,19 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         item { ScreenTitle("Patient Profile", onBack) }
+        item {
+            Card(Modifier.fillMaxWidth(), colors=CardDefaults.cardColors(containerColor=DoloSurfaceAlt), shape=RoundedCornerShape(18.dp)) {
+                Column(Modifier.padding(16.dp), verticalArrangement=Arrangement.spacedBy(6.dp)) {
+                    Row(verticalAlignment=Alignment.CenterVertically) { Icon(Icons.Outlined.Badge, null, tint=DoloTeal); Spacer(Modifier.width(8.dp)); Text("Hosted DO-LO Identity", fontWeight=FontWeight.Bold) }
+                    if (identityCard != null) {
+                        Text(identityCard.doloId, fontSize=22.sp, fontWeight=FontWeight.ExtraBold, color=DoloTeal)
+                        Text(identityCard.displayName + " | " + identityCard.role, color=DoloMuted)
+                        Text("Server-owned seeded prototype ID. It is not your internal UUID or mobile number.", fontSize=12.sp, color=DoloMuted)
+                    } else Text(identityMessage, color=DoloMuted)
+                    OutlinedButton(onClick=onRefreshIdentity, modifier=Modifier.fillMaxWidth()) { Text("Refresh identity") }
+                }
+            }
+        }
         item {
             OutlinedTextField(
                 value = name,

@@ -42,6 +42,7 @@ class PrototypeSessionManagerTest {
                 "OTP_PROVIDER_NOT_CONFIGURED"
             )
         )
+        override fun identityCard(accessToken:String)=PrototypeAuthResult.Success(PublicIdentityCard("DLO-PAT-000002","Prototype Patient","PATIENT",true))
         override fun createDemoSession() = result
         override fun refresh(refreshToken: String): PrototypeAuthResult<PrototypeTokenBundle> { this.refreshToken = refreshToken; return result }
         override fun logout(accessToken: String) {}

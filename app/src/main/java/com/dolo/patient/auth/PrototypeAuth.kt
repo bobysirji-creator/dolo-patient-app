@@ -14,6 +14,8 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
+data class PublicIdentityCard(val doloId:String,val displayName:String,val role:String,val prototype:Boolean)
+
 data class PatientEnrollmentReadiness(val stage:String,val demoPatientLogin:String,val productionPatientEnrollment:String,val otpUsage:String,val otpProvider:String,val profileEnrollment:String,val familyEnrollment:String,val doloIdIssuance:String,val reason:String)
 
 data class PrototypeTokenBundle(
@@ -89,6 +91,7 @@ class PrototypeSessionManager(private val store: SecureTokenStore, private val a
 
 interface PrototypeAuthApi {
     fun enrollmentReadiness(): PrototypeAuthResult<PatientEnrollmentReadiness>
+    fun identityCard(accessToken:String): PrototypeAuthResult<PublicIdentityCard>
     fun createDemoSession(): PrototypeAuthResult<PrototypeTokenBundle>
     fun refresh(refreshToken: String): PrototypeAuthResult<PrototypeTokenBundle>
     fun logout(accessToken: String)
@@ -103,6 +106,8 @@ class HttpPrototypeAuthApi(
     init { require(URL(this.baseUrl).protocol.equals("https", true)) { "Prototype auth requires HTTPS." } }
 
     override fun enrollmentReadiness():PrototypeAuthResult<PatientEnrollmentReadiness> = runCatching { PrototypeAuthJson.parseEnrollmentReadiness(get("/api/v1/auth/patient-enrollment/readiness")) }.fold({PrototypeAuthResult.Success(it)},{PrototypeAuthResult.Failure("Production registration status is temporarily unavailable.")})
+
+    override fun identityCard(accessToken:String):PrototypeAuthResult<PublicIdentityCard> = runCatching { PrototypeAuthJson.parseIdentityCard(get("/api/v1/auth/identity-card",accessToken)) }.fold({PrototypeAuthResult.Success(it)},{PrototypeAuthResult.Failure("Hosted DO-LO identity is temporarily unavailable.")})
 
     override fun createDemoSession() = call(
         "/api/v1/auth/prototype/sessions",
@@ -127,8 +132,8 @@ class HttpPrototypeAuthApi(
         }) }
     )
 
-    private fun get(path:String):String{
-        val connection=(URL(baseUrl+path).openConnection() as HttpURLConnection).apply{requestMethod="GET";connectTimeout=connectTimeoutMillis;readTimeout=readTimeoutMillis;setRequestProperty("Accept","application/json");setRequestProperty("User-Agent","DO-LO-Patient-Android/Stage40B");useCaches=false}
+    private fun get(path:String,bearer:String?=null):String{
+        val connection=(URL(baseUrl+path).openConnection() as HttpURLConnection).apply{requestMethod="GET";connectTimeout=connectTimeoutMillis;readTimeout=readTimeoutMillis;setRequestProperty("Accept","application/json");setRequestProperty("User-Agent","DO-LO-Patient-Android/Stage41B");bearer?.let{setRequestProperty("Authorization","Bearer $it")};useCaches=false}
         return try{val status=connection.responseCode;val response=(if(status in 200..299)connection.inputStream else connection.errorStream)?.bufferedReader(Charsets.UTF_8)?.use(::readBounded).orEmpty();if(status !in 200..299)error("Enrollment readiness returned HTTP $status");response}finally{connection.disconnect()}
     }
 
@@ -136,7 +141,7 @@ class HttpPrototypeAuthApi(
         val connection = (URL(baseUrl + path).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"; doOutput = true; connectTimeout = connectTimeoutMillis; readTimeout = readTimeoutMillis
             setRequestProperty("Content-Type", "application/json"); setRequestProperty("Accept", "application/json")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage40B")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage41B")
             bearer?.let { setRequestProperty("Authorization", "Bearer $it") }
             useCaches = false
         }
@@ -163,6 +168,8 @@ class HttpPrototypeAuthApi(
 }
 
 object PrototypeAuthJson {
+    fun parseIdentityCard(json:String):PublicIdentityCard{val root=JSONObject(json);require(root.optBoolean("authoritative")&&root.getString("privacy")=="SELF_ONLY_NO_PHONE"&&root.getString("productionEnrollment")=="DISABLED");val item=root.getJSONObject("identity");val result=PublicIdentityCard(item.getString("doloId"),item.getString("displayName"),item.getString("role"),item.getBoolean("prototype"));require(result.doloId.matches(Regex("^DLO-(PAT|DOC|AST|ADM)-[0-9]{6}$"))&&result.displayName.isNotBlank()&&result.displayName.length<=120&&result.role in setOf("PATIENT","DOCTOR","ASSISTANT","ADMIN"));return result}
+
     fun parseEnrollmentReadiness(json:String):PatientEnrollmentReadiness{val root=JSONObject(json);require(root.optBoolean("authoritative")&&root.getString("privacy")=="NO_PHONE_OR_PROFILE_ACCEPTED"&&root.getString("providers")=="DISABLED");val item=root.getJSONObject("enrollment");val result=PatientEnrollmentReadiness(item.getString("stage"),item.getString("demoPatientLogin"),item.getString("productionPatientEnrollment"),item.getString("otpUsage"),item.getString("otpProvider"),item.getString("profileEnrollment"),item.getString("familyEnrollment"),item.getString("doloIdIssuance"),item.getString("reason"));require(result.stage=="FOUNDATION_ONLY"&&result.demoPatientLogin in setOf("ENABLED","DISABLED")&&result.productionPatientEnrollment=="DISABLED"&&result.otpUsage=="AUTHENTICATION_ONLY"&&result.otpProvider=="DISABLED"&&result.profileEnrollment=="DISABLED"&&result.familyEnrollment=="DISABLED"&&result.doloIdIssuance=="RESERVED"&&result.reason=="OTP_PROVIDER_NOT_CONFIGURED");return result}
 
     fun parseTokenResponse(json: String): PrototypeTokenBundle {

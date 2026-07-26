@@ -8,8 +8,19 @@ import java.time.Instant
 
 class PrototypeAuthJsonTest {
     private val json = """{"accessToken":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","accessExpiresAt":"2026-07-20T08:15:00Z","refreshToken":"rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr","refreshExpiresAt":"2026-08-19T08:00:00Z","identity":{"seededDummy":true}}"""
+    private val identityJson = """{"identity":{"doloId":"DLO-PAT-000002","displayName":"Prototype Patient","role":"PATIENT","prototype":true},"authoritative":true,"privacy":"SELF_ONLY_NO_PHONE","productionEnrollment":"DISABLED"}"""
     private val readinessJson = """{"enrollment":{"stage":"FOUNDATION_ONLY","demoPatientLogin":"ENABLED","productionPatientEnrollment":"DISABLED","otpUsage":"AUTHENTICATION_ONLY","otpProvider":"DISABLED","profileEnrollment":"DISABLED","familyEnrollment":"DISABLED","doloIdIssuance":"RESERVED","reason":"OTP_PROVIDER_NOT_CONFIGURED"},"authoritative":true,"privacy":"NO_PHONE_OR_PROFILE_ACCEPTED","providers":"DISABLED"}"""
 
+    @Test fun acceptsSelfOnlyServerOwnedIdentity() {
+        val identity = PrototypeAuthJson.parseIdentityCard(identityJson)
+        assertEquals("DLO-PAT-000002", identity.doloId)
+        assertEquals("Prototype Patient", identity.displayName)
+        assertTrue(identity.prototype)
+    }
+
+    @Test(expected = IllegalArgumentException::class) fun rejectsPhoneBearingOrUnsafeIdentityContract() {
+        PrototypeAuthJson.parseIdentityCard(identityJson.replace("SELF_ONLY_NO_PHONE", "PHONE_INCLUDED"))
+    }
     @Test fun acceptsOnlyFailClosedEnrollmentReadiness() {
         val readiness = PrototypeAuthJson.parseEnrollmentReadiness(readinessJson)
         assertEquals("DISABLED", readiness.productionPatientEnrollment)
