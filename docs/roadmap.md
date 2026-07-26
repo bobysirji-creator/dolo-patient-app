@@ -361,8 +361,8 @@ Real Patient registration, DO-LO ID issuance and external OTP delivery remain re
 - [x] refresh/recovery action without account creation
 - [x] preserve local fallback and every unrelated local record
 - [x] stable version increment and JSON regression coverage
-- [ ] GitHub Actions compile, lint, unit tests and stable APK
-- [ ] API deployment and stable APK in-place upgrade
-- [ ] Stage 41AB physical-device acceptance
+- [x] GitHub Actions compile, lint, unit tests and stable APK
+- [x] API deployment and stable APK in-place upgrade
+- [x] Stage 41AB physical-device acceptance
 
 The public ID is not an authentication secret and cannot be edited. Real Patient registration and production DO-LO ID issuance remain disabled/reserved.
