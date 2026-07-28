@@ -29,7 +29,7 @@
     <string name="otp_resend">Resend OTP</string>
     <string name="otp_resending">Resending…</string>
     <string name="otp_sent_successfully">OTP sent successfully</string>
-    <string name="otp_security_title">Your data is 100% secure and encrypted</string>
+    <string name="otp_security_title" formatted="false">Your data is 100% secure and encrypted</string>
     <string name="otp_security_supporting">We never share your information</string>
     <string name="otp_verify">Verify &amp; Continue</string>
     <string name="otp_verifying">Verifying…</string>
