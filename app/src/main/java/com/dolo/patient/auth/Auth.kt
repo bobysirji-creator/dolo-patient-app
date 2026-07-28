@@ -125,6 +125,15 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
             main.post { result.onSuccess { uiState = uiState.copy(step = AuthStep.AUTHENTICATED, isLoading = false, session = it);if(it.mode==PatientAuthMode.HOSTED_PROTOTYPE)refreshIdentityCard() }.onFailure { uiState = uiState.copy(isLoading = false, error = it.message) } }
         }
     }
+    fun completeAuthentication(session: PatientSession) {
+        uiState = uiState.copy(
+            step = AuthStep.AUTHENTICATED,
+            isLoading = false,
+            error = null,
+            session = session
+        )
+        if (session.mode == PatientAuthMode.HOSTED_PROTOTYPE) refreshIdentityCard()
+    }
     fun editPhone() { uiState = uiState.copy(step = AuthStep.PHONE, otp = "", error = null) }
     fun logout() { repository.logout(); uiState = AuthUiState();refreshEnrollmentReadiness() }
     override fun onCleared() { executor.shutdownNow(); super.onCleared() }

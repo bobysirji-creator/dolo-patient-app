@@ -54,6 +54,38 @@ Verification:
 - local Android compilation is unavailable because this lightweight checkout has no Gradle wrapper or local JDK/Gradle installation
 - the repository GitHub Actions workflow remains the authoritative compile, lint, unit-test and APK check
 
-## Next screen
+## 2. OTP verification
 
-2. OTP verification — not redesigned in this change.
+Status: implemented in `0.29.0-otp-ui` (version code 35); GitHub Actions and physical-device acceptance pending.
+
+Reference: `C:\Users\Poly\Documents\codex\2026-07-11\OTP.png`
+
+Implemented:
+
+- reference-led Compose layout using the existing lightweight healthcare hero asset
+- phone-number summary with Edit and Android back navigation to login
+- six reusable, individually focused OTP digit boxes
+- numeric password keyboard, focus advance, backspace, paste and Done handling
+- 45-second countdown, expiration state and resend flow
+- incomplete, invalid, expired, network and too-many-attempt error states
+- loading and disabled states for verification and resend actions
+- secure-sign-in information card and polite accessibility announcements
+- safe-area, keyboard-aware scrolling and width constraints for small and large phones
+- previews for empty, partial, complete, invalid, expired, resending, verifying, network-error, small-screen and large-font states
+- unit coverage for OTP input, countdown and action eligibility
+
+Architecture:
+
+- `OtpVerificationUiState` contains render and action-eligibility state.
+- `OtpVerificationUiEvent` defines all user interactions.
+- `OtpVerificationViewModel` owns countdown, validation, retry and async verification state.
+- `OtpRepository` keeps the UI ready for a real provider while adapting the current `AuthRepository`.
+- `OtpVerificationRoute` owns navigation effects; `OtpVerificationScreen` remains stateless.
+
+Provider boundary:
+
+- OTP delivery remains mocked and the accepted demo code remains `123456`.
+- No SMS provider, payment, maps or push integration was enabled.
+- Existing hosted/local session behavior is preserved after successful verification.
+
+Next: Patient home dashboard redesign.

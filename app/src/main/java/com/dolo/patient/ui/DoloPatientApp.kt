@@ -19,12 +19,16 @@ import com.dolo.patient.platform.*
 import com.dolo.patient.ui.login.LoginRoute
 import com.dolo.patient.ui.login.LoginViewModel
 import com.dolo.patient.ui.login.LoginViewModelFactory
+import com.dolo.patient.ui.otp.AuthOtpRepository
+import com.dolo.patient.ui.otp.OtpVerificationRoute
+import com.dolo.patient.ui.otp.OtpVerificationViewModel
+import com.dolo.patient.ui.otp.OtpVerificationViewModelFactory
 import com.dolo.patient.ui.screens.*
 import kotlinx.coroutines.delay
 
 object Routes{const val Splash="splash";const val Login="login";const val Home="home";const val Categories="categories";const val Doctors="doctors/{category}";const val DoctorDetails="doctor/{doctorId}";const val Booking="booking/{doctorId}";const val Confirmation="confirmation/{doctorId}/{session}";const val History="history";const val Favourites="favourites";const val Queue="queue/{appointmentId}";const val Profile="profile";const val Notifications="notifications";const val Support="support";const val Integrations="integrations";const val HostedSync="hosted-sync";const val HostedDoctorDetails="hosted-doctor/{clinicId}";const val Review="review/{doctorId}/{appointmentId}"}
 @Composable fun DoloPatientApp(authRepository:AuthRepository,patientRepository:PatientRepository,platformApi:PlatformApi,hostedSyncApi:HostedPatientSyncApi){
- val nav=rememberNavController();val auth:AuthViewModel=viewModel(factory=AuthViewModelFactory(authRepository));val login:LoginViewModel=viewModel(factory=LoginViewModelFactory(authRepository));val patient:PatientViewModel=viewModel(factory=PatientViewModelFactory(patientRepository));val platform:PlatformConnectionViewModel=viewModel(factory=PlatformConnectionViewModelFactory(platformApi));val hosted:HostedPatientSyncViewModel=viewModel(factory=HostedPatientSyncViewModelFactory(hostedSyncApi))
+ val nav=rememberNavController();val auth:AuthViewModel=viewModel(factory=AuthViewModelFactory(authRepository));val login:LoginViewModel=viewModel(factory=LoginViewModelFactory(authRepository));val otp:OtpVerificationViewModel=viewModel(factory=OtpVerificationViewModelFactory(AuthOtpRepository(authRepository)));val patient:PatientViewModel=viewModel(factory=PatientViewModelFactory(patientRepository));val platform:PlatformConnectionViewModel=viewModel(factory=PlatformConnectionViewModelFactory(platformApi));val hosted:HostedPatientSyncViewModel=viewModel(factory=HostedPatientSyncViewModelFactory(hostedSyncApi))
  NavHost(
   nav,
   startDestination=Routes.Splash,
@@ -37,7 +41,15 @@ object Routes{const val Splash="splash";const val Login="login";const val Home="
   composable(Routes.Login){
    when(auth.uiState.step){
     AuthStep.PHONE->LoginRoute(login,auth::beginOtp)
-    AuthStep.OTP->OtpVerificationScreen(auth){nav.navigate(Routes.Home){popUpTo(Routes.Login){inclusive=true}}}
+    AuthStep.OTP->OtpVerificationRoute(
+     viewModel=otp,
+     phoneNumber=auth.uiState.phone,
+     onEditNumber=auth::editPhone,
+     onVerified={session->
+      auth.completeAuthentication(session)
+      nav.navigate(Routes.Home){popUpTo(Routes.Login){inclusive=true}}
+     }
+    )
     AuthStep.AUTHENTICATED->androidx.compose.runtime.LaunchedEffect(Unit){nav.navigate(Routes.Home){popUpTo(Routes.Login){inclusive=true}}}
    }
   }
