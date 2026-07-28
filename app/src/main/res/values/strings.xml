@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">DO-LO Patient</string>
+    <string name="login_brand_tagline">Book. Track. Visit. Worry Less.</string>
+    <string name="login_welcome_title">Welcome Back!</string>
+    <string name="login_welcome_supporting">Login to continue your health journey</string>
+    <string name="login_card_title">Login with Mobile Number</string>
+    <string name="login_country_code">+91</string>
+    <string name="login_phone_label">Mobile number</string>
+    <string name="login_phone_placeholder">Enter mobile number</string>
+    <string name="login_phone_content_description">Indian mobile number, 10 digits</string>
+    <string name="login_invalid_phone">Enter a valid 10-digit mobile number.</string>
+    <string name="login_network_error">Could not connect. Check your internet and try again.</string>
+    <string name="login_send_otp">Send OTP</string>
+    <string name="login_sending_otp">Sending OTP…</string>
+    <string name="login_secure_message">Your mobile number is protected with secure sign-in.</string>
+    <string name="login_or">or</string>
+    <string name="login_new_user">New to DO-LO App?</string>
+    <string name="login_create_account">Create an Account</string>
+    <string name="login_registration_unavailable">Account creation will be available after production registration is enabled.</string>
+    <string name="login_illustration_description">Doctor helping a Patient use healthcare services on a mobile phone</string>
+</resources>

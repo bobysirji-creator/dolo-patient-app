@@ -61,19 +61,14 @@ fun SplashScreen(onContinue:()->Unit){
  }
 }
 @Composable
-fun LoginScreen(auth:AuthViewModel,onLogin:()->Unit){
- val s=auth.uiState
- LaunchedEffect(s.step){if(s.step==AuthStep.AUTHENTICATED)onLogin()}
- Box(page.safeDrawingPadding().padding(horizontal=22.dp),contentAlignment=Alignment.Center){
+fun OtpVerificationScreen(auth:AuthViewModel,onLogin:()->Unit){
+ val state=auth.uiState
+ LaunchedEffect(state.step){if(state.step==AuthStep.AUTHENTICATED)onLogin()}
+ Box(page.safeDrawingPadding().imePadding().padding(horizontal=22.dp),contentAlignment=Alignment.Center){
   LazyColumn(Modifier.widthIn(max=440.dp),contentPadding=PaddingValues(vertical=24.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){
-   item{BrandLogo();Spacer(Modifier.height(24.dp));Text(if(s.step==AuthStep.OTP)"Enter verification code" else "Welcome to DO-LO",style=MaterialTheme.typography.headlineLarge);Text(if(s.step==AuthStep.OTP)"Use the six-digit demo code to continue." else "Sign in to book appointments and follow your live queue.",style=MaterialTheme.typography.bodyLarge,color=DoloMuted,modifier=Modifier.padding(top=6.dp))}
-   if(s.step==AuthStep.PHONE){
-    item{DoloCard{Row(verticalAlignment=Alignment.CenterVertically){Surface(shape=RoundedCornerShape(14.dp),color=DoloSurfaceAlt,modifier=Modifier.size(44.dp)){Icon(Icons.Outlined.PhoneAndroid,null,tint=DoloTeal,modifier=Modifier.padding(10.dp))};Spacer(Modifier.width(12.dp));Column{Text("Mobile number",style=MaterialTheme.typography.titleMedium);Text("Seeded prototype access",style=MaterialTheme.typography.bodySmall,color=DoloMuted)}};OutlinedTextField(s.phone,auth::updatePhone,Modifier.fillMaxWidth(),label={Text("10-digit mobile number")},prefix={Text("+91 ")},keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.Phone),singleLine=true,shape=RoundedCornerShape(16.dp));PrimaryButton("Continue",auth::requestOtp,s.phone.length==10)}}
-    item{Text("Prototype note",style=MaterialTheme.typography.labelLarge);Text("Real Patient registration and SMS delivery are not enabled yet. This build uses a safe seeded account and does not upload your local profile or family data.",style=MaterialTheme.typography.bodySmall,color=DoloMuted)}
-   }else{
-    item{DoloCard{OutlinedTextField(s.otp,auth::updateOtp,Modifier.fillMaxWidth(),label={Text("Verification code")},keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.NumberPassword),singleLine=true,shape=RoundedCornerShape(16.dp));Surface(shape=RoundedCornerShape(14.dp),color=DoloSurfaceAlt,modifier=Modifier.fillMaxWidth()){Row(Modifier.padding(13.dp),verticalAlignment=Alignment.CenterVertically){Icon(Icons.Outlined.Info,null,tint=DoloTeal);Spacer(Modifier.width(9.dp));Text("Demo code: 123456",fontWeight=FontWeight.Bold,color=DoloTeal)}};PrimaryButton(if(s.isLoading)"Signing in..." else "Verify and sign in",auth::verifyOtp,s.otp.length==6&&!s.isLoading);TextButton(auth::editPhone,modifier=Modifier.align(Alignment.CenterHorizontally)){Text("Use a different number")}}}
-   }
-   s.error?.let{item{Surface(shape=RoundedCornerShape(14.dp),color=MaterialTheme.colorScheme.errorContainer){Text(it,Modifier.padding(14.dp),color=MaterialTheme.colorScheme.onErrorContainer)}}}
+   item{BrandLogo();Spacer(Modifier.height(24.dp));Text("Enter verification code",style=MaterialTheme.typography.headlineLarge);Text("Use the six-digit demo code to continue.",style=MaterialTheme.typography.bodyLarge,color=DoloMuted,modifier=Modifier.padding(top=6.dp))}
+   item{DoloCard{OutlinedTextField(state.otp,auth::updateOtp,Modifier.fillMaxWidth(),label={Text("Verification code")},keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.NumberPassword),singleLine=true,shape=RoundedCornerShape(16.dp));Surface(shape=RoundedCornerShape(14.dp),color=DoloSurfaceAlt,modifier=Modifier.fillMaxWidth()){Row(Modifier.padding(13.dp),verticalAlignment=Alignment.CenterVertically){Icon(Icons.Outlined.Info,null,tint=DoloTeal);Spacer(Modifier.width(9.dp));Text("Demo code: 123456",fontWeight=FontWeight.Bold,color=DoloTeal)}};PrimaryButton(if(state.isLoading)"Signing in..." else "Verify and sign in",auth::verifyOtp,state.otp.length==6&&!state.isLoading,loading=state.isLoading);TextButton(auth::editPhone,modifier=Modifier.align(Alignment.CenterHorizontally)){Text("Use a different number")}}}
+   state.error?.let{item{Surface(shape=RoundedCornerShape(14.dp),color=MaterialTheme.colorScheme.errorContainer){Text(it,Modifier.padding(14.dp),color=MaterialTheme.colorScheme.onErrorContainer)}}}
   }
  }
 }

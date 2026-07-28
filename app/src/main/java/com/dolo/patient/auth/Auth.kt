@@ -102,6 +102,15 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     private fun refreshEnrollmentReadiness(){executor.execute{val result=repository.enrollmentReadiness();main.post{uiState=result.fold({uiState.copy(enrollment=it,enrollmentMessage=if(it.productionPatientEnrollment=="DISABLED")"Real Patient registration is not enabled yet." else "Production registration available.")},{uiState.copy(enrollmentMessage=it.message?:"Registration status unavailable.")})}}}
     fun refreshIdentityCard(){executor.execute{val result=repository.identityCard();main.post{uiState=result.fold({uiState.copy(identityCard=it,identityMessage="Server-owned identity verified.")},{uiState.copy(identityCard=null,identityMessage=it.message?:"Hosted identity unavailable.")})}}}
     fun updatePhone(value: String) { uiState = uiState.copy(phone = PhoneValidator.normalize(value), error = null) }
+    fun beginOtp(phone: String) {
+        uiState = uiState.copy(
+            phone = PhoneValidator.normalize(phone),
+            otp = "",
+            step = AuthStep.OTP,
+            isLoading = false,
+            error = null
+        )
+    }
     fun updateOtp(value: String) { uiState = uiState.copy(otp = value.filter(Char::isDigit).take(6), error = null) }
     fun requestOtp() {
         uiState = uiState.copy(isLoading = true, error = null)

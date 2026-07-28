@@ -105,18 +105,33 @@ fun MetricCard(label: String, value: String, modifier: Modifier = Modifier, acce
 }
 
 @Composable
-fun PrimaryButton(label: String, onClick: () -> Unit, enabled: Boolean = true) {
+fun PrimaryButton(
+    label: String,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    loading: Boolean = false
+) {
     Button(
         onClick = onClick,
-        enabled = enabled,
+        enabled = enabled && !loading,
         modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp).semantics { contentDescription = label },
         shape = RoundedCornerShape(17.dp),
         colors = ButtonDefaults.buttonColors(containerColor = DoloTeal, disabledContainerColor = DoloBorder, disabledContentColor = DoloMuted),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp, pressedElevation = 0.dp)
     ) {
+        if (loading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                color = Color.White,
+                strokeWidth = 2.dp
+            )
+            Spacer(Modifier.width(10.dp))
+        }
         Text(label, style = MaterialTheme.typography.labelLarge)
-        Spacer(Modifier.width(10.dp))
-        Icon(Icons.Outlined.ArrowForward, null, modifier = Modifier.size(19.dp))
+        if (!loading) {
+            Spacer(Modifier.width(10.dp))
+            Icon(Icons.Outlined.ArrowForward, null, modifier = Modifier.size(19.dp))
+        }
     }
 }
 
