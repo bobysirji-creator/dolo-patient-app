@@ -348,3 +348,8 @@ The complete and accepted modernization sequence is recorded in `docs/ui-moderni
 Patient App 0.30.0-home-ui (version code 38) recreates the approved Patient Home reference with modular Material 3 Compose components. Existing local and authoritative hosted queues, unread notifications, Admin broadcasts, favourites, booking, support and session behavior remain connected. The screen adds a dedicated All Queues route, swipe/dismiss broadcast carousel, responsive queue states, five-item fixed navigation and original optimized hero/broadcast assets.
 
 This PC checkout has no Gradle wrapper, local Gradle or Java runtime. GitHub Actions must complete the compile/lint/test/APK gate before physical-device review. On device, verify OTP-to-Home navigation, drawer/top-bar alignment, all active queues, broadcast swipe/dismiss, favourite scrolling, five bottom actions, small-screen scrolling and hosted/offline recovery.
+## Patient Home refinement checkpoint
+
+Patient App 0.30.1-home-polish (version code 39) compacts and top-aligns the greeting card, removes the greeting icon, keeps the Patient name horizontal, narrows search, unboxes Near me and relocates the queue View all action into the section header. The Home drawer now includes a locally persisted app-level Dark Mode toggle, and the Home design uses semantic Material colors for both themes.
+
+GitHub Actions remains the compile/lint/test/APK gate. On device, verify the full name at normal and larger font settings, the 112 dp greeting crop, search/Near me proportions, queue heading action and Dark Mode persistence after force-close and relaunch.

@@ -31,7 +31,7 @@ fun BrandLogo(modifier: Modifier = Modifier, compact: Boolean = false) {
         modifier = modifier.semantics(mergeDescendants = true) { contentDescription = "DO-LO Patient" },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("DO-", color = DoloNavy, fontSize = size, fontWeight = FontWeight.ExtraBold)
+        Text("DO-", color = MaterialTheme.colorScheme.onSurface, fontSize = size, fontWeight = FontWeight.ExtraBold)
         Text("LO", color = DoloTeal, fontSize = size, fontWeight = FontWeight.ExtraBold)
         Surface(color = DoloTeal, shape = CircleShape, modifier = Modifier.padding(start = 3.dp).size(if (compact) 14.dp else 17.dp)) {
             Icon(Icons.Outlined.Add, contentDescription = null, tint = Color.White, modifier = Modifier.padding(2.dp))

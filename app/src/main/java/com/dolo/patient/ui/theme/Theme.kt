@@ -3,6 +3,7 @@ package com.dolo.patient.ui.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -48,6 +49,27 @@ private val colors = lightColorScheme(
     errorContainer = Color(0xFFFFDAD6)
 )
 
+private val darkColors = darkColorScheme(
+    primary = Color(0xFF63D7CE),
+    onPrimary = Color(0xFF003733),
+    primaryContainer = Color(0xFF07544F),
+    onPrimaryContainer = Color(0xFFB7F5EF),
+    secondary = Color(0xFFA9C9E2),
+    onSecondary = Color(0xFF0D344F),
+    secondaryContainer = Color(0xFF244A64),
+    onSecondaryContainer = Color(0xFFD5E8F7),
+    tertiary = Color(0xFFFFB1C0),
+    background = Color(0xFF0C1619),
+    onBackground = Color(0xFFE3ECEE),
+    surface = Color(0xFF132226),
+    onSurface = Color(0xFFE3ECEE),
+    surfaceVariant = Color(0xFF1C3034),
+    onSurfaceVariant = Color(0xFFB8C8CB),
+    outline = Color(0xFF536B70),
+    outlineVariant = Color(0xFF2B4146),
+    error = Color(0xFFFFB4AB),
+    errorContainer = Color(0xFF93000A)
+)
 private val type = Typography(
     displaySmall = TextStyle(fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.ExtraBold, fontSize = 34.sp, lineHeight = 40.sp, letterSpacing = (-0.5).sp),
     headlineLarge = TextStyle(fontFamily = FontFamily.SansSerif, fontWeight = FontWeight.ExtraBold, fontSize = 29.sp, lineHeight = 34.sp, letterSpacing = (-0.35).sp),
@@ -72,6 +94,6 @@ private val shapes = Shapes(
 )
 
 @Composable
-fun DoloTheme(content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = colors, typography = type, shapes = shapes, content = content)
+fun DoloTheme(darkTheme: Boolean = false, content: @Composable () -> Unit) {
+    MaterialTheme(colorScheme = if (darkTheme) darkColors else colors, typography = type, shapes = shapes, content = content)
 }

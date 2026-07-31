@@ -3,6 +3,10 @@ package com.dolo.patient
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.dolo.patient.auth.AndroidKeystoreTokenStore
 import com.dolo.patient.auth.HttpPrototypeAuthApi
 import com.dolo.patient.auth.PrototypeAuthRepository
@@ -23,6 +27,21 @@ class MainActivity : ComponentActivity() {
         val hostedSyncApi=HttpHostedPatientSyncApi(BuildConfig.DOLO_API_BASE_URL,PrototypeSessionManager(tokenStore,authApi),storage)
         val patientRepository=LocalPatientRepository(storage)
         val platformApi=HttpPlatformApi(BuildConfig.DOLO_API_BASE_URL)
-        setContent { DoloTheme { DoloPatientApp(authRepository,patientRepository,platformApi,hostedSyncApi) } }
+        setContent {
+            var darkModeEnabled by remember { mutableStateOf(storage.getBoolean("patient_dark_mode", false)) }
+            DoloTheme(darkTheme = darkModeEnabled) {
+                DoloPatientApp(
+                    authRepository = authRepository,
+                    patientRepository = patientRepository,
+                    platformApi = platformApi,
+                    hostedSyncApi = hostedSyncApi,
+                    darkModeEnabled = darkModeEnabled,
+                    onDarkModeChange = { enabled ->
+                        darkModeEnabled = enabled
+                        storage.edit().putBoolean("patient_dark_mode", enabled).apply()
+                    }
+                )
+            }
+        }
     }
 }

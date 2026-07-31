@@ -135,3 +135,19 @@ Verification:
 
 - git diff --check and source-structure checks passed.
 - This lightweight checkout has no Gradle wrapper, local Gradle or local Java installation; GitHub Actions remains the authoritative compile, lint, unit-test and APK gate.
+### Patient Home layout and theme refinement
+
+Patient App 0.30.1-home-polish (version code 39) applies the first physical-layout refinement to the new Home screen:
+
+- greeting content is aligned to the top-left
+- the decorative waving-hand icon is removed
+- Patient names remain on one horizontal line with adaptive font sizing
+- greeting card height is reduced from 148 dp to 112 dp, approximately 25 percent
+- search occupies approximately 75 percent of its row
+- Near me is now an unboxed text action
+- View all moved from the token card to the Live appointment status heading
+- a persistent Dark Mode switch is available from the Home navigation drawer
+- Home surfaces, text, outlines, queue cards and navigation now consume Material theme colors in both modes
+- the DO-LO logo adapts its navy text to the active theme
+
+Dark Mode is stored locally in the existing private app preferences. No profile, appointment, family or hosted data is changed or uploaded.
