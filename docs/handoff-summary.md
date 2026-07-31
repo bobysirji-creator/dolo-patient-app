@@ -343,3 +343,8 @@ Patient App `0.27.0-stage45ab` (version code 33) begins the ecosystem UI moderni
 All existing role, booking, queue, local persistence and hosted synchronization behavior remains in place. Simulation controls are collapsed under a testing label, while connection diagnostics remain available from Help & support. Use GitHub Actions as the Android compile/lint/unit/APK gate, install the stable artifact over the existing app and complete `docs/stage45ab-device-test.md`.
 
 The complete and accepted modernization sequence is recorded in `docs/ui-modernization-roadmap.md`: Stage 46 modernizes Doctor, Stage 47 modernizes Admin and Stage 48 completes cross-app accessibility, responsive layout, dark theme and release polish.
+## Patient Home UI implementation checkpoint
+
+Patient App 0.30.0-home-ui (version code 38) recreates the approved Patient Home reference with modular Material 3 Compose components. Existing local and authoritative hosted queues, unread notifications, Admin broadcasts, favourites, booking, support and session behavior remain connected. The screen adds a dedicated All Queues route, swipe/dismiss broadcast carousel, responsive queue states, five-item fixed navigation and original optimized hero/broadcast assets.
+
+This PC checkout has no Gradle wrapper, local Gradle or Java runtime. GitHub Actions must complete the compile/lint/test/APK gate before physical-device review. On device, verify OTP-to-Home navigation, drawer/top-bar alignment, all active queues, broadcast swipe/dismiss, favourite scrolling, five bottom actions, small-screen scrolling and hosted/offline recovery.

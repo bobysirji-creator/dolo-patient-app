@@ -89,3 +89,49 @@ Provider boundary:
 - Existing hosted/local session behavior is preserved after successful verification.
 
 Next: Patient home dashboard redesign.
+## 3. Patient Home
+
+Status: implemented in 0.30.0-home-ui (version code 38); GitHub Actions and physical-device acceptance pending.
+
+Reference: C:\Users\Poly\Documents\codex\2026-07-11\home.jpeg
+
+Implemented:
+
+- fixed left-aligned menu and DO-LO logo top bar with an accessible unread-notification badge
+- responsive greeting card with a lightweight original Patient-at-home hero image
+- doctor search and Maps-ready Near me placeholder action
+- reusable patient-token and current-token cards backed by local and hosted queue data
+- patient name, Doctor name, estimated waiting range, queue state and multiple-active-queue indicator
+- dedicated All Queues route for current and upcoming local/hosted bookings
+- swipeable, dismissible Admin Broadcast carousel with action callbacks, indicators and loading/empty states
+- horizontally scrolling favourite-Doctor cards with reusable booking/profile actions
+- fixed five-item Patient bottom navigation with the emphasized centre Book action
+- functional navigation drawer for profile, favourites, support, hosted sync and sign out
+- loading, empty, paused, error, multiple-queue, no-broadcast and no-favourite states
+- normal, loading, no-token, paused, multiple-queue, no-broadcast, no-favourite, network-error, small-phone and large-font previews
+- content descriptions, headings, merged card semantics and minimum touch targets
+
+Architecture:
+
+- PatientHomeUiState, QueueSummaryUiModel, BroadcastUiModel and FavoriteDoctorUiModel keep data out of leaf composables.
+- PatientHomeViewModel maps the existing local and authoritative hosted data into presentation models and owns broadcast dismissal.
+- PatientHomeRoute owns refresh timing, navigation events and drawer state.
+- PatientHomeScreen is stateless and split into reusable top bar, greeting, search, queue, broadcast, favourite and bottom-navigation components.
+- Login and OTP implementation were not modified.
+
+Assets:
+
+- patient_home_hero.webp is an original app-specific Patient-at-home lifestyle asset.
+- admin_broadcast_megaphone.webp is an original lightweight 3D broadcast asset.
+- favourite-Doctor imagery uses the existing local specialty artwork as an explicit placeholder until final Doctor portraits are supplied.
+
+Provider boundary:
+
+- Near me remains a local placeholder; Maps is not enabled.
+- Broadcast data uses authoritative Admin communications when available and local dummy content otherwise.
+- SMS, Push and payment providers remain disabled.
+
+Verification:
+
+- git diff --check and source-structure checks passed.
+- This lightweight checkout has no Gradle wrapper, local Gradle or local Java installation; GitHub Actions remains the authoritative compile, lint, unit-test and APK gate.
