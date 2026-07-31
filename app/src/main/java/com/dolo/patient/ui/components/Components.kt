@@ -32,9 +32,9 @@ fun BrandLogo(modifier: Modifier = Modifier, compact: Boolean = false) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text("DO-", color = MaterialTheme.colorScheme.onSurface, fontSize = size, fontWeight = FontWeight.ExtraBold)
-        Text("LO", color = DoloTeal, fontSize = size, fontWeight = FontWeight.ExtraBold)
-        Surface(color = DoloTeal, shape = CircleShape, modifier = Modifier.padding(start = 3.dp).size(if (compact) 14.dp else 17.dp)) {
-            Icon(Icons.Outlined.Add, contentDescription = null, tint = Color.White, modifier = Modifier.padding(2.dp))
+        Text("LO", color = MaterialTheme.colorScheme.primary, fontSize = size, fontWeight = FontWeight.ExtraBold)
+        Surface(color = MaterialTheme.colorScheme.primary, shape = CircleShape, modifier = Modifier.padding(start = 3.dp).size(if (compact) 14.dp else 17.dp)) {
+            Icon(Icons.Outlined.Add, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.padding(2.dp))
         }
     }
 }
@@ -50,10 +50,10 @@ fun ScreenTitle(title: String, onBack: (() -> Unit)? = null) {
                 modifier = Modifier.size(44.dp),
                 shape = RoundedCornerShape(14.dp),
                 color = MaterialTheme.colorScheme.surface,
-                border = androidx.compose.foundation.BorderStroke(1.dp, DoloBorder),
+                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 shadowElevation = 2.dp
             ) {
-                IconButton(onClick = onBack) { Icon(Icons.Outlined.ArrowBack, "Back", tint = DoloNavy) }
+                IconButton(onClick = onBack) { Icon(Icons.Outlined.ArrowBack, "Back", tint = MaterialTheme.colorScheme.onSurface) }
             }
             Spacer(Modifier.width(12.dp))
         }
@@ -75,31 +75,31 @@ fun SearchBar(text: String = "Search doctors, clinics, specialties...", onClick:
     Surface(
         modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp).semantics { contentDescription = "Search doctors, clinics and specialties" }.clickable(role = Role.Button, onClick = onClick),
         shape = RoundedCornerShape(18.dp),
-        color = Color.White,
-        border = androidx.compose.foundation.BorderStroke(1.dp, DoloBorder),
+        color = MaterialTheme.colorScheme.surface,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         shadowElevation = 3.dp
     ) {
         Row(Modifier.padding(horizontal = 16.dp, vertical = 15.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Outlined.Search, null, tint = DoloTeal, modifier = Modifier.size(24.dp))
+            Icon(Icons.Outlined.Search, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
             Spacer(Modifier.width(11.dp))
-            Text(text, color = DoloMuted, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-            Icon(Icons.Outlined.ArrowForward, null, tint = DoloMuted, modifier = Modifier.size(19.dp))
+            Text(text, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+            Icon(Icons.Outlined.ArrowForward, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(19.dp))
         }
     }
 }
 
 @Composable
-fun MetricCard(label: String, value: String, modifier: Modifier = Modifier, accent: Color = DoloTeal) {
+fun MetricCard(label: String, value: String, modifier: Modifier = Modifier, accent: Color = Color.Unspecified) {
     Surface(
         modifier = modifier.semantics(mergeDescendants = true) { contentDescription = "$label: $value" },
         shape = RoundedCornerShape(20.dp),
-        color = Color.White,
-        border = androidx.compose.foundation.BorderStroke(1.dp, DoloBorder),
+        color = MaterialTheme.colorScheme.surface,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         shadowElevation = 3.dp
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(label.uppercase(), color = DoloMuted, style = MaterialTheme.typography.labelMedium)
-            Text(value, style = MaterialTheme.typography.displaySmall, color = accent)
+            Text(label.uppercase(), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelMedium)
+            Text(value, style = MaterialTheme.typography.displaySmall, color = if (accent == Color.Unspecified) MaterialTheme.colorScheme.primary else accent)
         }
     }
 }
@@ -116,13 +116,13 @@ fun PrimaryButton(
         enabled = enabled && !loading,
         modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp).semantics { contentDescription = label },
         shape = RoundedCornerShape(17.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = DoloTeal, disabledContainerColor = DoloBorder, disabledContentColor = DoloMuted),
+        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant, disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp, pressedElevation = 0.dp)
     ) {
         if (loading) {
             CircularProgressIndicator(
                 modifier = Modifier.size(20.dp),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onPrimary,
                 strokeWidth = 2.dp
             )
             Spacer(Modifier.width(10.dp))
@@ -142,7 +142,7 @@ fun SecondaryButton(label: String, onClick: () -> Unit, enabled: Boolean = true,
         enabled = enabled,
         modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
         shape = RoundedCornerShape(17.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, DoloBorder)
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         if (icon != null) { Icon(icon, null, modifier = Modifier.size(19.dp)); Spacer(Modifier.width(8.dp)) }
         Text(label, style = MaterialTheme.typography.labelLarge)
@@ -150,12 +150,12 @@ fun SecondaryButton(label: String, onClick: () -> Unit, enabled: Boolean = true,
 }
 
 @Composable
-fun DoloCard(modifier: Modifier = Modifier, containerColor: Color = Color.White, content: @Composable ColumnScope.() -> Unit) {
+fun DoloCard(modifier: Modifier = Modifier, containerColor: Color = Color.Unspecified, content: @Composable ColumnScope.() -> Unit) {
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        color = containerColor,
-        border = androidx.compose.foundation.BorderStroke(1.dp, DoloBorder.copy(alpha = 0.8f)),
+        color = if (containerColor == Color.Unspecified) MaterialTheme.colorScheme.surface else containerColor,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         shadowElevation = 3.dp
     ) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp), content = content) }
 }
@@ -165,13 +165,13 @@ fun QuickAction(label: String, icon: ImageVector, onClick: () -> Unit, modifier:
     Surface(
         modifier = modifier.heightIn(min = 84.dp).clickable(role = Role.Button, onClick = onClick),
         shape = RoundedCornerShape(18.dp),
-        color = Color.White,
-        border = androidx.compose.foundation.BorderStroke(1.dp, DoloBorder),
+        color = MaterialTheme.colorScheme.surface,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         shadowElevation = 2.dp
     ) {
         Column(Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Surface(shape = RoundedCornerShape(11.dp), color = DoloSurfaceAlt, modifier = Modifier.size(36.dp)) {
-                Icon(icon, null, tint = DoloTeal, modifier = Modifier.padding(8.dp))
+            Surface(shape = RoundedCornerShape(11.dp), color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.size(36.dp)) {
+                Icon(icon, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(8.dp))
             }
             Text(label, style = MaterialTheme.typography.titleSmall, maxLines = 2)
         }
@@ -179,9 +179,10 @@ fun QuickAction(label: String, icon: ImageVector, onClick: () -> Unit, modifier:
 }
 
 @Composable
-fun StatusBadge(label: String, color: Color = DoloTeal) {
-    Surface(shape = RoundedCornerShape(50), color = color.copy(alpha = 0.12f)) {
-        Text(label, modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp), color = color, style = MaterialTheme.typography.labelMedium)
+fun StatusBadge(label: String, color: Color = Color.Unspecified) {
+    val resolvedColor = if (color == Color.Unspecified) MaterialTheme.colorScheme.primary else color
+    Surface(shape = RoundedCornerShape(50), color = resolvedColor.copy(alpha = 0.12f)) {
+        Text(label, modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp), color = resolvedColor, style = MaterialTheme.typography.labelMedium)
     }
 }
 
@@ -189,7 +190,7 @@ enum class PatientBottomDestination { HOME, APPOINTMENTS, BOOK }
 
 @Composable
 fun DoloBottomBar(selected: PatientBottomDestination, onHome: () -> Unit, onAppointments: () -> Unit, onBook: () -> Unit) {
-    Surface(color = Color.White, shadowElevation = 10.dp, tonalElevation = 0.dp) {
+    Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 10.dp, tonalElevation = 0.dp) {
         Row(
             modifier = Modifier.fillMaxWidth().navigationBarsPadding().heightIn(min = 66.dp).padding(horizontal = 22.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -200,10 +201,10 @@ fun DoloBottomBar(selected: PatientBottomDestination, onHome: () -> Unit, onAppo
                 Surface(
                     modifier = Modifier.size(52.dp).semantics { contentDescription = "Book appointment" }.clickable(role = Role.Button, onClick = onBook),
                     shape = RoundedCornerShape(18.dp),
-                    color = DoloTeal,
+                    color = MaterialTheme.colorScheme.primary,
                     shadowElevation = 5.dp
-                ) { Icon(Icons.Outlined.Add, null, tint = Color.White, modifier = Modifier.padding(13.dp)) }
-                Text("Book", style = MaterialTheme.typography.labelMedium, color = if (selected == PatientBottomDestination.BOOK) DoloTeal else DoloMuted)
+                ) { Icon(Icons.Outlined.Add, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.padding(13.dp)) }
+                Text("Book", style = MaterialTheme.typography.labelMedium, color = if (selected == PatientBottomDestination.BOOK) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
             }
             BottomItem(Icons.Outlined.CalendarMonth, "Appointments", selected == PatientBottomDestination.APPOINTMENTS, onAppointments, Modifier.weight(1f))
         }
@@ -212,7 +213,7 @@ fun DoloBottomBar(selected: PatientBottomDestination, onHome: () -> Unit, onAppo
 
 @Composable
 private fun BottomItem(icon: ImageVector, label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val color by animateColorAsState(if (selected) DoloTeal else DoloMuted, label = "bottom-color")
+    val color by animateColorAsState(if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, label = "bottom-color")
     val lift by animateDpAsState(if (selected) 2.dp else 0.dp, label = "bottom-lift")
     Column(
         modifier = modifier.heightIn(min = 56.dp).padding(bottom = lift).semantics(mergeDescendants = true) { contentDescription = label + if (selected) ", selected" else "" }.clickable(role = Role.Button, onClick = onClick),

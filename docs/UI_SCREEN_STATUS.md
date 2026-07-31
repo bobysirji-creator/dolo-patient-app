@@ -151,6 +151,7 @@ Patient App 0.30.1-home-polish (version code 39) applies the first physical-layo
 - the DO-LO logo adapts its navy text to the active theme
 
 Dark Mode is stored locally in the existing private app preferences. No profile, appointment, family or hosted data is changed or uploaded.
+
 ### Patient Home artwork and queue-card correction
 
 Patient App 0.30.2-home-card-fix (version code 40) strengthens the Patient-at-home greeting artwork with improved contrast, color and sharpness. The illustration now renders at full opacity, while the Home gradient preserves text readability without hiding the artwork in Dark Mode.
@@ -158,3 +159,11 @@ Patient App 0.30.2-home-card-fix (version code 40) strengthens the Patient-at-ho
 The Your Token and Currently in Process cards now share the tallest intrinsic row height. Both cards remain equal in size when Patient names, Doctor names or status content require additional vertical space.
 
 Verification: confirm artwork visibility in Light and Dark modes, then test both queue cards with short and long Patient and Doctor names. GitHub Actions remains the authoritative Android compile, lint, unit-test and APK gate for this lightweight checkout.
+
+### Queue-card order and Dark Mode contrast correction
+
+Patient App 0.30.3-dark-contrast (version code 41) places the queue state immediately below the current token number and moves the Doctor identity panel beneath it in the Currently in Process card.
+
+The Patient UI now uses semantic Material theme colors across Login, OTP, shared cards and navigation, Home, discovery, booking, appointment, notification and diagnostics surfaces. The mobile-number field explicitly defines theme-aware text, placeholder, label, cursor, background, border and disabled colors. Fixed pale cards and dark navy text were replaced where they caused low contrast, while intentional white-on-navy promotional content remains unchanged.
+
+Verification: check Login mobile-number readability, OTP boxes and phone summary, Home queue cards, discovery/booking cards, notifications and diagnostics in both Light and Dark modes. GitHub Actions remains the authoritative compile, lint, unit-test and APK gate.

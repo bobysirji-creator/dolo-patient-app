@@ -43,7 +43,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -62,12 +61,6 @@ import com.dolo.patient.R
 import com.dolo.patient.ui.components.BrandLogo
 import com.dolo.patient.ui.components.DoloCard
 import com.dolo.patient.ui.components.PrimaryButton
-import com.dolo.patient.ui.theme.DoloBackground
-import com.dolo.patient.ui.theme.DoloBorder
-import com.dolo.patient.ui.theme.DoloMuted
-import com.dolo.patient.ui.theme.DoloNavy
-import com.dolo.patient.ui.theme.DoloSurfaceAlt
-import com.dolo.patient.ui.theme.DoloTeal
 import com.dolo.patient.ui.theme.DoloTheme
 
 @Composable
@@ -106,7 +99,7 @@ fun LoginScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(DoloBackground)
+            .background(MaterialTheme.colorScheme.background)
             .windowInsetsPadding(WindowInsets.safeDrawing)
             .imePadding(),
         contentAlignment = Alignment.TopCenter
@@ -124,7 +117,7 @@ fun LoginScreen(
                     Text(
                         text = stringResource(R.string.login_brand_tagline),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = DoloMuted
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -134,12 +127,12 @@ fun LoginScreen(
                     Text(
                         text = stringResource(R.string.login_welcome_title),
                         style = MaterialTheme.typography.headlineLarge,
-                        color = DoloNavy
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = stringResource(R.string.login_welcome_supporting),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = DoloMuted
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -162,7 +155,7 @@ fun LoginScreen(
                     Text(
                         text = stringResource(R.string.login_card_title),
                         style = MaterialTheme.typography.titleLarge,
-                        color = DoloNavy
+                        color = MaterialTheme.colorScheme.onSurface
                     )
 
                     PhoneNumberField(
@@ -203,14 +196,14 @@ fun LoginScreen(
                         Icon(
                             imageVector = Icons.Outlined.Lock,
                             contentDescription = null,
-                            tint = DoloTeal,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
                             text = stringResource(R.string.login_secure_message),
                             style = MaterialTheme.typography.bodySmall,
-                            color = DoloMuted
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
@@ -218,14 +211,14 @@ fun LoginScreen(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        HorizontalDivider(Modifier.weight(1f), color = DoloBorder)
+                        HorizontalDivider(Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
                         Text(
                             text = stringResource(R.string.login_or),
                             modifier = Modifier.padding(horizontal = 12.dp),
                             style = MaterialTheme.typography.bodySmall,
-                            color = DoloMuted
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        HorizontalDivider(Modifier.weight(1f), color = DoloBorder)
+                        HorizontalDivider(Modifier.weight(1f), color = MaterialTheme.colorScheme.outlineVariant)
                     }
 
                     Row(
@@ -236,12 +229,12 @@ fun LoginScreen(
                         Text(
                             text = stringResource(R.string.login_new_user),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = DoloMuted
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         TextButton(onClick = onCreateAccount) {
                             Text(
                                 text = stringResource(R.string.login_create_account),
-                                color = DoloTeal,
+                                color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -294,13 +287,13 @@ fun PhoneNumberField(
                 Icon(
                     imageVector = Icons.Outlined.Phone,
                     contentDescription = null,
-                    tint = DoloNavy,
+                    tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(22.dp)
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
                     text = stringResource(R.string.login_country_code),
-                    color = DoloNavy,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(Modifier.width(10.dp))
@@ -328,11 +321,20 @@ fun PhoneNumberField(
         ),
         shape = RoundedCornerShape(18.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            focusedBorderColor = DoloTeal,
-            unfocusedBorderColor = DoloBorder,
-            errorBorderColor = MaterialTheme.colorScheme.error
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            cursorColor = MaterialTheme.colorScheme.primary,
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+            errorBorderColor = MaterialTheme.colorScheme.error,
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
         )
     )
 }
@@ -346,7 +348,7 @@ private fun LoginMessage(message: String, isError: Boolean) {
         color = if (isError) {
             MaterialTheme.colorScheme.errorContainer
         } else {
-            DoloSurfaceAlt
+            MaterialTheme.colorScheme.surfaceVariant
         },
         shape = RoundedCornerShape(14.dp)
     ) {
@@ -357,7 +359,7 @@ private fun LoginMessage(message: String, isError: Boolean) {
             color = if (isError) {
                 MaterialTheme.colorScheme.onErrorContainer
             } else {
-                DoloNavy
+                MaterialTheme.colorScheme.onSurface
             },
             textAlign = TextAlign.Start
         )

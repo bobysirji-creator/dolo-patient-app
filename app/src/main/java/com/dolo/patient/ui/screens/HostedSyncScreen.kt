@@ -32,8 +32,6 @@ import com.dolo.patient.data.HostedReschedulePolicy
 import com.dolo.patient.data.HostedReceiptPresentation
 import com.dolo.patient.data.HostedPreferences
 import com.dolo.patient.ui.components.ScreenTitle
-import com.dolo.patient.ui.theme.DoloSurfaceAlt
-import com.dolo.patient.ui.theme.DoloTeal
 import kotlinx.coroutines.delay
 
 @Composable
@@ -59,7 +57,7 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
     ) {
         item { ScreenTitle("Connected care", onBack) }
         item {
-            Card(colors = CardDefaults.cardColors(containerColor = if (state.error) MaterialTheme.colorScheme.errorContainer else DoloSurfaceAlt)) {
+            Card(colors = CardDefaults.cardColors(containerColor = if (state.error) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surfaceVariant)) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Secure test connection", fontWeight = FontWeight.Bold)
                     Text(state.message)
@@ -93,7 +91,7 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                 items(snapshot.targetedCampaigns, key = { "targeted-${it.id}" }) { campaign ->
                     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
                         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text("${campaign.purpose.replace('_', ' ')} - In-app only", style = MaterialTheme.typography.labelLarge, color = DoloTeal, fontWeight = FontWeight.Bold)
+                            Text("${campaign.purpose.replace('_', ' ')} - In-app only", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                             Text(campaign.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                             Text(campaign.message)
                             Text("Active ${campaign.startsOn} to ${campaign.endsOn}", style = MaterialTheme.typography.bodySmall)
@@ -116,7 +114,7 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                             Text(
                                 "DO-LO broadcast",
                                 style = MaterialTheme.typography.labelLarge,
-                                color = DoloTeal,
+                                color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(communication.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
@@ -160,9 +158,9 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
             } else {
                 items(snapshot.appointments, key = { it.id }) { appointment ->
                     val live = snapshot.live.firstOrNull { it.appointmentId == appointment.id }
-                    Card(colors = CardDefaults.cardColors(containerColor = DoloSurfaceAlt)) {
+                    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
                         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                            Text("Token ${appointment.token}", style = MaterialTheme.typography.headlineSmall, color = DoloTeal, fontWeight = FontWeight.ExtraBold)
+                            Text("Token ${appointment.token}", style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.ExtraBold)
                             Text("${appointment.patientName} - ${appointment.date} - ${appointment.session}")
                             Text("${appointment.doctorName} - ${appointment.clinicName}")
                             Text("Status: ${appointment.status}")
@@ -183,7 +181,7 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                                     Text(
                                         if (hostedReview.status == "PENDING") "Submitted - pending Admin moderation" else "Moderation: ${hostedReview.status}",
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = DoloTeal
+                                        color = MaterialTheme.colorScheme.primary
                                     )
                                 } else {
                                     HostedReviewEditor(appointment.id, state.loading) { rating, comment ->
@@ -240,7 +238,7 @@ private fun PatientCommunicationPreferenceCard(current:HostedPreferences,loading
     var promotions by rememberSaveable(current.consentedAt){mutableStateOf(current.promotionalMessages)}
     var inApp by rememberSaveable(current.consentedAt){mutableStateOf(current.inAppMessages)}
     var language by rememberSaveable(current.consentedAt){mutableStateOf(current.preferredLanguage)}
-    Card(colors=CardDefaults.cardColors(containerColor=DoloSurfaceAlt)){Column(Modifier.padding(16.dp),verticalArrangement=Arrangement.spacedBy(10.dp)){
+    Card(colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surfaceVariant)){Column(Modifier.padding(16.dp),verticalArrangement=Arrangement.spacedBy(10.dp)){
         Text("Communication preferences",style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.Bold)
         PreferenceSwitch("Appointment and service updates",appointmentUpdates){appointmentUpdates=it}
         PreferenceSwitch("Health information",healthInformation){healthInformation=it}

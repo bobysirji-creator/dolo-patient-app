@@ -53,12 +53,6 @@ import com.dolo.patient.auth.PatientSession
 import com.dolo.patient.ui.components.BrandLogo
 import com.dolo.patient.ui.components.DoloCard
 import com.dolo.patient.ui.components.PrimaryButton
-import com.dolo.patient.ui.theme.DoloBackground
-import com.dolo.patient.ui.theme.DoloBorder
-import com.dolo.patient.ui.theme.DoloMuted
-import com.dolo.patient.ui.theme.DoloNavy
-import com.dolo.patient.ui.theme.DoloSurfaceAlt
-import com.dolo.patient.ui.theme.DoloTeal
 import com.dolo.patient.ui.theme.DoloTheme
 
 @Composable
@@ -114,7 +108,7 @@ fun OtpVerificationScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(DoloBackground)
+            .background(MaterialTheme.colorScheme.background)
             .windowInsetsPadding(WindowInsets.safeDrawing)
             .imePadding(),
         contentAlignment = Alignment.TopCenter
@@ -132,7 +126,7 @@ fun OtpVerificationScreen(
                     Text(
                         text = stringResource(R.string.login_brand_tagline),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = DoloMuted
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -149,13 +143,13 @@ fun OtpVerificationScreen(
                     ) {
                         Surface(
                             modifier = Modifier.size(48.dp),
-                            color = DoloSurfaceAlt,
+                            color = MaterialTheme.colorScheme.surfaceVariant,
                             shape = CircleShape
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.HealthAndSafety,
                                 contentDescription = null,
-                                tint = DoloTeal,
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(11.dp)
                             )
                         }
@@ -163,12 +157,12 @@ fun OtpVerificationScreen(
                             Text(
                                 text = stringResource(R.string.otp_title),
                                 style = MaterialTheme.typography.headlineSmall,
-                                color = DoloNavy
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = stringResource(R.string.otp_supporting),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = DoloMuted
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -217,7 +211,7 @@ fun OtpVerificationScreen(
                         Text(
                             text = stringResource(R.string.otp_did_not_receive),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = DoloMuted
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
@@ -226,7 +220,7 @@ fun OtpVerificationScreen(
                                 contentDescription = "OTP countdown ${OtpRules.countdown(uiState.secondsRemaining)}"
                             },
                             style = MaterialTheme.typography.bodyMedium,
-                            color = DoloNavy,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.Bold
                         )
                         TextButton(
@@ -260,7 +254,7 @@ fun OtpVerificationScreen(
                                 .fillMaxWidth()
                                 .semantics { liveRegion = LiveRegionMode.Polite },
                             style = MaterialTheme.typography.bodySmall,
-                            color = DoloTeal,
+                            color = MaterialTheme.colorScheme.primary,
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -311,9 +305,9 @@ private fun PhoneSummary(
             .semantics {
                 contentDescription = "OTP sent to ${formatIndianPhone(phoneNumber)}"
             },
-        color = Color.White,
+        color = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(18.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, DoloBorder)
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 11.dp),
@@ -321,13 +315,13 @@ private fun PhoneSummary(
         ) {
             Surface(
                 modifier = Modifier.size(40.dp),
-                color = DoloSurfaceAlt,
+                color = MaterialTheme.colorScheme.surfaceVariant,
                 shape = CircleShape
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Phone,
                     contentDescription = null,
-                    tint = DoloNavy,
+                    tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(9.dp)
                 )
             }
@@ -336,12 +330,12 @@ private fun PhoneSummary(
                 text = formatIndianPhone(phoneNumber),
                 modifier = Modifier.weight(1f),
                 style = MaterialTheme.typography.titleMedium,
-                color = DoloNavy
+                color = MaterialTheme.colorScheme.onSurface
             )
             TextButton(onClick = onEdit) {
                 Text(
                     text = stringResource(R.string.otp_edit),
-                    color = DoloTeal,
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -423,14 +417,14 @@ fun OtpDigitBox(
 ) {
     val borderColor = when {
         isError -> MaterialTheme.colorScheme.error
-        focused -> DoloTeal
-        else -> DoloBorder
+        focused -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.outlineVariant
     }
 
     Surface(
         modifier = modifier.heightIn(min = 56.dp),
         shape = RoundedCornerShape(15.dp),
-        color = if (enabled) Color.White else DoloBackground,
+        color = if (enabled) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant,
         border = androidx.compose.foundation.BorderStroke(
             width = if (focused || isError) 2.dp else 1.dp,
             color = borderColor
@@ -440,7 +434,7 @@ fun OtpDigitBox(
             Text(
                 text = value,
                 style = MaterialTheme.typography.titleLarge,
-                color = DoloNavy,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.ExtraBold,
                 textAlign = TextAlign.Center
             )
@@ -456,9 +450,9 @@ fun SecurityInfoCard(modifier: Modifier = Modifier) {
             .semantics {
                 contentDescription = "Secure and encrypted sign-in. We never share your information."
             },
-        color = DoloSurfaceAlt,
+        color = MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(17.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, DoloTeal.copy(alpha = 0.2f))
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f))
     ) {
         Row(
             modifier = Modifier.padding(13.dp),
@@ -466,13 +460,13 @@ fun SecurityInfoCard(modifier: Modifier = Modifier) {
         ) {
             Surface(
                 modifier = Modifier.size(42.dp),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.surface,
                 shape = CircleShape
             ) {
                 Icon(
                     imageVector = Icons.Outlined.HealthAndSafety,
                     contentDescription = null,
-                    tint = DoloTeal,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(9.dp)
                 )
             }
@@ -481,12 +475,12 @@ fun SecurityInfoCard(modifier: Modifier = Modifier) {
                 Text(
                     text = stringResource(R.string.otp_security_title),
                     style = MaterialTheme.typography.titleSmall,
-                    color = DoloNavy
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = stringResource(R.string.otp_security_supporting),
                     style = MaterialTheme.typography.bodySmall,
-                    color = DoloMuted
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

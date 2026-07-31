@@ -259,14 +259,14 @@ fun PatientGreetingHeader(patientName: String, patientCity: String, darkModeEnab
                     fontSize = if (patientName.length > 18) 18.sp else 22.sp,
                     lineHeight = 25.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    color = DoloTeal,
+                    color = MaterialTheme.colorScheme.primary,
                     maxLines = 1,
                     softWrap = false,
                     overflow = TextOverflow.Ellipsis
                 )
                 if (patientCity.isNotBlank()) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Outlined.LocationOn, null, tint = DoloTeal, modifier = Modifier.size(14.dp))
+                        Icon(Icons.Outlined.LocationOn, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
                         Spacer(Modifier.width(3.dp))
                         Text(patientCity, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                     }
@@ -296,9 +296,9 @@ fun DoctorSearchRow(onSearch: () -> Unit, onNearMe: () -> Unit) {
             modifier = Modifier.weight(1f).heightIn(min = 48.dp).semantics { contentDescription = "Find doctors near me" },
             contentPadding = PaddingValues(horizontal = 4.dp)
         ) {
-            Icon(Icons.Outlined.LocationOn, null, tint = DoloTeal, modifier = Modifier.size(20.dp))
+            Icon(Icons.Outlined.LocationOn, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
             Spacer(Modifier.width(3.dp))
-            Text("Near me", color = DoloTeal, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium, maxLines = 1)
+            Text("Near me", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelMedium, maxLines = 1)
         }
     }
 }
@@ -349,28 +349,28 @@ fun QueueSummarySection(
 }
 @Composable
 fun PatientTokenCard(queue: QueueSummaryUiModel, modifier: Modifier = Modifier) {
-    HomeStatusCard(modifier, "YOUR TOKEN", DoloTeal) {
+    HomeStatusCard(modifier, "YOUR TOKEN", MaterialTheme.colorScheme.primary) {
         Text("Your Token Number", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurface)
         Row(verticalAlignment = Alignment.Bottom) {
-            Text(queue.patientToken, fontSize = 40.sp, lineHeight = 42.sp, fontWeight = FontWeight.ExtraBold, color = DoloTeal)
+            Text(queue.patientToken, fontSize = 40.sp, lineHeight = 42.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
             Spacer(Modifier.width(6.dp))
             queue.estimatedWaitMinutes?.let {
                 Row(Modifier.padding(bottom = 5.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.Schedule, null, tint = DoloTeal, modifier = Modifier.size(14.dp))
+                    Icon(Icons.Outlined.Schedule, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
                     Text(" " + it.first + "–" + it.last + " min", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                 }
             }
             Spacer(Modifier.weight(1f))
             Surface(shape = CircleShape, color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.size(38.dp)) {
-                Icon(Icons.Outlined.ConfirmationNumber, null, tint = DoloTeal, modifier = Modifier.padding(9.dp))
+                Icon(Icons.Outlined.ConfirmationNumber, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(9.dp))
             }
         }
         Text("Patient: " + queue.patientName, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
         Surface(color = MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(10.dp)) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.CalendarMonth, null, tint = DoloTeal, modifier = Modifier.size(16.dp))
+                Icon(Icons.Outlined.CalendarMonth, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(5.dp))
-                Text(queue.bookingTime, fontSize = 10.sp, color = DoloTeal, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(queue.bookingTime, fontSize = 10.sp, color = MaterialTheme.colorScheme.primary, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     }
@@ -386,18 +386,11 @@ fun CurrentTokenCard(queue: QueueSummaryUiModel, onOpen: (String) -> Unit, modif
         Row(verticalAlignment = Alignment.Bottom) {
             Text(queue.currentToken, fontSize = 40.sp, lineHeight = 42.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.secondary)
             Spacer(Modifier.weight(1f))
-            Surface(shape = CircleShape, color = Color(0xFFEDF3FF), modifier = Modifier.size(38.dp)) {
-                Icon(Icons.Outlined.MedicalServices, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.padding(9.dp))
+            Surface(shape = CircleShape, color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.size(38.dp)) {
+                Icon(Icons.Outlined.MedicalServices, null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.padding(9.dp))
             }
         }
         Spacer(Modifier.height(2.dp))
-        Surface(color = Color(0xFFEDF3FF), shape = RoundedCornerShape(10.dp)) {
-            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Outlined.PersonOutline, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(16.dp))
-                Spacer(Modifier.width(5.dp))
-                Text("With ${queue.doctorName}", fontSize = 10.sp, color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            }
-        }
         Text(
             when (queue.queueStatus) {
                 QueueStatus.ACTIVE -> "Queue active"
@@ -408,6 +401,13 @@ fun CurrentTokenCard(queue: QueueSummaryUiModel, onOpen: (String) -> Unit, modif
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 11.sp
         )
+        Surface(color = MaterialTheme.colorScheme.secondaryContainer, shape = RoundedCornerShape(10.dp)) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 7.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Outlined.PersonOutline, null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(5.dp))
+                Text("With ${queue.doctorName}", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSecondaryContainer, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            }
+        }
     }
 }
 
@@ -439,7 +439,7 @@ private fun NoActiveQueueCard(onBook: () -> Unit) {
     Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceVariant, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Surface(shape = CircleShape, color = MaterialTheme.colorScheme.surface, modifier = Modifier.size(48.dp)) {
-                Icon(Icons.Outlined.EventAvailable, null, tint = DoloTeal, modifier = Modifier.padding(11.dp))
+                Icon(Icons.Outlined.EventAvailable, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(11.dp))
             }
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
@@ -463,7 +463,7 @@ fun AdminBroadcastCarousel(
             broadcasts.isEmpty() -> {
                 Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
                     Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Outlined.Campaign, null, tint = DoloTeal)
+                        Icon(Icons.Outlined.Campaign, null, tint = MaterialTheme.colorScheme.primary)
                         Spacer(Modifier.width(10.dp))
                         Text("No current DO-LO broadcasts.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
@@ -479,7 +479,7 @@ fun AdminBroadcastCarousel(
                         repeat(broadcasts.size) { index ->
                             Box(
                                 Modifier.padding(horizontal = 3.dp).size(if (pagerState.currentPage == index) 8.dp else 6.dp)
-                                    .clip(CircleShape).background(if (pagerState.currentPage == index) DoloTeal else MaterialTheme.colorScheme.outlineVariant)
+                                    .clip(CircleShape).background(if (pagerState.currentPage == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)
                             )
                         }
                     }
@@ -496,9 +496,9 @@ fun BroadcastCard(broadcast: BroadcastUiModel, onDismiss: (String) -> Unit, onAc
             Row(Modifier.fillMaxWidth().padding(16.dp)) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Outlined.Campaign, null, tint = DoloTeal, modifier = Modifier.size(21.dp))
+                        Icon(Icons.Outlined.Campaign, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(21.dp))
                         Spacer(Modifier.width(7.dp))
-                        Text("Admin Broadcast", color = DoloTeal, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge)
+                        Text("Admin Broadcast", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge)
                     }
                     Text(broadcast.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface, maxLines = 2, overflow = TextOverflow.Ellipsis)
                     Text(broadcast.message, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 3, overflow = TextOverflow.Ellipsis)
@@ -551,7 +551,7 @@ fun FavoriteDoctorsSection(
         if (doctors.isEmpty()) {
             Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
                 Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.FavoriteBorder, null, tint = DoloTeal)
+                    Icon(Icons.Outlined.FavoriteBorder, null, tint = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.width(10.dp))
                     Column(Modifier.weight(1f)) {
                         Text("No favorite doctors yet", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
@@ -637,10 +637,10 @@ fun DoloPatientBottomNavigation(
                 Surface(
                     modifier = Modifier.size(50.dp).semantics { contentDescription = "Book appointment" }.clickable(role = Role.Button, onClick = onBook),
                     shape = CircleShape,
-                    color = DoloTeal,
+                    color = MaterialTheme.colorScheme.primary,
                     shadowElevation = 6.dp
                 ) { Icon(Icons.Outlined.Add, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.padding(12.dp)) }
-                Text("Book", fontSize = 10.sp, color = if (selected == PatientBottomItem.BOOK) DoloTeal else MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("Book", fontSize = 10.sp, color = if (selected == PatientBottomItem.BOOK) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
             }
             PatientBottomNavItem(Icons.Outlined.History, "History", selected == PatientBottomItem.HISTORY, onHistory, Modifier.weight(1f))
             PatientBottomNavItem(Icons.Outlined.PersonOutline, "Profile", selected == PatientBottomItem.PROFILE, onProfile, Modifier.weight(1f))
@@ -650,7 +650,7 @@ fun DoloPatientBottomNavigation(
 
 @Composable
 private fun PatientBottomNavItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier) {
-    val color = if (selected) DoloTeal else MaterialTheme.colorScheme.onSurfaceVariant
+    val color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
     Column(
         modifier.heightIn(min = 58.dp).semantics(mergeDescendants = true) { contentDescription = label + if (selected) ", selected" else "" }.clickable(role = Role.Button, onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -766,13 +766,13 @@ fun AllQueuesScreen(
                                     Text(queue.clinicName, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                     Text("${queue.patientName} • ${queue.session}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
-                                Text("Token ${queue.patientToken}", color = DoloTeal, fontWeight = FontWeight.ExtraBold)
+                                Text("Token ${queue.patientToken}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.ExtraBold)
                             }
                             HorizontalDivider()
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text("Current: ${queue.currentToken}", fontWeight = FontWeight.SemiBold)
                                 Text(queue.estimatedWaitMinutes?.let { "${it.first}–${it.last} min" } ?: "Wait pending", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text(queue.queueStatus.name.lowercase().replaceFirstChar(Char::uppercase), color = DoloTeal)
+                                Text(queue.queueStatus.name.lowercase().replaceFirstChar(Char::uppercase), color = MaterialTheme.colorScheme.primary)
                             }
                         }
                     }
