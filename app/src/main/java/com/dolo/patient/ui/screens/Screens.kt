@@ -45,11 +45,11 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.delay
 
-private val page=Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+@Composable private fun pageModifier()=Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
 
 @Composable
 fun SplashScreen(onContinue:()->Unit){
- Box(page.safeDrawingPadding().padding(24.dp),contentAlignment=Alignment.Center){
+ Box(pageModifier().safeDrawingPadding().padding(24.dp),contentAlignment=Alignment.Center){
   Column(Modifier.widthIn(max=420.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(18.dp)){
    BrandLogo()
    Surface(shape=RoundedCornerShape(32.dp),color=MaterialTheme.colorScheme.surfaceVariant,modifier=Modifier.size(164.dp)){Icon(Icons.Outlined.HealthAndSafety,null,tint=MaterialTheme.colorScheme.primary,modifier=Modifier.padding(38.dp))}
@@ -64,7 +64,7 @@ fun SplashScreen(onContinue:()->Unit){
 fun OtpVerificationScreen(auth:AuthViewModel,onLogin:()->Unit){
  val state=auth.uiState
  LaunchedEffect(state.step){if(state.step==AuthStep.AUTHENTICATED)onLogin()}
- Box(page.safeDrawingPadding().imePadding().padding(horizontal=22.dp),contentAlignment=Alignment.Center){
+ Box(pageModifier().safeDrawingPadding().imePadding().padding(horizontal=22.dp),contentAlignment=Alignment.Center){
   LazyColumn(Modifier.widthIn(max=440.dp),contentPadding=PaddingValues(vertical=24.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){
    item{BrandLogo();Spacer(Modifier.height(24.dp));Text("Enter verification code",style=MaterialTheme.typography.headlineLarge);Text("Use the six-digit demo code to continue.",style=MaterialTheme.typography.bodyLarge,color=MaterialTheme.colorScheme.onSurfaceVariant,modifier=Modifier.padding(top=6.dp))}
    item{DoloCard{OutlinedTextField(state.otp,auth::updateOtp,Modifier.fillMaxWidth(),label={Text("Verification code")},keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.NumberPassword),singleLine=true,shape=RoundedCornerShape(16.dp));Surface(shape=RoundedCornerShape(14.dp),color=MaterialTheme.colorScheme.surfaceVariant,modifier=Modifier.fillMaxWidth()){Row(Modifier.padding(13.dp),verticalAlignment=Alignment.CenterVertically){Icon(Icons.Outlined.Info,null,tint=MaterialTheme.colorScheme.primary);Spacer(Modifier.width(9.dp));Text("Demo code: 123456",fontWeight=FontWeight.Bold,color=MaterialTheme.colorScheme.primary)}};PrimaryButton(if(state.isLoading)"Signing in..." else "Verify and sign in",auth::verifyOtp,state.otp.length==6&&!state.isLoading,loading=state.isLoading);TextButton(auth::editPhone,modifier=Modifier.align(Alignment.CenterHorizontally)){Text("Use a different number")}}}
@@ -223,7 +223,7 @@ fun HostedDoctorDetailsScreen(
     onRefresh: () -> Unit,
     onBook: () -> Unit
 ) {
-    LazyColumn(page.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    LazyColumn(pageModifier().padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item { ScreenTitle("Doctor Profile", onBack) }
         if (clinic == null) {
             item { EmptyCard("This approved hosted Doctor profile is unavailable. Refresh discovery and try again.") }
@@ -272,8 +272,8 @@ fun DoctorCard(d:Doctor,favourite:Boolean,onOpen:()->Unit,onFavourite:()->Unit){
   Row(verticalAlignment=Alignment.CenterVertically){Icon(Icons.Outlined.Star,null,tint=DoloWarning,modifier=Modifier.size(18.dp));Text(" ${d.rating}",fontWeight=FontWeight.Bold);Text("  •  ${d.experienceYears}+ years",style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant);Spacer(Modifier.weight(1f));Text("₹${d.consultationFee}",fontWeight=FontWeight.ExtraBold,color=MaterialTheme.colorScheme.onSurface);Spacer(Modifier.width(10.dp));Icon(Icons.Outlined.ArrowForward,"Open profile",tint=MaterialTheme.colorScheme.primary)}
  }
 }
-@Composable fun DoctorDetailsScreen(id:String,favourite:Boolean,reviews:List<DoctorReview>,onBack:()->Unit,onFavourite:()->Unit,onBook:()->Unit){val d=DummyData.doctors.firstOrNull{it.id==id}?:DummyData.doctors.first();LazyColumn(page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){item{ScreenTitle("Doctor Details",onBack)};item{DoctorCard(d,favourite,{},onFavourite)};item{InfoCard("About","Experienced "+d.specialty.lowercase()+" focused on clear guidance and patient-friendly care.")};item{InfoCard("Clinic",d.clinic+"\nWalk-in sessions: Morning and Evening")};item{InfoCard("Patient reviews","★ "+d.rating+" / 5\n"+reviews.count{it.doctorId==d.id}+" verified DO-LO reviews")};item{PrimaryButton("Book Walk-in Appointment",onBook)}}}
-@Composable fun FavouritesScreen(state:PatientUiState,onBack:()->Unit,onDoctor:(String)->Unit,onFavourite:(String)->Unit){val ds=DummyData.doctors.filter{it.id in state.favouriteIds};LazyColumn(page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){item{ScreenTitle("Favourite Doctors",onBack)};if(ds.isEmpty())item{EmptyCard("You have not saved any doctors yet.")}else items(ds){DoctorCard(it,true,{onDoctor(it.id)},{onFavourite(it.id)})}}}
+@Composable fun DoctorDetailsScreen(id:String,favourite:Boolean,reviews:List<DoctorReview>,onBack:()->Unit,onFavourite:()->Unit,onBook:()->Unit){val d=DummyData.doctors.firstOrNull{it.id==id}?:DummyData.doctors.first();LazyColumn(pageModifier().padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){item{ScreenTitle("Doctor Details",onBack)};item{DoctorCard(d,favourite,{},onFavourite)};item{InfoCard("About","Experienced "+d.specialty.lowercase()+" focused on clear guidance and patient-friendly care.")};item{InfoCard("Clinic",d.clinic+"\nWalk-in sessions: Morning and Evening")};item{InfoCard("Patient reviews","★ "+d.rating+" / 5\n"+reviews.count{it.doctorId==d.id}+" verified DO-LO reviews")};item{PrimaryButton("Book Walk-in Appointment",onBook)}}}
+@Composable fun FavouritesScreen(state:PatientUiState,onBack:()->Unit,onDoctor:(String)->Unit,onFavourite:(String)->Unit){val ds=DummyData.doctors.filter{it.id in state.favouriteIds};LazyColumn(pageModifier().padding(20.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){item{ScreenTitle("Favourite Doctors",onBack)};if(ds.isEmpty())item{EmptyCard("You have not saved any doctors yet.")}else items(ds){DoctorCard(it,true,{onDoctor(it.id)},{onFavourite(it.id)})}}}
 @Composable
 fun AppointmentHistoryScreen(list:List<Appointment>,onBack:()->Unit,onQueue:(String)->Unit,onReschedule:(String)->Unit,onReview:(String,String)->Unit,canReschedule:(Appointment)->Boolean,canReview:(Appointment)->Boolean,onHome:()->Unit,onBook:()->Unit){
  var filter by remember{mutableStateOf("UPCOMING")}
@@ -304,7 +304,7 @@ fun BookingScreen(doctorId:String,state:PatientUiState,onBack:()->Unit,onConfirm
  var session by remember{mutableStateOf(Session.MORNING)}
  val patients=listOf(state.profile.name)+state.family.map{it.name}
  var patientName by remember{mutableStateOf(patients.first())}
- LazyColumn(page.safeDrawingPadding(),contentPadding=PaddingValues(horizontal=18.dp,vertical=10.dp),verticalArrangement=Arrangement.spacedBy(13.dp)){
+ LazyColumn(pageModifier().safeDrawingPadding(),contentPadding=PaddingValues(horizontal=18.dp,vertical=10.dp),verticalArrangement=Arrangement.spacedBy(13.dp)){
   item{ScreenTitle("Book appointment",onBack)}
   item{Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(6.dp)){BookingStep("1","Patient",true,Modifier.weight(1f));BookingStep("2","Date",true,Modifier.weight(1f));BookingStep("3","Session",true,Modifier.weight(1f))}}
   item{DoloCard(containerColor=MaterialTheme.colorScheme.primaryContainer){Row(verticalAlignment=Alignment.CenterVertically){Surface(shape=RoundedCornerShape(16.dp),color=MaterialTheme.colorScheme.surface,modifier=Modifier.size(54.dp)){Icon(Icons.Outlined.MedicalServices,null,tint=MaterialTheme.colorScheme.primary,modifier=Modifier.padding(13.dp))};Spacer(Modifier.width(12.dp));Column(Modifier.weight(1f)){Text(doctor.name,style=MaterialTheme.typography.titleMedium);Text(doctor.specialty,color=MaterialTheme.colorScheme.primary,style=MaterialTheme.typography.labelLarge);Text(doctor.clinic,style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)}}}}
@@ -323,7 +323,7 @@ fun BookingScreen(doctorId:String,state:PatientUiState,onBack:()->Unit,onConfirm
 @Composable
 fun ConfirmationScreen(doctorId:String,session:String,appointment:Appointment?=null,onQueue:()->Unit,onDone:()->Unit){
  val doctor=DummyData.doctors.firstOrNull{it.id==doctorId}?:DummyData.doctors.first()
- Box(page.safeDrawingPadding().padding(20.dp),contentAlignment=Alignment.Center){
+ Box(pageModifier().safeDrawingPadding().padding(20.dp),contentAlignment=Alignment.Center){
   Column(Modifier.widthIn(max=440.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(14.dp)){
    Surface(shape=CircleShape,color=MaterialTheme.colorScheme.surfaceVariant,modifier=Modifier.size(70.dp)){Icon(Icons.Outlined.Check,null,tint=DoloSuccess,modifier=Modifier.padding(17.dp))}
    Text("Appointment booked",style=MaterialTheme.typography.headlineMedium)
@@ -342,7 +342,7 @@ fun ConfirmationScreen(doctorId:String,session:String,appointment:Appointment?=n
  var showTestTools by remember{mutableStateOf(false)}
  LaunchedEffect(appointmentId){while(true){onRefresh();delay(ReleaseReadiness.QUEUE_REFRESH_INTERVAL_MILLIS)}}
  LaunchedEffect(appointmentId,queue?.currentTokenStartedAt){while(true){nowMillis=System.currentTimeMillis();delay(1000)}}
- LazyColumn(page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){
+ LazyColumn(pageModifier().padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){
   item{ScreenTitle("Live Queue",onBack)}
   if(appointment==null)item{EmptyCard("Appointment not found.")}
   else{
@@ -537,7 +537,7 @@ fun ProfileScreen(
     var age by remember { mutableStateOf("") }
 
     LazyColumn(
-        modifier = page.padding(20.dp),
+        modifier = pageModifier().padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item { ScreenTitle("Profile & family", onBack) }
@@ -640,7 +640,7 @@ fun NotificationsScreen(
     var requestedHostedCursor by remember{mutableStateOf<String?>(null)}
     LaunchedEffect(newestHostedCursor,hostedState?.loading) { onMarkRead();if(hostedState?.loading!=true&&newestHostedCursor!=null&&requestedHostedCursor!=newestHostedCursor){requestedHostedCursor=newestHostedCursor;onMarkHostedRead(newestHostedCursor)} }
     LazyColumn(
-        modifier = page.padding(20.dp),
+        modifier = pageModifier().padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item { ScreenTitle("Notifications", onBack) }
@@ -687,7 +687,7 @@ fun ReviewScreen(
     var comment by remember { mutableStateOf("") }
 
     LazyColumn(
-        modifier = page.padding(20.dp),
+        modifier = pageModifier().padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item { ScreenTitle("Rate Consultation", onBack) }
@@ -746,7 +746,7 @@ fun SupportScreen(
     var category by remember{mutableStateOf("APP")};var subject by remember{mutableStateOf("")};var message by remember{mutableStateOf("")}
     val categories=listOf("APPOINTMENT","DOCTOR","BILLING","APP","OTHER")
     LaunchedEffect(Unit){if(hosted.snapshot==null)onRefresh()}
-    LazyColumn(modifier=page.padding(20.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){
+    LazyColumn(modifier=pageModifier().padding(20.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){
         item{ScreenTitle("Help & support",onBack)}
         item{InfoCard("How does the live queue work?","Your token, patients ahead and estimated wait refresh while the hosted screen is open.")}
         item{InfoCard("Private in-app support","Your requests are visible only to your current DO-LO account and the support team.")}
@@ -774,7 +774,7 @@ fun IntegrationStatusScreen(
         if (platform.status == PlatformConnectionStatus.NOT_CHECKED) onRefreshPlatform()
     }
     LazyColumn(
-        modifier = page.padding(20.dp),
+        modifier = pageModifier().padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item { ScreenTitle("App status & diagnostics", onBack) }

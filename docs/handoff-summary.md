@@ -365,3 +365,7 @@ Use GitHub Actions for the compile/lint/test/APK gate. On a physical device, che
 Patient App 0.30.3-dark-contrast (version code 41) swaps Queue Active and With Doctor in the current-token card and completes a semantic-color pass over the Patient UI. Authentication fields, OTP content, shared cards, bottom navigation and feature screens now select matching theme surfaces and foregrounds instead of retaining light-only white/navy combinations.
 
 Use GitHub Actions for compilation and APK generation. On a physical device, verify the phone field before and after typing, disabled/loading controls, OTP entry, queue cards and representative discovery, booking, notification and diagnostic pages in both themes.
+
+### Version 0.30.3 CI correction
+
+The initial Dark Mode contrast commit failed Kotlin compilation because a theme color was read by a file-level Modifier. The shared page modifier is now a composable function, so `MaterialTheme.colorScheme.background` is evaluated only from composable screen contexts. UI behavior and data workflows are unchanged.
