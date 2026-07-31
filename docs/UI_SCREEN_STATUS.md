@@ -56,17 +56,17 @@ Verification:
 
 ## 2. OTP verification
 
-Status: implemented in `0.29.0-otp-ui` (version code 35); GitHub Actions and physical-device acceptance pending.
+Status: polished in `0.29.1-otp-ui-polish` (version code 36); GitHub Actions and physical-device acceptance pending.
 
 Reference: `C:\Users\Poly\Documents\codex\2026-07-11\OTP.png`
 
 Implemented:
 
-- reference-led Compose layout using the existing lightweight healthcare hero asset
+- reference-led Compose layout with a dedicated female-Patient healthcare hero asset and no floating illustration icons
 - phone-number summary with Edit and Android back navigation to login
 - six reusable, individually focused OTP digit boxes
-- numeric password keyboard, focus advance, backspace, paste and Done handling
-- 45-second countdown, expiration state and resend flow
+- numeric password keyboard, stable focus, backspace, paste and Done handling without keyboard-driven vertical screen movement
+- countdown placed beside Resend OTP; expired codes remain editable and show an error only after verification
 - incomplete, invalid, expired, network and too-many-attempt error states
 - loading and disabled states for verification and resend actions
 - secure-sign-in information card and polite accessibility announcements

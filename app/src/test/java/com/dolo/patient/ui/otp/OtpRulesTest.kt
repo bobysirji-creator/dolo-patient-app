@@ -40,7 +40,7 @@ class OtpRulesTest {
         assertFalse(complete.canResend)
 
         val expired = complete.copy(secondsRemaining = 0, isExpired = true)
-        assertFalse(expired.canVerify)
+        assertTrue(expired.canVerify)
         assertTrue(expired.canResend)
     }
 }

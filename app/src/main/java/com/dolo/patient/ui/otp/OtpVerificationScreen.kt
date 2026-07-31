@@ -12,13 +12,9 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.HealthAndSafety
-import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Phone
-import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -43,7 +39,6 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -191,7 +186,7 @@ fun OtpVerificationScreen(
 
                     OtpInputField(
                         value = uiState.otp,
-                        enabled = !uiState.isExpired && !uiState.isVerifying && !uiState.isResending,
+                        enabled = !uiState.isVerifying && !uiState.isResending,
                         isError = uiState.error != null,
                         onDigitChanged = { index, value ->
                             onEvent(OtpVerificationUiEvent.DigitChanged(index, value))
@@ -207,9 +202,14 @@ fun OtpVerificationScreen(
                         }
                     )
 
-                    if (errorMessage != null) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 20.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Text(
-                            text = errorMessage,
+                            text = errorMessage.orEmpty(),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .semantics { liveRegion = LiveRegionMode.Polite },
@@ -218,11 +218,6 @@ fun OtpVerificationScreen(
                             textAlign = TextAlign.Center
                         )
                     }
-
-                    OtpCountdownTimer(
-                        secondsRemaining = uiState.secondsRemaining,
-                        expired = uiState.isExpired
-                    )
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -233,6 +228,16 @@ fun OtpVerificationScreen(
                             text = stringResource(R.string.otp_did_not_receive),
                             style = MaterialTheme.typography.bodyMedium,
                             color = DoloMuted
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = OtpRules.countdown(uiState.secondsRemaining),
+                            modifier = Modifier.semantics {
+                                contentDescription = "OTP countdown ${OtpRules.countdown(uiState.secondsRemaining)}"
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = DoloNavy,
+                            fontWeight = FontWeight.Bold
                         )
                         TextButton(
                             onClick = {
@@ -293,62 +298,16 @@ fun OtpVerificationScreen(
 
 @Composable
 private fun OtpHero() {
-    Box(
+    Image(
+        painter = painterResource(R.drawable.otp_healthcare_hero),
+        contentDescription = stringResource(R.string.otp_illustration_description),
+        contentScale = ContentScale.Crop,
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 158.dp, max = 220.dp)
             .aspectRatio(1.55f)
             .clip(RoundedCornerShape(26.dp))
-    ) {
-        Image(
-            painter = painterResource(R.drawable.login_healthcare_hero),
-            contentDescription = stringResource(R.string.otp_illustration_description),
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
-        FloatingHealthIcon(
-            icon = Icons.Outlined.CalendarMonth,
-            description = "Appointment calendar",
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(12.dp)
-        )
-        FloatingHealthIcon(
-            icon = Icons.Outlined.Schedule,
-            description = "Appointment time",
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(12.dp)
-        )
-        FloatingHealthIcon(
-            icon = Icons.Outlined.Lock,
-            description = "Secure verification",
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(12.dp)
-        )
-    }
-}
-
-@Composable
-private fun FloatingHealthIcon(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    description: String,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier.size(38.dp),
-        shape = RoundedCornerShape(12.dp),
-        color = Color.White.copy(alpha = 0.9f),
-        shadowElevation = 3.dp
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = description,
-            tint = DoloTeal,
-            modifier = Modifier.padding(8.dp)
-        )
-    }
+    )
 }
 
 @Composable
@@ -414,8 +373,6 @@ fun OtpInputField(
     val requesters = remember {
         List(OtpRules.OTP_LENGTH) { FocusRequester() }
     }
-    val focusManager = LocalFocusManager.current
-
     LaunchedEffect(Unit) {
         requesters.first().requestFocus()
     }
@@ -443,7 +400,6 @@ fun OtpInputField(
                     when {
                         digits.length > 1 -> {
                             onPaste(digits)
-                            focusManager.clearFocus()
                         }
                         digits.isEmpty() -> {
                             onBackspace(index)
@@ -453,8 +409,6 @@ fun OtpInputField(
                             onDigitChanged(index, digits)
                             if (index < OtpRules.OTP_LENGTH - 1) {
                                 requesters[index + 1].requestFocus()
-                            } else {
-                                focusManager.clearFocus()
                             }
                         }
                     }
@@ -534,51 +488,6 @@ fun OtpDigitBox(
             }
         }
     )
-}
-
-@Composable
-fun OtpCountdownTimer(
-    secondsRemaining: Int,
-    expired: Boolean,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .semantics {
-                contentDescription = if (expired) {
-                    "OTP expired"
-                } else {
-                    "OTP expires in ${OtpRules.countdown(secondsRemaining)}"
-                }
-            },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        HorizontalDivider(Modifier.weight(1f), color = DoloBorder)
-        Spacer(Modifier.width(10.dp))
-        Icon(
-            imageVector = Icons.Outlined.Schedule,
-            contentDescription = null,
-            tint = if (expired) MaterialTheme.colorScheme.error else DoloTeal,
-            modifier = Modifier.size(20.dp)
-        )
-        Spacer(Modifier.width(6.dp))
-        Text(
-            text = if (expired) {
-                stringResource(R.string.otp_expired)
-            } else {
-                stringResource(
-                    R.string.otp_expires_in,
-                    OtpRules.countdown(secondsRemaining)
-                )
-            },
-            style = MaterialTheme.typography.bodyMedium,
-            color = if (expired) MaterialTheme.colorScheme.error else DoloMuted,
-            fontWeight = FontWeight.SemiBold
-        )
-        Spacer(Modifier.width(10.dp))
-        HorizontalDivider(Modifier.weight(1f), color = DoloBorder)
-    }
 }
 
 @Composable

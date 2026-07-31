@@ -59,7 +59,7 @@ data class OtpVerificationUiState(
     val editRequested: Boolean = false
 ) {
     val isComplete: Boolean get() = otp.length == OtpRules.OTP_LENGTH
-    val canVerify: Boolean get() = isComplete && !isExpired && !isVerifying && !isResending
+    val canVerify: Boolean get() = isComplete && !isVerifying && !isResending
     val canResend: Boolean get() = isExpired && !isVerifying && !isResending
 }
 
@@ -103,8 +103,7 @@ class OtpVerificationViewModel(
             if (uiState.secondsRemaining <= 1) {
                 uiState = uiState.copy(
                     secondsRemaining = 0,
-                    isExpired = true,
-                    error = if (uiState.error == null) OtpError.Expired else uiState.error
+                    isExpired = true
                 )
                 return
             }
@@ -131,7 +130,7 @@ class OtpVerificationViewModel(
     }
 
     private fun updateDigit(index: Int, value: String) {
-        if (uiState.isExpired || uiState.isVerifying || uiState.isResending) return
+        if (uiState.isVerifying || uiState.isResending) return
         if (value.filter(Char::isDigit).length > 1) {
             pasteOtp(value)
             return
@@ -144,7 +143,7 @@ class OtpVerificationViewModel(
     }
 
     private fun pasteOtp(value: String) {
-        if (uiState.isExpired || uiState.isVerifying || uiState.isResending) return
+        if (uiState.isVerifying || uiState.isResending) return
         uiState = uiState.copy(
             otp = OtpRules.digits(value),
             error = null,
@@ -153,7 +152,7 @@ class OtpVerificationViewModel(
     }
 
     private fun backspace(index: Int) {
-        if (uiState.isExpired || uiState.isVerifying || uiState.isResending) return
+        if (uiState.isVerifying || uiState.isResending) return
         uiState = uiState.copy(
             otp = OtpRules.backspace(uiState.otp, index),
             error = null
