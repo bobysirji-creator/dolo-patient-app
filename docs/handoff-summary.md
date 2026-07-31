@@ -353,3 +353,8 @@ This PC checkout has no Gradle wrapper, local Gradle or Java runtime. GitHub Act
 Patient App 0.30.1-home-polish (version code 39) compacts and top-aligns the greeting card, removes the greeting icon, keeps the Patient name horizontal, narrows search, unboxes Near me and relocates the queue View all action into the section header. The Home drawer now includes a locally persisted app-level Dark Mode toggle, and the Home design uses semantic Material colors for both themes.
 
 GitHub Actions remains the compile/lint/test/APK gate. On device, verify the full name at normal and larger font settings, the 112 dp greeting crop, search/Near me proportions, queue heading action and Dark Mode persistence after force-close and relaunch.
+## Patient Home artwork and equal-card-height checkpoint
+
+Patient App 0.30.2-home-card-fix (version code 40) restores full greeting-artwork visibility in both themes, uses a lighter terminal overlay in Dark Mode and ships a higher-contrast optimized hero asset. The two live-status cards now fill one shared intrinsic row height, preventing longer names or status text from producing mismatched card sizes.
+
+Use GitHub Actions for the compile/lint/test/APK gate. On a physical device, check Light and Dark modes plus short and long Patient/Doctor names before accepting this checkpoint.

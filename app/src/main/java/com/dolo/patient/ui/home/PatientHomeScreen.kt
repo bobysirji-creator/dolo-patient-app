@@ -236,15 +236,15 @@ fun PatientGreetingHeader(patientName: String, patientCity: String, darkModeEnab
                 modifier = Modifier.fillMaxSize().align(Alignment.CenterEnd),
                 contentScale = ContentScale.Crop,
                 alignment = Alignment.CenterEnd,
-                alpha = if (darkModeEnabled) .42f else 1f
+                alpha = 1f
             )
             Box(
                 Modifier.matchParentSize().background(
                     androidx.compose.ui.graphics.Brush.horizontalGradient(
                         colorStops = arrayOf(
                             0f to MaterialTheme.colorScheme.surface,
-                            .62f to MaterialTheme.colorScheme.surface.copy(alpha = .96f),
-                            1f to MaterialTheme.colorScheme.surface.copy(alpha = if (darkModeEnabled) .45f else 0f)
+                            .54f to MaterialTheme.colorScheme.surface.copy(alpha = .90f),
+                            1f to MaterialTheme.colorScheme.surface.copy(alpha = if (darkModeEnabled) .08f else 0f)
                         )
                     )
                 )
@@ -327,9 +327,12 @@ fun QueueSummarySection(
             loading -> QueueLoadingCards()
             queue == null -> NoActiveQueueCard(onViewAll)
             else -> {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    PatientTokenCard(queue, Modifier.weight(1f))
-                    CurrentTokenCard(queue, onOpen, Modifier.weight(1f))
+                Row(
+                    Modifier.fillMaxWidth().height(IntrinsicSize.Max),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    PatientTokenCard(queue, Modifier.weight(1f).fillMaxHeight())
+                    CurrentTokenCard(queue, onOpen, Modifier.weight(1f).fillMaxHeight())
                 }
                 if (queue.queueStatus == QueueStatus.PAUSED) {
                     Surface(color = DoloWarning.copy(alpha = .13f), shape = RoundedCornerShape(14.dp)) {
