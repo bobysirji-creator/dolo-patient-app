@@ -33,11 +33,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.input.key.type
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -188,14 +184,8 @@ fun OtpVerificationScreen(
                         value = uiState.otp,
                         enabled = !uiState.isVerifying && !uiState.isResending,
                         isError = uiState.error != null,
-                        onDigitChanged = { index, value ->
-                            onEvent(OtpVerificationUiEvent.DigitChanged(index, value))
-                        },
-                        onPaste = { value ->
+                        onValueChange = { value ->
                             onEvent(OtpVerificationUiEvent.OtpPasted(value))
-                        },
-                        onBackspace = { index ->
-                            onEvent(OtpVerificationUiEvent.Backspace(index))
                         },
                         onSubmit = {
                             onEvent(OtpVerificationUiEvent.Verify)
@@ -364,130 +354,98 @@ fun OtpInputField(
     value: String,
     enabled: Boolean,
     isError: Boolean,
-    onDigitChanged: (Int, String) -> Unit,
-    onPaste: (String) -> Unit,
-    onBackspace: (Int) -> Unit,
+    onValueChange: (String) -> Unit,
     onSubmit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val requesters = remember {
-        List(OtpRules.OTP_LENGTH) { FocusRequester() }
-    }
+    val focusRequester = remember { FocusRequester() }
+    var focused by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
-        requesters.first().requestFocus()
-    }
-    LaunchedEffect(value) {
-        if (value.length in 1 until OtpRules.OTP_LENGTH) {
-            requesters[value.length].requestFocus()
-        }
+        focusRequester.requestFocus()
     }
 
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        repeat(OtpRules.OTP_LENGTH) { index ->
-            OtpDigitBox(
-                value = value.getOrNull(index)?.toString().orEmpty(),
-                index = index,
-                enabled = enabled,
-                isError = isError,
-                modifier = Modifier
-                    .weight(1f)
-                    .focusRequester(requesters[index]),
-                onValueChange = { input ->
-                    val digits = input.filter(Char::isDigit)
-                    when {
-                        digits.length > 1 -> {
-                            onPaste(digits)
-                        }
-                        digits.isEmpty() -> {
-                            onBackspace(index)
-                            if (index > 0) requesters[index - 1].requestFocus()
-                        }
-                        else -> {
-                            onDigitChanged(index, digits)
-                            if (index < OtpRules.OTP_LENGTH - 1) {
-                                requesters[index + 1].requestFocus()
-                            }
-                        }
+    BasicTextField(
+        value = value,
+        onValueChange = { onValueChange(OtpRules.digits(it)) },
+        enabled = enabled,
+        singleLine = true,
+        textStyle = MaterialTheme.typography.titleLarge.copy(color = Color.Transparent),
+        cursorBrush = SolidColor(Color.Transparent),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.NumberPassword,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(onDone = { onSubmit() }),
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .focusRequester(focusRequester)
+            .onFocusChanged { focused = it.isFocused }
+            .semantics {
+                contentDescription = "6-digit OTP, ${value.length} digits entered"
+            },
+        decorationBox = { innerTextField ->
+            Box {
+                Box(
+                    modifier = Modifier
+                        .size(1.dp)
+                        .align(Alignment.Center)
+                ) {
+                    innerTextField()
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    repeat(OtpRules.OTP_LENGTH) { index ->
+                        OtpDigitBox(
+                            value = value.getOrNull(index)?.toString().orEmpty(),
+                            focused = focused && index == value.length.coerceAtMost(OtpRules.OTP_LENGTH - 1),
+                            enabled = enabled,
+                            isError = isError,
+                            modifier = Modifier.weight(1f)
+                        )
                     }
-                },
-                onBackspace = {
-                    onBackspace(index)
-                    if (index > 0) requesters[index - 1].requestFocus()
-                },
-                onSubmit = onSubmit
-            )
+                }
+            }
         }
-    }
+    )
 }
 
 @Composable
 fun OtpDigitBox(
     value: String,
-    index: Int,
+    focused: Boolean,
     enabled: Boolean,
     isError: Boolean,
-    onValueChange: (String) -> Unit,
-    onBackspace: () -> Unit,
-    onSubmit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var focused by remember { mutableStateOf(false) }
     val borderColor = when {
         isError -> MaterialTheme.colorScheme.error
         focused -> DoloTeal
         else -> DoloBorder
     }
 
-    BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
-        enabled = enabled,
-        singleLine = true,
-        textStyle = MaterialTheme.typography.titleLarge.copy(
-            color = DoloNavy,
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.ExtraBold
-        ),
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.NumberPassword,
-            imeAction = if (index == OtpRules.OTP_LENGTH - 1) ImeAction.Done else ImeAction.Next
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = { onSubmit() }
-        ),
-        modifier = modifier
-            .heightIn(min = 56.dp)
-            .onFocusChanged { focused = it.isFocused }
-            .onPreviewKeyEvent { event ->
-                if (event.type == KeyEventType.KeyDown && event.key == Key.Backspace) {
-                    onBackspace()
-                    true
-                } else {
-                    false
-                }
-            }
-            .semantics {
-                contentDescription = "OTP digit ${index + 1} of ${OtpRules.OTP_LENGTH}"
-            },
-        decorationBox = { innerTextField ->
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                shape = RoundedCornerShape(15.dp),
-                color = if (enabled) Color.White else DoloBackground,
-                border = androidx.compose.foundation.BorderStroke(
-                    width = if (focused || isError) 2.dp else 1.dp,
-                    color = borderColor
-                )
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    innerTextField()
-                }
-            }
+    Surface(
+        modifier = modifier.heightIn(min = 56.dp),
+        shape = RoundedCornerShape(15.dp),
+        color = if (enabled) Color.White else DoloBackground,
+        border = androidx.compose.foundation.BorderStroke(
+            width = if (focused || isError) 2.dp else 1.dp,
+            color = borderColor
+        )
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleLarge,
+                color = DoloNavy,
+                fontWeight = FontWeight.ExtraBold,
+                textAlign = TextAlign.Center
+            )
         }
-    )
+    }
 }
 
 @Composable
