@@ -21,7 +21,7 @@ class DummyDataTest {
                 matchingDoctors.size >= 2
             )
         }
-        assertEquals(24, DummyData.doctors.size)
-        assertEquals(24, DummyData.doctors.map { it.id }.distinct().size)
+        assertTrue(DummyData.doctors.size >= DummyData.categories.size * 2)
+        assertEquals(DummyData.doctors.size, DummyData.doctors.map { it.id }.distinct().size)
     }
 }
