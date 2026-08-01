@@ -68,3 +68,11 @@ The source reference was opened and inspected. The Compose implementation cannot
 - Light/Dark themes and 320 dp layout remain readable without clipping.
 
 final result: blocked
+
+## Cardless categories refinement
+
+The visual implementation now removes the hero and all decorative category/status card surfaces. Each specialty illustration is stored with an alpha channel and rendered with ContentScale.Fit inside a fixed 112 dp image region, preventing edge crop while keeping two-column rhythm consistent.
+
+Physical-device acceptance remains required because this checkout has no Gradle wrapper, Java runtime or Android renderer. Verify transparent edges against both Light and Dark backgrounds, complete artwork visibility at 320 dp width, long specialty labels, and the Home bottom-navigation action.
+
+final result: blocked

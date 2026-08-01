@@ -375,3 +375,9 @@ The initial Dark Mode contrast commit failed Kotlin compilation because a theme 
 Patient App `0.31.0-categories-ui` (version code 42) replaces the original demo category grid with a state-driven, searchable, accessible two-column Compose experience. Sixteen specialty categories expose stable IDs, aliases and Doctor counts. Selection passes category ID and visible name to the existing Doctor-list journey, while current local specialty naming remains compatible.
 
 The screen uses `DoctorCategoryRepository` and a fake local implementation so a future REST catalogue can replace prototype data without changing UI components. Loading, empty, error, no-result and disabled states are explicit. SMS, Push, Maps and Payments remain disabled. Use GitHub Actions for the authoritative Android gate, then verify the reference-led layout and navigation on a physical device.
+
+## Doctor Categories flat-layout refinement
+
+Patient App 0.31.1-categories-flat (version code 43) removes the category hero and card containers, ships transparent category illustrations, and changes image scaling from crop to fit. The Home bottom-nav action now returns to the existing Home back-stack destination reliably.
+
+GitHub Actions remains the compile/lint/unit/APK gate. On device, verify all category artwork is complete at the edges, search and category selection still work, unavailable states remain disabled, Light/Dark contrast is readable, and tapping Home returns directly to Patient Home.

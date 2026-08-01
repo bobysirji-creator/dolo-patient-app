@@ -210,3 +210,11 @@ Verification:
 - run GitHub Actions for compile, lint, unit tests and APK generation.
 - install the stable APK and compare the normal categories screen with the reference on a physical Android phone.
 - verify live search, clear, back, notifications, all bottom actions, each available category and Light/Dark themes.
+
+### Doctor Categories cardless refinement
+
+Patient App 0.31.1-categories-flat (version code 43) removes the decorative hero and all category/status card backgrounds. Specialty artwork now uses transparent lossless WebP assets and ContentScale.Fit within a consistently sized image area, so illustrations remain fully visible on small phones without cropping.
+
+The search field keeps a transparent container, while loading, empty, error and verification content render directly on the page background. Category selection, accessibility descriptions, unavailable states and REST-ready repository boundaries are unchanged.
+
+The Categories bottom-navigation Home action now explicitly pops back to the existing Home destination and falls back to a single-top Home navigation only when Home is absent from the stack.

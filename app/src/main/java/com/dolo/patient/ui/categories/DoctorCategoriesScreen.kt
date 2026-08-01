@@ -1,6 +1,5 @@
 package com.dolo.patient.ui.categories
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,7 +21,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -50,7 +48,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
@@ -152,9 +149,7 @@ fun DoctorCategoriesScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                DoctorCategoriesHero()
-            }
+
             item(span = { GridItemSpan(maxLineSpan) }) {
                 CategorySearchField(
                     query = state.query,
@@ -229,67 +224,30 @@ private fun DoctorCategoriesTopBar(
     onBack: () -> Unit,
     onNotifications: () -> Unit
 ) {
-    Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 2.dp) {
-        Row(
-            modifier = Modifier.statusBarsPadding().fillMaxWidth().heightIn(min = 62.dp).padding(horizontal = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBack, modifier = Modifier.semantics { contentDescription = "Go back" }) {
-                Icon(Icons.Outlined.ArrowBack, contentDescription = null)
-            }
-            BrandLogo(modifier = Modifier.weight(1f), compact = true)
-            IconButton(onClick = onNotifications) {
-                BadgedBox(
-                    badge = {
-                        if (notificationCount > 0) {
-                            Badge(containerColor = DoloCoral) {
-                                Text(if (notificationCount > 9) "9+" else notificationCount.toString())
-                            }
+    Row(
+        modifier = Modifier
+            .statusBarsPadding()
+            .fillMaxWidth()
+            .heightIn(min = 62.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onBack, modifier = Modifier.semantics { contentDescription = "Go back" }) {
+            Icon(Icons.Outlined.ArrowBack, contentDescription = null)
+        }
+        BrandLogo(modifier = Modifier.weight(1f), compact = true)
+        IconButton(onClick = onNotifications) {
+            BadgedBox(
+                badge = {
+                    if (notificationCount > 0) {
+                        Badge(containerColor = DoloCoral) {
+                            Text(if (notificationCount > 9) "9+" else notificationCount.toString())
                         }
                     }
-                ) {
-                    Icon(Icons.Outlined.Notifications, contentDescription = "Notifications")
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun DoctorCategoriesHero() {
-    Surface(
-        modifier = Modifier.fillMaxWidth().height(150.dp),
-        shape = RoundedCornerShape(24.dp),
-        color = MaterialTheme.colorScheme.primaryContainer,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    ) {
-        Box {
-            Image(
-                painter = painterResource(R.drawable.login_healthcare_hero),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-                alignment = Alignment.Center
-            )
-            Box(
-                Modifier.fillMaxSize().background(
-                    androidx.compose.ui.graphics.Brush.horizontalGradient(
-                        0f to MaterialTheme.colorScheme.primaryContainer,
-                        0.56f to MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.92f),
-                        1f to MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.08f)
-                    )
-                )
-            )
-            Column(
-                modifier = Modifier.fillMaxWidth(0.62f).padding(18.dp),
-                verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
-                Text("Doctor Categories", style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                Text(
-                    "Find the right specialist for your health",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.82f)
-                )
+                Icon(Icons.Outlined.Notifications, contentDescription = "Notifications")
             }
         }
     }
@@ -321,8 +279,8 @@ private fun CategorySearchField(
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(onSearch = { onSearch() }),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = MaterialTheme.colorScheme.surface,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+            focusedContainerColor = androidx.compose.ui.graphics.Color.Transparent,
+            unfocusedContainerColor = androidx.compose.ui.graphics.Color.Transparent,
             focusedBorderColor = MaterialTheme.colorScheme.primary,
             unfocusedBorderColor = MaterialTheme.colorScheme.outline
         )
@@ -335,73 +293,65 @@ fun DoctorCategoryCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val cardModifier = modifier
-        .fillMaxWidth()
-        .height(190.dp)
-        .alpha(if (category.isAvailable) 1f else 0.58f)
-        .semantics(mergeDescendants = true) {
-            contentDescription = "${category.contentDescription}. ${category.name}, ${category.doctorCount} doctors available"
-            if (!category.isAvailable) disabled()
-        }
-        .clickable(
-            enabled = category.isAvailable,
-            role = Role.Button,
-            onClick = onClick
-        )
-    Surface(
-        modifier = cardModifier,
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(22.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        shadowElevation = 5.dp
-    ) {
-        Column(Modifier.fillMaxSize().padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Surface(
-                modifier = Modifier.fillMaxWidth().height(102.dp),
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            ) {
-                Image(
-                    painter = painterResource(category.imageRes),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp))
-                )
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(178.dp)
+            .alpha(if (category.isAvailable) 1f else 0.58f)
+            .semantics(mergeDescendants = true) {
+                contentDescription = "${category.contentDescription}. ${category.name}, ${category.doctorCount} doctors available"
+                if (!category.isAvailable) disabled()
             }
-            Spacer(Modifier.height(8.dp))
-            Text(
-                category.name,
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+            .clickable(
+                enabled = category.isAvailable,
+                role = Role.Button,
+                onClick = onClick
             )
-            Text(
-                if (category.isAvailable) "${category.doctorCount} Doctors" else "Coming soon",
-                style = MaterialTheme.typography.bodySmall,
-                color = if (category.isAvailable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                fontWeight = FontWeight.SemiBold
+            .padding(horizontal = 4.dp, vertical = 3.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(112.dp)
+                .padding(horizontal = 6.dp, vertical = 2.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(category.imageRes),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxSize()
             )
         }
+        Spacer(Modifier.height(6.dp))
+        Text(
+            category.name,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            if (category.isAvailable) "${category.doctorCount} Doctors" else "Coming soon",
+            style = MaterialTheme.typography.bodySmall,
+            color = if (category.isAvailable) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }
 
 @Composable
 private fun LoadingCategoryCard() {
-    Surface(
-        modifier = Modifier.fillMaxWidth().height(190.dp),
-        shape = RoundedCornerShape(22.dp),
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    Column(
+        modifier = Modifier.fillMaxWidth().height(178.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Column(Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Box(Modifier.fillMaxWidth().height(102.dp).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surfaceVariant))
-            Spacer(Modifier.height(12.dp))
-            Box(Modifier.fillMaxWidth(0.7f).height(13.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant))
-            Spacer(Modifier.height(8.dp))
-            CircularProgressIndicator(Modifier.size(17.dp), strokeWidth = 2.dp)
-        }
+        CircularProgressIndicator(Modifier.size(24.dp), strokeWidth = 2.dp)
+        Spacer(Modifier.height(10.dp))
+        Text("Loading specialty", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -412,47 +362,47 @@ private fun CategoriesMessageCard(
     actionLabel: String? = null,
     onAction: (() -> Unit)? = null
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    Column(
+        Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Column(
-            Modifier.padding(horizontal = 22.dp, vertical = 26.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                if (actionLabel == "Try again") Icons.Outlined.Refresh else Icons.Outlined.Search,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(34.dp)
-            )
-            Text(title, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
-            Text(message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
-            if (actionLabel != null && onAction != null) TextButton(onClick = onAction) { Text(actionLabel) }
-        }
+        Icon(
+            if (actionLabel == "Try again") Icons.Outlined.Refresh else Icons.Outlined.Search,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(34.dp)
+        )
+        Text(title, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+        Text(message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+        if (actionLabel != null && onAction != null) TextButton(onClick = onAction) { Text(actionLabel) }
     }
 }
 
 @Composable
 private fun VerificationBanner() {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Surface(shape = CircleShape, color = MaterialTheme.colorScheme.surface, modifier = Modifier.size(44.dp)) {
-                Icon(Icons.Outlined.HealthAndSafety, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(10.dp))
-            }
-            Spacer(Modifier.width(12.dp))
-            Column {
-                Text("All doctors are verified and experienced professionals.", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSecondaryContainer)
-                Text("Your health is our priority.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.78f))
-            }
+        Icon(
+            Icons.Outlined.HealthAndSafety,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(34.dp)
+        )
+        Spacer(Modifier.width(12.dp))
+        Column {
+            Text(
+                "All doctors are verified and experienced professionals.",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                "Your health is our priority.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
