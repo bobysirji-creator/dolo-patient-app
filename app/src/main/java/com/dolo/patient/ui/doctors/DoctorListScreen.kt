@@ -335,10 +335,10 @@ fun DoctorSearchSection(
         OutlinedTextField(
             value = query,
             onValueChange = onSearchChanged,
-            modifier = Modifier.weight(1f).semantics {
+            modifier = Modifier.weight(1f).height(56.dp).semantics {
                 contentDescription = "Search " + category.pluralDisplayName + " and clinics"
             },
-            placeholder = { Text("Search " + category.pluralDisplayName.lowercase() + ", clinics...") },
+            placeholder = { Text("Search") },
             leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
             trailingIcon = {
                 if (query.isNotEmpty()) {
@@ -363,7 +363,7 @@ fun DoctorSearchSection(
         )
         OutlinedButton(
             onClick = onNearMe,
-            modifier = Modifier.heightIn(min = 56.dp),
+            modifier = Modifier.height(56.dp),
             shape = RoundedCornerShape(18.dp),
             contentPadding = PaddingValues(horizontal = 12.dp)
         ) {

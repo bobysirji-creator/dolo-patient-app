@@ -253,3 +253,7 @@ Verification:
 - install the APK and verify Cardiology plus at least two other categories.
 - verify search, each sort/filter, favourites, Profile, Book Now, notifications, five bottom destinations and callback confirmation.
 - test 320 dp layout, increased font size, Light/Dark themes and long Doctor/clinic text.
+
+### Doctor List search-row refinement
+
+Patient App 0.32.1-doctor-list-search (version code 45) gives the Doctor search field and Near me action the same fixed 56 dp height. The visible search placeholder is shortened to `Search`; the screen-reader description remains category-aware.

@@ -387,3 +387,7 @@ GitHub Actions remains the compile/lint/unit/APK gate. On device, verify all cat
 Patient App 0.32.0-doctor-list-ui (version code 44) replaces the original demo Doctor results page with the reference-led searchable and filterable Doctor List. Dynamic specialty headers, realistic portrait assets, responsive Doctor rows, availability, fees, favourites, local and hosted Profile routing, direct local booking, Maps placeholders, callback confirmation and the existing five-item bottom navigation are connected.
 
 The four Cardiology demo Doctors use stable local IDs backed by DummyData, so Profile and walk-in booking remain functional. No Doctor Profile redesign or provider integration is included. GitHub Actions remains the Android compile/lint/unit/APK gate; physical-device visual comparison is still required.
+
+## Doctor List search-row refinement
+
+Patient App 0.32.1-doctor-list-search (version code 45) aligns the Doctor search and Near me controls at 56 dp and simplifies the visible placeholder to `Search`. Search logic, accessibility context, filters, booking and navigation are unchanged.
