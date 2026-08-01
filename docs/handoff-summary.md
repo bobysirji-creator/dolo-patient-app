@@ -369,3 +369,9 @@ Use GitHub Actions for compilation and APK generation. On a physical device, ver
 ### Version 0.30.3 CI correction
 
 The initial Dark Mode contrast commit failed Kotlin compilation because a theme color was read by a file-level Modifier. The shared page modifier is now a composable function, so `MaterialTheme.colorScheme.background` is evaluated only from composable screen contexts. UI behavior and data workflows are unchanged.
+
+## Doctor Categories UI implementation checkpoint
+
+Patient App `0.31.0-categories-ui` (version code 42) replaces the original demo category grid with a state-driven, searchable, accessible two-column Compose experience. Sixteen specialty categories expose stable IDs, aliases and Doctor counts. Selection passes category ID and visible name to the existing Doctor-list journey, while current local specialty naming remains compatible.
+
+The screen uses `DoctorCategoryRepository` and a fake local implementation so a future REST catalogue can replace prototype data without changing UI components. Loading, empty, error, no-result and disabled states are explicit. SMS, Push, Maps and Payments remain disabled. Use GitHub Actions for the authoritative Android gate, then verify the reference-led layout and navigation on a physical device.

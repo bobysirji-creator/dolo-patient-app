@@ -1,15 +1,11 @@
 package com.dolo.patient.ui.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -22,8 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -100,43 +94,6 @@ fun HomeScreen(onCategories:()->Unit,onDoctor:(String)->Unit,onHistory:()->Unit,
    item{SectionHeader("Favourite doctors",if(favourites.isNotEmpty())"View all" else null,if(favourites.isNotEmpty())onFavourites else null)}
    if(favourites.isEmpty())item{EmptyCard("Save doctors you trust for faster booking next time.")}else items(favourites.take(2),key={it.id}){DoctorCard(it,true,{onDoctor(it.id)},{})}
    item{Spacer(Modifier.height(4.dp))}
-  }
- }
-}
-@Composable
-fun CategoriesScreen(
- onBack:()->Unit,
- onSelect:(String)->Unit,
- onHome:()->Unit,
- onAppointments:()->Unit,
- onBook:()->Unit
-){
- Scaffold(
-  containerColor=MaterialTheme.colorScheme.background,
-  bottomBar={DoloBottomBar(PatientBottomDestination.BOOK,onHome,onAppointments,onBook)}
- ){padding->
-  Column(Modifier.padding(padding).fillMaxSize().padding(horizontal=18.dp)){
-   ScreenTitle("Choose a specialty",onBack)
-   Text("What kind of care do you need?",style=MaterialTheme.typography.bodyLarge,color=MaterialTheme.colorScheme.onSurfaceVariant,modifier=Modifier.padding(top=4.dp,bottom=14.dp))
-   LazyVerticalGrid(GridCells.Adaptive(150.dp),modifier=Modifier.weight(1f),contentPadding=PaddingValues(bottom=20.dp),horizontalArrangement=Arrangement.spacedBy(12.dp),verticalArrangement=Arrangement.spacedBy(12.dp)){
-    items(DummyData.categories,key={it.id}){category->CategoryCard(category,onSelect)}
-   }
-  }
- }
-}
-
-@Composable
-private fun CategoryCard(category:com.dolo.patient.data.model.DoctorCategory,onSelect:(String)->Unit){
- Surface(
-  modifier=Modifier.height(142.dp).clickable{onSelect(category.name)},
-  color=MaterialTheme.colorScheme.surface,
-  border=androidx.compose.foundation.BorderStroke(1.dp,MaterialTheme.colorScheme.outlineVariant),
-  shadowElevation=3.dp,
-  shape=RoundedCornerShape(20.dp)
- ){
-  Column(Modifier.fillMaxSize().padding(10.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.SpaceBetween){
-   Image(painter=painterResource(category.imageRes),contentDescription=category.name+" illustration",modifier=Modifier.fillMaxWidth().height(92.dp).clip(RoundedCornerShape(15.dp)),contentScale=ContentScale.Crop)
-   Text(category.name,textAlign=TextAlign.Center,style=MaterialTheme.typography.titleSmall,color=MaterialTheme.colorScheme.onSurface,maxLines=1)
   }
  }
 }

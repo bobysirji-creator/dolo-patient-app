@@ -41,3 +41,30 @@ Blocked for the same reason. The top bar, greeting hero, token cards, Admin Broa
 - Replace explicit Doctor image placeholders with approved portraits.
 
 final result: blocked
+# Doctor Categories design QA
+
+source visual truth path: C:\Users\Poly\Documents\codex\2026-07-11\categories.jpeg
+implementation screenshot path: unavailable
+viewport: intended Android portrait phones from 320 dp through standard and large widths
+state: normal categories plus preview-only loading, error, no-result, empty and disabled states
+
+## Full-view comparison evidence
+
+The source reference was opened and inspected. The Compose implementation cannot be rendered in this lightweight checkout because the repository has no Gradle wrapper and this PC environment has no configured Android SDK/runtime. Code inspection is not visual comparison evidence.
+
+## Findings
+
+- [P1] Native implementation screenshot unavailable
+  - Location: Doctor Categories screen.
+  - Impact: exact typography, card density, image crop and small-screen behavior cannot be visually certified here.
+  - Fix: run GitHub Actions, install the stable APK, capture the populated Categories screen on a physical phone and compare it with the reference.
+
+## Implementation checklist
+
+- GitHub Actions compile, lint, unit-test and APK jobs pass.
+- Search by specialty and health-need aliases filters live.
+- Clear search, Back, Notifications and all five bottom destinations work.
+- Category selection opens Doctor List with the correct category ID/name.
+- Light/Dark themes and 320 dp layout remain readable without clipping.
+
+final result: blocked

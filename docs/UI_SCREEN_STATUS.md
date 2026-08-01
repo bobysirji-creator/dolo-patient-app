@@ -167,3 +167,46 @@ Patient App 0.30.3-dark-contrast (version code 41) places the queue state immedi
 The Patient UI now uses semantic Material theme colors across Login, OTP, shared cards and navigation, Home, discovery, booking, appointment, notification and diagnostics surfaces. The mobile-number field explicitly defines theme-aware text, placeholder, label, cursor, background, border and disabled colors. Fixed pale cards and dark navy text were replaced where they caused low contrast, while intentional white-on-navy promotional content remains unchanged.
 
 Verification: check Login mobile-number readability, OTP boxes and phone summary, Home queue cards, discovery/booking cards, notifications and diagnostics in both Light and Dark modes. GitHub Actions remains the authoritative compile, lint, unit-test and APK gate.
+
+## 4. Doctor Categories
+
+Status: implemented in `0.31.0-categories-ui` (version code 42); GitHub Actions and physical-device acceptance pending.
+
+Reference: `C:\Users\Poly\Documents\codex\2026-07-11\categories.jpeg`
+
+Implemented:
+
+- responsive two-column specialty grid with 16 required categories and visible Doctor counts
+- dedicated premium medical illustrations for Gastroenterology, Pulmonology, Urology, Endocrinology and Oncology; existing approved category artwork is reused where suitable
+- compact DO-LO top bar with Back, logo and accessible unread-notification badge
+- realistic healthcare hero using the approved local Doctor-and-Patient artwork
+- live case-insensitive search across names, health needs and specialty aliases
+- search IME action, clear control, focus/keyboard handling and no-result recovery
+- loading skeletons, repository empty state, retryable network-error state and disabled-category presentation
+- category selection routes with both stable category ID and visible category name
+- existing local specialty aliases remain compatible with the current Doctor list
+- verified-healthcare-professional information banner
+- reusable five-item Patient navigation with Book selected
+- merged card semantics, descriptive imagery and responsive small-phone previews
+- unit coverage for filtering, aliases, multi-term matching, empty results, category counts and unique IDs
+
+Architecture:
+
+- `DoctorCategoriesUiState` contains render state only.
+- `DoctorCategoriesUiEvent` defines search, clear, retry and selection actions.
+- `DoctorCategoriesViewModel` owns loading and live filtering.
+- `DoctorCategoryRepository` keeps the screen REST-ready; `FakeDoctorCategoryRepository` supplies current prototype data.
+- `DoctorCategoriesRoute` owns navigation and only opens available categories.
+- `DoctorCategoriesScreen`, `DoctorCategoryCard` and the search/header/status components remain stateless and reusable.
+
+Provider boundary:
+
+- category data is local fake repository data in this checkpoint.
+- no Maps, payment, SMS or Push provider was enabled.
+- REST replacement can be introduced behind `DoctorCategoryRepository` without redesigning the screen.
+
+Verification:
+
+- run GitHub Actions for compile, lint, unit tests and APK generation.
+- install the stable APK and compare the normal categories screen with the reference on a physical Android phone.
+- verify live search, clear, back, notifications, all bottom actions, each available category and Light/Dark themes.
