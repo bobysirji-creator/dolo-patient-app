@@ -23,8 +23,10 @@ object DummyData {
     val doctors = listOf(
         Doctor("1", "Dr. Aisha Mehta", "General Physician", "Care Point Clinic", 11, 4.8, 500),
         Doctor("2", "Dr. Rohan Kapoor", "General Physician", "City Health Centre", 8, 4.7, 450),
-        Doctor("3", "Dr. Neha Sharma", "Cardiologist", "Heartline Clinic", 14, 4.9, 800),
-        Doctor("4", "Dr. Arjun Malhotra", "Cardiologist", "Pulse Care Hospital", 10, 4.7, 750, eveningAvailable = false),
+        Doctor("3", "Dr. Rohan Mehta", "Cardiologist", "Heart Care Clinic, Sector 45", 12, 4.8, 700),
+        Doctor("4", "Dr. Anjali Verma", "Cardiologist", "Civic Heart Clinic, Sector 12", 9, 4.7, 600),
+        Doctor("25", "Dr. Arjun Kapoor", "Cardiologist", "Life Line Hospital, Sector 44", 15, 4.6, 750),
+        Doctor("26", "Dr. Neha Singh", "Cardiologist", "Wellness Heart Centre, Sector 29", 8, 4.5, 550),
         Doctor("5", "Dr. Kavya Iyer", "Dentist", "Smile Studio", 9, 4.8, 600),
         Doctor("6", "Dr. Sameer Khan", "Dentist", "Pearl Dental Care", 13, 4.6, 550, morningAvailable = false),
         Doctor("7", "Dr. Meera Joshi", "Pediatrician", "Little Steps Clinic", 12, 4.9, 650),

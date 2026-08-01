@@ -218,3 +218,38 @@ Patient App 0.31.1-categories-flat (version code 43) removes the decorative hero
 The search field keeps a transparent container, while loading, empty, error and verification content render directly on the page background. Category selection, accessibility descriptions, unavailable states and REST-ready repository boundaries are unchanged.
 
 The Categories bottom-navigation Home action now explicitly pops back to the existing Home destination and falls back to a single-top Home navigation only when Home is absent from the stack.
+
+## 5. Doctor List
+
+Status: implemented in 0.32.0-doctor-list-ui (version code 44); GitHub Actions and physical-device visual acceptance pending.
+
+Reference: C:\Users\Poly\Documents\codex\2026-07-11\doctor_list.jpeg
+
+Implemented:
+
+- open specialty header with dynamic category names, supporting copy and transparent category artwork
+- left-aligned Back plus DO-LO branding, visually centred Doctor List title and accessible notification badge
+- live case-insensitive search across Doctor, specialty, qualification, clinic and locality
+- Near me and clinic-location placeholders isolated behind Maps-ready callbacks
+- horizontally scrollable Sort, Available Now, Fees, Experience and filter-reset controls
+- responsive lightweight Doctor items with realistic local portraits, verification, rating, experience, clinic, distance, availability, fee, favourite, Profile and Book Now actions
+- compact narrow-phone layout that moves fee and booking below Doctor details
+- loading, search-empty, category-empty, filtered-empty, network-error and unavailable states
+- hosted Doctor profiles remain discoverable without bypassing the hosted Profile flow
+- Request Callback confirmation remains a non-provider prototype boundary
+- existing five-item Patient navigation is reused
+- previews cover standard, search, no-results, empty-category, unavailable, small-phone, large-font, loading and error states
+- unit coverage validates search, sorting, combined filters, category arguments and action IDs
+
+Provider boundary:
+
+- no Maps, calls, SMS, Push or Payment provider was enabled.
+- local realistic portraits are packaged as optimised WebP.
+- DoctorListRepository and filter/query models are ready for a future paginated REST endpoint.
+
+Verification:
+
+- GitHub Actions must run compile, lint, unit tests and stable APK generation.
+- install the APK and verify Cardiology plus at least two other categories.
+- verify search, each sort/filter, favourites, Profile, Book Now, notifications, five bottom destinations and callback confirmation.
+- test 320 dp layout, increased font size, Light/Dark themes and long Doctor/clinic text.

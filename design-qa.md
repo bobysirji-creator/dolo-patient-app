@@ -76,3 +76,31 @@ The visual implementation now removes the hero and all decorative category/statu
 Physical-device acceptance remains required because this checkout has no Gradle wrapper, Java runtime or Android renderer. Verify transparent edges against both Light and Dark backgrounds, complete artwork visibility at 320 dp width, long specialty labels, and the Home bottom-navigation action.
 
 final result: blocked
+
+# Doctor List design QA
+
+source visual truth path: C:\Users\Poly\Documents\codex\2026-07-11\doctor_list.jpeg
+implementation screenshot path: unavailable
+viewport: Android portrait phones from 320 dp through large widths
+state: populated Cardiology list plus loading, search-empty, category-empty, filtered-empty, error and unavailable states
+
+## Comparison evidence
+
+The approved Doctor List reference was opened and inspected. The Compose implementation cannot be rendered in this lightweight checkout because there is no Gradle wrapper, local Java/Gradle toolchain, Android SDK or emulator. Code inspection and asset review are not accepted as a rendered visual comparison.
+
+## Findings
+
+- [P1] Native implementation screenshot unavailable
+  - Location: complete Doctor List screen.
+  - Impact: exact typography, responsive row breakpoints, filter density, portrait crop and long-text wrapping cannot be visually certified locally.
+  - Fix: run GitHub Actions, install the stable APK, capture the populated Cardiology screen on a physical phone and compare it at the same viewport with the approved reference.
+
+## Device checklist
+
+- Verify Back plus logo placement, centred title and notification alignment.
+- Verify open specialty header and fully visible transparent illustration.
+- Verify portrait clarity, Doctor-row readability, fee and Book Now placement on small and standard phones.
+- Verify search, filters, favourite, Profile, booking, Near me placeholder, callback dialog and bottom navigation.
+- Verify Light/Dark modes and increased font scaling.
+
+final result: blocked

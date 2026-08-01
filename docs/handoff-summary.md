@@ -381,3 +381,9 @@ The screen uses `DoctorCategoryRepository` and a fake local implementation so a 
 Patient App 0.31.1-categories-flat (version code 43) removes the category hero and card containers, ships transparent category illustrations, and changes image scaling from crop to fit. The Home bottom-nav action now returns to the existing Home back-stack destination reliably.
 
 GitHub Actions remains the compile/lint/unit/APK gate. On device, verify all category artwork is complete at the edges, search and category selection still work, unavailable states remain disabled, Light/Dark contrast is readable, and tapping Home returns directly to Patient Home.
+
+## Doctor List UI implementation checkpoint
+
+Patient App 0.32.0-doctor-list-ui (version code 44) replaces the original demo Doctor results page with the reference-led searchable and filterable Doctor List. Dynamic specialty headers, realistic portrait assets, responsive Doctor rows, availability, fees, favourites, local and hosted Profile routing, direct local booking, Maps placeholders, callback confirmation and the existing five-item bottom navigation are connected.
+
+The four Cardiology demo Doctors use stable local IDs backed by DummyData, so Profile and walk-in booking remain functional. No Doctor Profile redesign or provider integration is included. GitHub Actions remains the Android compile/lint/unit/APK gate; physical-device visual comparison is still required.

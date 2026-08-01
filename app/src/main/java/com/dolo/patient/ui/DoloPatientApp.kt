@@ -21,6 +21,7 @@ import com.dolo.patient.platform.*
 import com.dolo.patient.ui.categories.DoctorCategoriesRoute
 import com.dolo.patient.ui.home.AllQueuesScreen
 import com.dolo.patient.ui.home.PatientHomeRoute
+import com.dolo.patient.ui.doctors.DoctorListRoute
 import com.dolo.patient.ui.login.LoginRoute
 import com.dolo.patient.ui.login.LoginViewModel
 import com.dolo.patient.ui.login.LoginViewModelFactory
@@ -65,8 +66,8 @@ object Routes{const val Splash="splash";const val Login="login";const val Home="
   }
   composable(Routes.AllQueues){AllQueuesScreen(patientState=patient.uiState,hostedState=if(auth.uiState.session?.mode==PatientAuthMode.HOSTED_PROTOTYPE)hosted.uiState else null,onBack=nav::popBackStack,onQueue={nav.navigate("queue/"+it)})}
   composable(Routes.Categories){DoctorCategoriesRoute(notificationCount=patient.uiState.notifications.count{!it.isRead},onBack=nav::popBackStack,onNotifications={nav.navigate(Routes.Notifications)},onCategorySelected={category->nav.navigate("doctors/${Uri.encode(category.id)}/${Uri.encode(category.name)}")},onHome={nav.returnToHome()},onAppointments={nav.openPrimary(Routes.History)},onBook={},onHistory={nav.openPrimary(Routes.History)},onProfile={nav.openPrimary(Routes.Profile)})}
-  composable(Routes.Doctors,arguments=listOf(navArgument("category"){type=NavType.StringType})){e->val c=e.arguments?.getString("category").orEmpty();DoctorListScreen(c,nav::popBackStack,patient.uiState,platform.uiState,{patient.search(it,if(c=="All")null else c)},{nav.navigate("doctor/"+it)},{nav.navigate("hosted-doctor/"+it)},platform::refresh,patient::toggleFavourite,{nav.openPrimary(Routes.Home)},{nav.openPrimary(Routes.History)},{nav.openPrimary(Routes.Categories)})}
-  composable(Routes.CategoryDoctors,arguments=listOf(navArgument("categoryId"){type=NavType.StringType},navArgument("categoryName"){type=NavType.StringType})){e->val id=e.arguments?.getString("categoryId").orEmpty();val name=e.arguments?.getString("categoryName").orEmpty();val specialty=doctorSearchSpecialty(id,name);DoctorListScreen(name,nav::popBackStack,patient.uiState,platform.uiState,{patient.search(it,specialty)},{nav.navigate("doctor/"+it)},{nav.navigate("hosted-doctor/"+it)},platform::refresh,patient::toggleFavourite,{nav.openPrimary(Routes.Home)},{nav.openPrimary(Routes.History)},{nav.openPrimary(Routes.Categories)})}
+  composable(Routes.Doctors,arguments=listOf(navArgument("category"){type=NavType.StringType})){e->val c=e.arguments?.getString("category").orEmpty();DoctorListRoute(c,c,patient.uiState,platform.uiState,nav::popBackStack,{nav.navigate(Routes.Notifications)},{nav.navigate("doctor/"+it)},{nav.navigate("hosted-doctor/"+it)},{nav.navigate("booking/"+it)},platform::refresh,patient::toggleFavourite,{nav.returnToHome()},{nav.openPrimary(Routes.History)},{nav.openPrimary(Routes.Categories)},{nav.openPrimary(Routes.History)},{nav.openPrimary(Routes.Profile)})}
+  composable(Routes.CategoryDoctors,arguments=listOf(navArgument("categoryId"){type=NavType.StringType},navArgument("categoryName"){type=NavType.StringType})){e->val id=e.arguments?.getString("categoryId").orEmpty();val name=e.arguments?.getString("categoryName").orEmpty();DoctorListRoute(id,name,patient.uiState,platform.uiState,nav::popBackStack,{nav.navigate(Routes.Notifications)},{nav.navigate("doctor/"+it)},{nav.navigate("hosted-doctor/"+it)},{nav.navigate("booking/"+it)},platform::refresh,patient::toggleFavourite,{nav.returnToHome()},{nav.openPrimary(Routes.History)},{nav.openPrimary(Routes.Categories)},{nav.openPrimary(Routes.History)},{nav.openPrimary(Routes.Profile)})}
   composable(Routes.HostedDoctorDetails,arguments=listOf(navArgument("clinicId"){type=NavType.StringType})){e->val id=e.arguments?.getString("clinicId").orEmpty();HostedDoctorDetailsScreen(platform.uiState.clinics.firstOrNull{it.id==id},hosted.uiState.snapshot?.communications.orEmpty().filter{it.audience=="DOCTOR_PROFILE"&&it.clinicId==id},nav::popBackStack,platform::refresh){nav.navigate(Routes.HostedSync)}}
   composable(Routes.DoctorDetails,arguments=listOf(navArgument("doctorId"){type=NavType.StringType})){e->val id=e.arguments?.getString("doctorId").orEmpty();DoctorDetailsScreen(id,patient.uiState.favouriteIds.contains(id),patient.uiState.reviews,nav::popBackStack,{patient.toggleFavourite(id)},{nav.navigate("booking/"+id)})}
   composable(Routes.Favourites){FavouritesScreen(patient.uiState,nav::popBackStack,{nav.navigate("doctor/"+it)},patient::toggleFavourite)}
@@ -94,7 +95,4 @@ private fun NavHostController.openPrimary(route:String){
   launchSingleTop=true
   restoreState=true
  }
-}
-private fun doctorSearchSpecialty(categoryId:String,categoryName:String):String=when(categoryId){
- "pediatrics"->"Pediatrician";"dermatology"->"Dermatologist";"gynecology"->"Gynecologist";"orthopedics"->"Orthopedic";"cardiology"->"Cardiologist";"ent"->"ENT Specialist";"ophthalmology"->"Ophthalmologist";"dentistry"->"Dentist";"psychiatry"->"Psychiatrist";"neurology"->"Neurologist";else->categoryName
 }
