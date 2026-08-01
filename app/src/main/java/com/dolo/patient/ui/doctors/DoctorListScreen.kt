@@ -422,7 +422,8 @@ fun DoctorFilterRow(
                     )
                 }
             )
-        }        item {
+        }
+        item {
             DoctorMenuChip(
                 label = if (filters.minimumExperience == null) "Experience" else filters.minimumExperience.toString() + "+ years",
                 selected = filters.minimumExperience != null,
