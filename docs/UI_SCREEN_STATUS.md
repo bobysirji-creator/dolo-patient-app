@@ -288,3 +288,8 @@ Verification:
 - GitHub Actions must compile, lint, run unit tests and produce the stable APK.
 - install over the accepted Patient App and complete `docs/appointment-booking-device-test.md`.
 - capture the populated booking screen and compare it with the source reference before visual acceptance.
+### Appointment Booking readability and payment refinement
+
+Patient App 0.33.1-booking-polish (version code 47) simplifies visitor selection to the Patient name plus selection indicator, removes initials avatars from the Who is visiting row, widens all horizontal booking choices and gives each card a stable height. Selected cards now use a subtle translucent teal surface and lighter border instead of a high-contrast fill.
+
+The fee model now excludes the clinic-collected consultation fee from the booking payment. `Total Payable Now` equals the configurable DO-LO service charge after any applicable service-charge discount/tax, while the consultation fee is separately labelled for payment at the clinic. Fee labels and amounts share aligned columns.

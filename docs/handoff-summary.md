@@ -398,3 +398,6 @@ Patient App 0.33.0-booking-ui (version code 46) replaces the demo booking form w
 The screen uses `AppointmentBookingRepository` with a fake implementation so REST booking options and appointment creation can be added without replacing the Compose UI. Successful confirmation still commits through the existing `PatientViewModel.book` path, preserving token allocation, history, persistence and live queue behavior. Provider integrations remain disabled and the existing Booking Confirmation screen is intentionally unchanged.
 
 This checkout has no local Android toolchain. GitHub Actions is the compile/lint/unit/APK gate; then complete `docs/appointment-booking-device-test.md` on a physical phone.
+## Appointment Booking polish checkpoint
+
+Patient App 0.33.1-booking-polish (version code 47) widens and fixes the height of visitor, clinic and session cards, removes visitor-initial circles, softens selected-state contrast and aligns fee values. The booking total now represents only the DO-LO service charge payable during booking; the Doctor consultation fee remains clearly listed for direct payment at the clinic. Appointment creation and token workflow are unchanged.

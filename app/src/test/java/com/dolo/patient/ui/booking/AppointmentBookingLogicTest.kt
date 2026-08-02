@@ -51,8 +51,8 @@ class AppointmentBookingLogicTest {
     }
 
     @Test fun feeTotalIsCalculatedOutsideComposable() {
-        assertEquals(720, AppointmentFeeUiModel(700, 20).totalPayable)
-        assertEquals(670, AppointmentFeeUiModel(700, 20, discount = 50).totalPayable)
+        assertEquals(20, AppointmentFeeUiModel(700, 20).totalPayable)
+        assertEquals(0, AppointmentFeeUiModel(700, 20, discount = 50).totalPayable)
     }
 
     @Test fun validationRequiresEverySelection() {

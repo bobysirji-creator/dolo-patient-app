@@ -31,3 +31,10 @@ Use the stable APK produced for Patient App 0.33.0-booking-ui (version code 46).
 - [ ] TalkBack announces visitor, clinic, date, session availability/selection, notification count and Confirm Booking.
 
 Record screenshots of the populated screen in Light and Dark modes for comparison with `C:\Users\Poly\Documents\codex\2026-07-11\appointment.png`.
+## Version 0.33.1 focused checks
+
+- [ ] Who is visiting cards show only the full Patient name and selection indicator; no initials circles appear.
+- [ ] Long Patient, clinic and session text uses the wider fixed-size horizontal cards without changing card height.
+- [ ] Selected visitor, clinic, date and session backgrounds are lightly tinted in Light and Dark modes.
+- [ ] Consultation Fee is labelled for clinic payment and is excluded from Total Payable Now.
+- [ ] Total Payable Now equals the DO-LO Service Charge and all fee amounts align at the right edge.

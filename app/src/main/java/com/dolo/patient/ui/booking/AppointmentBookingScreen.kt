@@ -26,6 +26,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -169,15 +170,14 @@ fun WhoIsVisitingSection(visitors: List<AppointmentVisitorUiModel>, selectedId: 
 @Composable
 fun AppointmentVisitorOption(visitor: AppointmentVisitorUiModel, selected: Boolean, onClick: () -> Unit) {
     val description = "${visitor.name}, ${visitor.relationLabel}, ${if (selected) "selected" else "not selected"} for appointment"
-    SelectableSurface(166.dp, selected, visitor.isProfileComplete, description, onClick) {
-        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Surface(Modifier.size(48.dp), CircleShape, color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant) { Box(contentAlignment = Alignment.Center) { Text(visitor.initials, fontWeight = FontWeight.Bold, color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant) } }
-            Spacer(Modifier.width(9.dp)); Column(Modifier.weight(1f)) { Text(visitor.name, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis); Text(visitor.relationLabel, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+    SelectableSurface(220.dp, selected, visitor.isProfileComplete, description, onClick, fixedHeight = 62.dp) {
+        Row(Modifier.fillMaxSize().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(visitor.name, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+            Spacer(Modifier.width(10.dp))
             SelectionIcon(selected)
         }
     }
 }
-
 @Composable
 fun ClinicSelectionSection(clinics: List<ClinicOptionUiModel>, selectedId: String?, onSelect: (String) -> Unit) {
     SectionTitle(Icons.Outlined.LocalHospital, "1  Select Clinic"); Spacer(Modifier.height(10.dp))
@@ -188,8 +188,8 @@ fun ClinicSelectionSection(clinics: List<ClinicOptionUiModel>, selectedId: Strin
 @Composable
 fun CompactClinicCard(clinic: ClinicOptionUiModel, selected: Boolean, onClick: () -> Unit) {
     val distance = clinic.distanceKm?.let { "$it kilometres away" } ?: "distance unavailable"
-    SelectableSurface(174.dp, selected, clinic.isAvailable, "${clinic.name}, ${clinic.address}, $distance, ${if (selected) "selected" else "not selected"}", onClick) {
-        Column(Modifier.heightIn(min = 142.dp).padding(13.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+    SelectableSurface(236.dp, selected, clinic.isAvailable, "${clinic.name}, ${clinic.address}, $distance, ${if (selected) "selected" else "not selected"}", onClick) {
+        Column(Modifier.fillMaxSize().padding(13.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Row { Icon(Icons.Outlined.LocationOn, null, tint = MaterialTheme.colorScheme.primary); Spacer(Modifier.weight(1f)); SelectionIcon(selected) }
             Text(clinic.name, style = MaterialTheme.typography.titleSmall, maxLines = 2, overflow = TextOverflow.Ellipsis)
             Text(clinic.address, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 3, overflow = TextOverflow.Ellipsis)
@@ -200,15 +200,26 @@ fun CompactClinicCard(clinic: ClinicOptionUiModel, selected: Boolean, onClick: (
 }
 
 @Composable
-private fun SelectableSurface(width: androidx.compose.ui.unit.Dp, selected: Boolean, enabled: Boolean, description: String, onClick: () -> Unit, content: @Composable () -> Unit) {
+private fun SelectableSurface(
+    width: androidx.compose.ui.unit.Dp,
+    selected: Boolean,
+    enabled: Boolean,
+    description: String,
+    onClick: () -> Unit,
+    fixedHeight: androidx.compose.ui.unit.Dp = 148.dp,
+    content: @Composable () -> Unit
+) {
     Surface(
-        modifier = Modifier.width(width).heightIn(min = 94.dp).alpha(if (enabled) 1f else .5f).semantics(mergeDescendants = true) { contentDescription = description }.clickable(enabled = enabled, role = Role.RadioButton, onClick = onClick),
-        shape = RoundedCornerShape(18.dp), color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
-        border = BorderStroke(if (selected) 2.dp else 1.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline), shadowElevation = if (selected) 3.dp else 1.dp,
+        modifier = Modifier.width(width).height(fixedHeight).alpha(if (enabled) 1f else .5f)
+            .semantics(mergeDescendants = true) { contentDescription = description }
+            .clickable(enabled = enabled, role = Role.RadioButton, onClick = onClick),
+        shape = RoundedCornerShape(18.dp),
+        color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = .07f) else MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.primary.copy(alpha = .7f) else MaterialTheme.colorScheme.outline),
+        shadowElevation = if (selected) 2.dp else 1.dp,
         content = content
     )
 }
-
 @Composable
 private fun SelectionIcon(selected: Boolean) { Icon(if (selected) Icons.Outlined.CheckCircle else Icons.Outlined.RadioButtonUnchecked, null, tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline, modifier = Modifier.size(20.dp)) }
 
@@ -223,11 +234,11 @@ fun AppointmentDateSelector(dates: List<AppointmentDateUiModel>, selected: Local
 
 @Composable
 private fun DateOption(option: AppointmentDateUiModel, selected: Boolean, onClick: () -> Unit) {
-    val foreground = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+    val foreground = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
     Surface(
         modifier = Modifier.width(62.dp).height(78.dp).alpha(if (option.isAvailable) 1f else .45f).semantics { contentDescription = "${option.date}, ${if (option.isAvailable) "available" else "unavailable"}${if (selected) ", selected" else ""}" }.clickable(enabled = option.isAvailable, role = Role.RadioButton, onClick = onClick),
-        shape = RoundedCornerShape(15.dp), color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline)
+        shape = RoundedCornerShape(15.dp), color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = .08f) else MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.primary.copy(alpha = .7f) else MaterialTheme.colorScheme.outline)
     ) { Column(Modifier.padding(vertical = 7.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Text(option.date.format(DateTimeFormatter.ofPattern("EEE")), style = MaterialTheme.typography.labelMedium, color = foreground)
         Text(option.date.dayOfMonth.toString(), style = MaterialTheme.typography.titleLarge, color = foreground)
@@ -245,8 +256,8 @@ fun WalkInSessionSection(sessions: List<WalkInSessionUiModel>, selectedId: Strin
 @Composable
 fun WalkInSessionCard(session: WalkInSessionUiModel, selected: Boolean, onClick: () -> Unit) {
     val time = session.startTime.format(timeFormat) + " - " + session.endTime.format(timeFormat)
-    SelectableSurface(244.dp, selected, session.isAvailable, "${session.name}, $time, ${session.availableTokens} tokens available${if (selected) ", selected" else ""}", onClick) {
-        Column(Modifier.heightIn(min = 160.dp).padding(15.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    SelectableSurface(300.dp, selected, session.isAvailable, "${session.name}, $time, ${session.availableTokens} tokens available${if (selected) ", selected" else ""}", onClick, fixedHeight = 160.dp) {
+        Column(Modifier.fillMaxSize().padding(15.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) { Icon(if (session.type == WalkInSessionType.MORNING) Icons.Outlined.LightMode else Icons.Outlined.DarkMode, null, tint = MaterialTheme.colorScheme.primary); Spacer(Modifier.width(8.dp)); Text(session.name, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f)); SelectionIcon(selected) }
             Text(time, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.secondary)
             Text(if (session.isAvailable) "${session.availableTokens} Tokens Available" else "Session Full", style = MaterialTheme.typography.labelLarge, color = if (session.isAvailable) DoloSuccess else MaterialTheme.colorScheme.error)
@@ -273,19 +284,32 @@ fun SelectedPatientDetailsCard(visitor: AppointmentVisitorUiModel?, onChange: ()
 
 @Composable
 fun AppointmentFeeSummary(fees: AppointmentFeeUiModel, onInfo: () -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text("Fee Summary", style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
         FeeRow("Consultation Fee", AppointmentBookingLogic.formatInr(fees.consultationFee))
-        Row(verticalAlignment = Alignment.CenterVertically) { Text("DO-LO Service Charge", Modifier.weight(1f)); IconButton(onClick = onInfo, modifier = Modifier.size(36.dp)) { Icon(Icons.Outlined.Info, "About service charge", Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary) }; Text(AppointmentBookingLogic.formatInr(fees.serviceCharge)) }
+        Text("Pay directly at the clinic", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        FeeRow("DO-LO Service Charge", AppointmentBookingLogic.formatInr(fees.serviceCharge), onInfo = onInfo)
         if (fees.discount > 0) FeeRow("Discount", "-${AppointmentBookingLogic.formatInr(fees.discount)}")
-        HorizontalDivider(); FeeRow("Total Payable", AppointmentBookingLogic.formatInr(fees.totalPayable), true)
-        Text("Consultation fee is collected at the clinic. Online payment is not enabled yet.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        HorizontalDivider()
+        FeeRow("Total Payable Now", AppointmentBookingLogic.formatInr(fees.totalPayable), strong = true)
+        Text("Only the DO-LO service charge is payable during booking. The consultation fee is paid at the clinic.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 @Composable
-private fun FeeRow(label: String, value: String, strong: Boolean = false) { Row(Modifier.fillMaxWidth()) { Text(label, Modifier.weight(1f), style = if (strong) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium); Text(value, style = if (strong) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyMedium, color = if (strong) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface) } }
-
+private fun FeeRow(label: String, value: String, strong: Boolean = false, onInfo: (() -> Unit)? = null) {
+    Row(Modifier.fillMaxWidth().heightIn(min = 36.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+            Text(label, style = if (strong) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium)
+            if (onInfo != null) {
+                IconButton(onClick = onInfo, modifier = Modifier.size(34.dp)) {
+                    Icon(Icons.Outlined.Info, "About service charge", Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+                }
+            }
+        }
+        Text(value, modifier = Modifier.widthIn(min = 76.dp), textAlign = TextAlign.End, style = if (strong) MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyMedium, color = if (strong) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)
+    }
+}
 @Composable
 fun SecureBookingInfo() { Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = .55f)) { Row(Modifier.fillMaxWidth().padding(14.dp), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Outlined.GppGood, null, tint = MaterialTheme.colorScheme.primary); Spacer(Modifier.width(11.dp)); Column { Text("Secure Booking", style = MaterialTheme.typography.titleSmall); Text("Your data is safe with us.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) } } } }
 

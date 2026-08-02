@@ -69,7 +69,7 @@ data class AppointmentFeeUiModel(
     val tax: Int = 0
 ) {
     val totalPayable: Int
-        get() = (consultationFee + serviceCharge + tax - discount).coerceAtLeast(0)
+        get() = (serviceCharge + tax - discount).coerceAtLeast(0)
 }
 
 data class AppointmentBookingOptions(

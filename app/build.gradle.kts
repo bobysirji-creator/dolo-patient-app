@@ -23,8 +23,8 @@ android {
         applicationId = "com.dolo.patient"
         minSdk = 26
         targetSdk = 35
-        versionCode = 46
-        versionName = "0.33.0-booking-ui"
+        versionCode = 47
+        versionName = "0.33.1-booking-polish"
         buildConfigField(
             "String",
             "DOLO_API_BASE_URL",
