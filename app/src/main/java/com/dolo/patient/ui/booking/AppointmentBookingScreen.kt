@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
@@ -210,14 +211,15 @@ private fun SelectableSurface(
     fixedHeight: androidx.compose.ui.unit.Dp = 148.dp,
     content: @Composable () -> Unit
 ) {
-    Surface(
+    val selectedContainer = lerp(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.primaryContainer, 0.22f)
+        Surface(
         modifier = Modifier.width(width).height(fixedHeight).alpha(if (enabled) 1f else .5f)
             .semantics(mergeDescendants = true) { contentDescription = description }
             .selectable(selected = selected, enabled = enabled, role = Role.RadioButton, interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onClick),
         shape = RoundedCornerShape(18.dp),
-        color = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = .32f) else MaterialTheme.colorScheme.surface,
+        color = if (selected) selectedContainer else MaterialTheme.colorScheme.surface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        shadowElevation = 1.dp,
+        shadowElevation = 0.dp,
         content = content
     )
 }
@@ -235,10 +237,11 @@ fun AppointmentDateSelector(dates: List<AppointmentDateUiModel>, selected: Local
 
 @Composable
 private fun DateOption(option: AppointmentDateUiModel, selected: Boolean, onClick: () -> Unit) {
+    val selectedContainer = lerp(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.primaryContainer, 0.22f)
     val foreground = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
     Surface(
         modifier = Modifier.width(62.dp).height(78.dp).alpha(if (option.isAvailable) 1f else .45f).semantics { contentDescription = "${option.date}, ${if (option.isAvailable) "available" else "unavailable"}${if (selected) ", selected" else ""}" }.selectable(selected = selected, enabled = option.isAvailable, role = Role.RadioButton, interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onClick),
-        shape = RoundedCornerShape(15.dp), color = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = .32f) else MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(15.dp), color = if (selected) selectedContainer else MaterialTheme.colorScheme.surface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) { Column(Modifier.padding(vertical = 7.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Text(option.date.format(DateTimeFormatter.ofPattern("EEE")), style = MaterialTheme.typography.labelMedium, color = foreground)

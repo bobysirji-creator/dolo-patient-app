@@ -407,3 +407,6 @@ Patient App 0.33.2-selection-outline (version code 48) keeps one neutral 1 dp ou
 ### Appointment selection-halo correction
 
 Patient App 0.33.3-selection-halo (version code 49) replaces generic clickable indications on booking choices with radio-selection semantics and a deliberately disabled visual press/focus halo. The normal thin card border remains unchanged; selection continues through the light tint, tick and accessible selected state without adding a grey outer ring.
+### Daylight selected-surface correction
+
+Patient App 0.33.4-selection-surface (version code 50) replaces the translucent selected-card fill with an opaque color blended from the active theme surface and primary container. Selectable cards also use zero elevation. This removes the daylight-only dark inner edge while preserving the normal 1 dp outline, subtle selected tint, tick and Dark Mode appearance.
