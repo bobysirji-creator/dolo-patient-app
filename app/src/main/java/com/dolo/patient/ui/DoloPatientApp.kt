@@ -18,6 +18,9 @@ import androidx.navigation.navArgument
 import com.dolo.patient.auth.*
 import com.dolo.patient.data.*
 import com.dolo.patient.platform.*
+import com.dolo.patient.data.model.Session
+import com.dolo.patient.ui.booking.AppointmentBookingRoute
+import com.dolo.patient.ui.booking.WalkInSessionType
 import com.dolo.patient.ui.categories.DoctorCategoriesRoute
 import com.dolo.patient.ui.home.AllQueuesScreen
 import com.dolo.patient.ui.home.PatientHomeRoute
@@ -79,7 +82,7 @@ object Routes{const val Splash="splash";const val Login="login";const val Home="
   composable(Routes.Integrations){IntegrationStatusScreen(nav::popBackStack,platform.uiState,platform::refresh){nav.navigate(Routes.HostedSync)}}
   composable(Routes.HostedSync){HostedSyncScreen(nav::popBackStack,hosted)}
   composable(Routes.Review,arguments=listOf(navArgument("doctorId"){type=NavType.StringType},navArgument("appointmentId"){type=NavType.StringType})){e->val doctorId=e.arguments?.getString("doctorId").orEmpty();val appointmentId=e.arguments?.getString("appointmentId").orEmpty();ReviewScreen(patient.uiState,doctorId,appointmentId,nav::popBackStack){rating,comment->patient.addReview(appointmentId,rating,comment)}}
-  composable(Routes.Booking,arguments=listOf(navArgument("doctorId"){type=NavType.StringType})){e->BookingScreen(e.arguments?.getString("doctorId").orEmpty(),patient.uiState,nav::popBackStack){id,date,s,patientName->patient.book(id,date,s,patientName);nav.navigate("confirmation/"+id+"/"+s.name)}}
+  composable(Routes.Booking,arguments=listOf(navArgument("doctorId"){type=NavType.StringType})){e->val id=e.arguments?.getString("doctorId").orEmpty();AppointmentBookingRoute(id,patient.uiState,nav::popBackStack,{nav.navigate(Routes.Notifications)},patient::toggleFavourite,{request->val session=if(request.sessionType==WalkInSessionType.MORNING)Session.MORNING else Session.EVENING;patient.book(request.doctorId,request.appointmentDate.toString(),session,request.patientName);nav.navigate("confirmation/"+request.doctorId+"/"+session.name)},{nav.returnToHome()},{nav.openPrimary(Routes.History)},{nav.openPrimary(Routes.Categories)},{nav.openPrimary(Routes.History)},{nav.openPrimary(Routes.Profile)})}
   composable(Routes.Confirmation){e->ConfirmationScreen(e.arguments?.getString("doctorId").orEmpty(),e.arguments?.getString("session").orEmpty(),patient.uiState.active,{patient.uiState.active?.id?.let{nav.navigate("queue/"+it)}}){nav.navigate(Routes.Home){popUpTo(Routes.Home){inclusive=true}}}}
  }
 }

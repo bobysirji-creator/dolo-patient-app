@@ -257,3 +257,34 @@ Verification:
 ### Doctor List search-row refinement
 
 Patient App 0.32.1-doctor-list-search (version code 45) gives the Doctor search field and Near me action the same fixed 56 dp height. The visible search placeholder is shortened to `Search`; the screen-reader description remains category-aware.
+## 6. Appointment Booking
+
+Status: implemented in 0.33.0-booking-ui (version code 46); GitHub Actions and physical-device visual acceptance pending.
+
+Reference: C:\Users\Poly\Documents\codex\2026-07-11\appointment.png
+
+Implemented:
+
+- reference-led, vertically scrolling Material 3 booking journey with Back, notification badge and reusable Patient bottom navigation
+- selected Doctor summary with portrait, verification, specialty, rating, experience, clinic, distance and favourite toggle
+- mutually exclusive Self/family visitor selection backed by saved Patient and family profiles
+- compact horizontally scrolling clinic choices without photographs; Maps-ready coordinate fields remain provider-neutral
+- seven-day selector with unavailable-date treatment and a future date-picker placeholder
+- independent Morning and Evening walk-in session cards with token capacity, reporting time and unavailable states
+- Patient details derived from the selected visitor rather than duplicated UI values
+- configurable fee model, DO-LO service-charge explanation, clinic-only consultation-fee notice and secure-booking panel
+- validation, loading, retry, booking-progress, duplicate-tap protection, accessibility descriptions and Light/Dark previews
+- fake repository boundary ready for future GET booking-options and POST appointment APIs
+- existing local appointment persistence, token allocation, confirmation and live-queue journey remain connected
+
+Provider boundary:
+
+- real Maps, Payments, SMS and Push providers remain disabled.
+- consultation fees remain clinic-collected; no Doctor-fee transaction is processed by the Patient app.
+- the More-date action is a safe placeholder until server availability rules are authoritative.
+
+Verification:
+
+- GitHub Actions must compile, lint, run unit tests and produce the stable APK.
+- install over the accepted Patient App and complete `docs/appointment-booking-device-test.md`.
+- capture the populated booking screen and compare it with the source reference before visual acceptance.

@@ -391,3 +391,10 @@ The four Cardiology demo Doctors use stable local IDs backed by DummyData, so Pr
 ## Doctor List search-row refinement
 
 Patient App 0.32.1-doctor-list-search (version code 45) aligns the Doctor search and Near me controls at 56 dp and simplifies the visible placeholder to `Search`. Search logic, accessibility context, filters, booking and navigation are unchanged.
+## Appointment Booking UI checkpoint
+
+Patient App 0.33.0-booking-ui (version code 46) replaces the demo booking form with the reference-led walk-in booking screen. The state-driven flow supports the logged-in Patient and saved family members, compact clinics, available dates, independent Morning/Evening sessions, dynamic Patient details, fee breakdown, validation, retry/loading states and accessible responsive components.
+
+The screen uses `AppointmentBookingRepository` with a fake implementation so REST booking options and appointment creation can be added without replacing the Compose UI. Successful confirmation still commits through the existing `PatientViewModel.book` path, preserving token allocation, history, persistence and live queue behavior. Provider integrations remain disabled and the existing Booking Confirmation screen is intentionally unchanged.
+
+This checkout has no local Android toolchain. GitHub Actions is the compile/lint/unit/APK gate; then complete `docs/appointment-booking-device-test.md` on a physical phone.

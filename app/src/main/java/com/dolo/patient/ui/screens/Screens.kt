@@ -31,7 +31,6 @@ import com.dolo.patient.auth.AuthStep
 import com.dolo.patient.auth.AuthViewModel
 import com.dolo.patient.data.*
 import com.dolo.patient.data.model.Doctor
-import com.dolo.patient.data.model.Session
 import com.dolo.patient.integrations.*
 import com.dolo.patient.ui.components.*
 import com.dolo.patient.ui.theme.*
@@ -251,30 +250,6 @@ fun AppointmentHistoryScreen(list:List<Appointment>,onBack:()->Unit,onQueue:(Str
     }
    }
   }
- }
-}
-@Composable
-fun BookingScreen(doctorId:String,state:PatientUiState,onBack:()->Unit,onConfirm:(String,String,Session,String)->Unit){
- val doctor=DummyData.doctors.firstOrNull{it.id==doctorId}?:DummyData.doctors.first()
- val dates=remember{(0L..2L).map{LocalDate.now().plusDays(it)}}
- var selectedDate by remember{mutableStateOf(dates.first())}
- var session by remember{mutableStateOf(Session.MORNING)}
- val patients=listOf(state.profile.name)+state.family.map{it.name}
- var patientName by remember{mutableStateOf(patients.first())}
- LazyColumn(pageModifier().safeDrawingPadding(),contentPadding=PaddingValues(horizontal=18.dp,vertical=10.dp),verticalArrangement=Arrangement.spacedBy(13.dp)){
-  item{ScreenTitle("Book appointment",onBack)}
-  item{Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(6.dp)){BookingStep("1","Patient",true,Modifier.weight(1f));BookingStep("2","Date",true,Modifier.weight(1f));BookingStep("3","Session",true,Modifier.weight(1f))}}
-  item{DoloCard(containerColor=MaterialTheme.colorScheme.primaryContainer){Row(verticalAlignment=Alignment.CenterVertically){Surface(shape=RoundedCornerShape(16.dp),color=MaterialTheme.colorScheme.surface,modifier=Modifier.size(54.dp)){Icon(Icons.Outlined.MedicalServices,null,tint=MaterialTheme.colorScheme.primary,modifier=Modifier.padding(13.dp))};Spacer(Modifier.width(12.dp));Column(Modifier.weight(1f)){Text(doctor.name,style=MaterialTheme.typography.titleMedium);Text(doctor.specialty,color=MaterialTheme.colorScheme.primary,style=MaterialTheme.typography.labelLarge);Text(doctor.clinic,style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)}}}}
-  item{SectionHeader("Who is visiting?")}
-  item{LazyRow(horizontalArrangement=Arrangement.spacedBy(8.dp)){items(patients,key={it}){name->FilterChip(name==patientName,{patientName=name},{Text(name)},leadingIcon=if(name==patientName){{Icon(Icons.Outlined.Check,null,modifier=Modifier.size(17.dp))}}else null)}}}
-  item{SectionHeader("Choose a date")}
-  item{Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){dates.forEach{date->DateChoice(date,date==selectedDate,{selectedDate=date},Modifier.weight(1f))}}}
-  item{SectionHeader("Choose a walk-in session")}
-  item{SessionChoice("Morning","09:00 AM – 01:00 PM",session==Session.MORNING){session=Session.MORNING}}
-  item{SessionChoice("Evening","05:00 PM – 09:00 PM",session==Session.EVENING){session=Session.EVENING}}
-  item{DoloCard{Text("Booking summary",style=MaterialTheme.typography.titleMedium);SummaryRow("Patient",patientName);SummaryRow("Date",selectedDate.format(DateTimeFormatter.ofPattern("EEE, dd MMM yyyy")));SummaryRow("Session",session.name.lowercase().replaceFirstChar(Char::uppercase));HorizontalDivider(color=MaterialTheme.colorScheme.outlineVariant);SummaryRow("Consultation fee at clinic","₹${doctor.consultationFee}");SummaryRow("DO-LO service charge","₹20");SummaryRow("Total","₹${doctor.consultationFee+20}",emphasized=true);Text("Consultation fee is collected at the clinic. Online payment providers remain disabled in this prototype.",style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)}}
-  item{PrimaryButton("Confirm and get token",{onConfirm(doctor.id,selectedDate.toString(),session,patientName)})}
-  item{Spacer(Modifier.height(8.dp))}
  }
 }
 @Composable
@@ -894,27 +869,7 @@ private fun StatusTimeline(status: String) {
     }
 }
 
-@Composable
-private fun BookingStep(number:String,label:String,active:Boolean,modifier:Modifier=Modifier){
- Row(modifier,verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.Center){Surface(shape=CircleShape,color=if(active)MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,modifier=Modifier.size(24.dp)){Text(number,color=MaterialTheme.colorScheme.onPrimary,fontWeight=FontWeight.Bold,fontSize=11.sp,textAlign=TextAlign.Center,modifier=Modifier.padding(top=4.dp))};Spacer(Modifier.width(5.dp));Text(label,style=MaterialTheme.typography.labelMedium,color=if(active)MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant)}
-}
-
-@Composable
-private fun SummaryRow(label:String,value:String,emphasized:Boolean=false){
- Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically){Text(label,style=if(emphasized)MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyMedium,color=if(emphasized)MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,modifier=Modifier.weight(1f));Text(value,style=if(emphasized)MaterialTheme.typography.titleLarge else MaterialTheme.typography.bodyMedium,fontWeight=if(emphasized)FontWeight.ExtraBold else FontWeight.SemiBold,color=if(emphasized)MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)}
-}
-
-@Composable
-private fun DateChoice(date:LocalDate,selected:Boolean,onClick:()->Unit,modifier:Modifier=Modifier){
- Surface(modifier.clickable(onClick=onClick),shape=RoundedCornerShape(17.dp),color=if(selected)MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,border=androidx.compose.foundation.BorderStroke(1.dp,if(selected)MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),shadowElevation=if(selected)3.dp else 1.dp){Column(Modifier.fillMaxWidth().padding(vertical=11.dp),horizontalAlignment=Alignment.CenterHorizontally){Text(date.format(DateTimeFormatter.ofPattern("EEE")),color=if(selected)MaterialTheme.colorScheme.onPrimary.copy(alpha=.8f) else MaterialTheme.colorScheme.onSurfaceVariant,style=MaterialTheme.typography.labelMedium);Text(date.dayOfMonth.toString(),color=if(selected)MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,fontSize=23.sp,fontWeight=FontWeight.ExtraBold);Text(date.format(DateTimeFormatter.ofPattern("MMM")),color=if(selected)MaterialTheme.colorScheme.onPrimary.copy(alpha=.8f) else MaterialTheme.colorScheme.onSurfaceVariant,style=MaterialTheme.typography.bodySmall)}}
-}
-
 private fun displayDate(value:String):String=runCatching{LocalDate.parse(value).format(DateTimeFormatter.ofPattern("EEEE, dd MMM yyyy"))}.getOrDefault(value)
-
-@Composable
-private fun SessionChoice(title:String,time:String,selected:Boolean,onClick:()->Unit){
- Surface(Modifier.fillMaxWidth().clickable(onClick=onClick),shape=RoundedCornerShape(18.dp),color=if(selected)MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface,border=androidx.compose.foundation.BorderStroke(1.dp,if(selected)MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),shadowElevation=if(selected)3.dp else 1.dp){Row(Modifier.padding(15.dp),verticalAlignment=Alignment.CenterVertically){Surface(shape=RoundedCornerShape(13.dp),color=if(selected)MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceVariant,modifier=Modifier.size(42.dp)){Icon(if(title=="Morning")Icons.Outlined.LightMode else Icons.Outlined.DarkMode,null,tint=MaterialTheme.colorScheme.primary,modifier=Modifier.padding(10.dp))};Spacer(Modifier.width(12.dp));Column(Modifier.weight(1f)){Text("$title session",style=MaterialTheme.typography.titleMedium);Text(time,style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)};if(selected)Icon(Icons.Outlined.CheckCircle,"Selected",tint=MaterialTheme.colorScheme.primary)} }
-}
 
 @Composable
 private fun InfoCard(title:String,text:String){DoloCard{Text(title,style=MaterialTheme.typography.titleMedium);Text(text,style=MaterialTheme.typography.bodyMedium,color=MaterialTheme.colorScheme.onSurfaceVariant)}}

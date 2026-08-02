@@ -104,3 +104,30 @@ The approved Doctor List reference was opened and inspected. The Compose impleme
 - Verify Light/Dark modes and increased font scaling.
 
 final result: blocked
+
+# Appointment Booking design QA
+
+source visual truth path: C:\Users\Poly\Documents\codex\2026-07-11\appointment.png
+implementation screenshot path: unavailable
+viewport: Android portrait phones from 320 dp through large widths
+state: complete local walk-in booking, plus loading, error, family, unavailable and large-font preview states
+
+## Comparison evidence
+
+The approved booking reference was opened and inspected. A native Compose screenshot cannot be rendered in this lightweight checkout because no Gradle wrapper, local JDK, Android SDK or emulator is available. Static source review is not accepted as visual-comparison evidence.
+
+## Findings
+
+- [P1] Native implementation screenshot unavailable
+  - Location: complete Appointment Booking screen.
+  - Impact: exact typography, scrolling density, portrait crop, horizontal-card rhythm and small-phone wrapping cannot be visually certified locally.
+  - Fix: pass GitHub Actions, install the stable APK, capture the populated booking screen and compare it with the reference at a matching viewport.
+
+## Device checklist
+
+- Verify visitor selection appears between Doctor summary and clinic selection.
+- Verify clinic cards contain no photographs and all long names/addresses remain readable.
+- Verify compact dates, Morning/Evening sessions, dynamic Patient details and fee total.
+- Verify Confirm Booking prominence, disabled/loading states, Light/Dark contrast and increased font scaling.
+
+final result: blocked
