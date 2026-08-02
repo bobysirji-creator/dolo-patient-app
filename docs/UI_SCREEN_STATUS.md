@@ -293,3 +293,6 @@ Verification:
 Patient App 0.33.1-booking-polish (version code 47) simplifies visitor selection to the Patient name plus selection indicator, removes initials avatars from the Who is visiting row, widens all horizontal booking choices and gives each card a stable height. Selected cards now use a subtle translucent teal surface and lighter border instead of a high-contrast fill.
 
 The fee model now excludes the clinic-collected consultation fee from the booking payment. `Total Payable Now` equals the configurable DO-LO service charge after any applicable service-charge discount/tax, while the consultation fee is separately labelled for payment at the clinic. Fee labels and amounts share aligned columns.
+### Appointment selection-outline correction
+
+Patient App 0.33.2-selection-outline (version code 48) keeps one neutral 1 dp outline and the same subtle elevation for selected and unselected booking cards. Selection is now communicated by a light primary-container tint, teal text/tick and accessibility state, preventing a stronger border from consuming visible card space.

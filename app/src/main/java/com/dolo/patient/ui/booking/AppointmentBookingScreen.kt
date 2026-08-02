@@ -214,9 +214,9 @@ private fun SelectableSurface(
             .semantics(mergeDescendants = true) { contentDescription = description }
             .clickable(enabled = enabled, role = Role.RadioButton, onClick = onClick),
         shape = RoundedCornerShape(18.dp),
-        color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = .07f) else MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.primary.copy(alpha = .7f) else MaterialTheme.colorScheme.outline),
-        shadowElevation = if (selected) 2.dp else 1.dp,
+        color = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = .32f) else MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        shadowElevation = 1.dp,
         content = content
     )
 }
@@ -234,11 +234,11 @@ fun AppointmentDateSelector(dates: List<AppointmentDateUiModel>, selected: Local
 
 @Composable
 private fun DateOption(option: AppointmentDateUiModel, selected: Boolean, onClick: () -> Unit) {
-    val foreground = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+    val foreground = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
     Surface(
         modifier = Modifier.width(62.dp).height(78.dp).alpha(if (option.isAvailable) 1f else .45f).semantics { contentDescription = "${option.date}, ${if (option.isAvailable) "available" else "unavailable"}${if (selected) ", selected" else ""}" }.clickable(enabled = option.isAvailable, role = Role.RadioButton, onClick = onClick),
-        shape = RoundedCornerShape(15.dp), color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = .08f) else MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, if (selected) MaterialTheme.colorScheme.primary.copy(alpha = .7f) else MaterialTheme.colorScheme.outline)
+        shape = RoundedCornerShape(15.dp), color = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = .32f) else MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) { Column(Modifier.padding(vertical = 7.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Text(option.date.format(DateTimeFormatter.ofPattern("EEE")), style = MaterialTheme.typography.labelMedium, color = foreground)
         Text(option.date.dayOfMonth.toString(), style = MaterialTheme.typography.titleLarge, color = foreground)

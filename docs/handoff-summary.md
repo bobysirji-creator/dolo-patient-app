@@ -401,3 +401,6 @@ This checkout has no local Android toolchain. GitHub Actions is the compile/lint
 ## Appointment Booking polish checkpoint
 
 Patient App 0.33.1-booking-polish (version code 47) widens and fixes the height of visitor, clinic and session cards, removes visitor-initial circles, softens selected-state contrast and aligns fee values. The booking total now represents only the DO-LO service charge payable during booking; the Doctor consultation fee remains clearly listed for direct payment at the clinic. Appointment creation and token workflow are unchanged.
+### Appointment selection-outline correction
+
+Patient App 0.33.2-selection-outline (version code 48) keeps one neutral 1 dp outline and the same subtle elevation for selected and unselected booking cards. Selection is now communicated by a light primary-container tint, teal text/tick and accessibility state, preventing a stronger border from consuming visible card space.
