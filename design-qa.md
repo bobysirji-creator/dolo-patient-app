@@ -131,3 +131,30 @@ The approved booking reference was opened and inspected. A native Compose screen
 - Verify Confirm Booking prominence, disabled/loading states, Light/Dark contrast and increased font scaling.
 
 final result: blocked
+
+# Booking Confirmation design QA
+
+source visual truth path: C:\Users\Poly\Documents\codex\2026-07-11\Booking_confirm.png
+implementation screenshot path: unavailable
+viewport: Android portrait phones from 320 dp through large widths
+state: confirmed booking plus loading, pending, error, no-estimate, family, three-digit-token and Dark Mode states
+
+## Comparison evidence
+
+The approved booking-confirmation reference was opened and inspected. A native Compose screenshot cannot be rendered in this lightweight checkout because no Gradle wrapper, local JDK, Android SDK or emulator is available. Static source review is not accepted as visual-comparison evidence.
+
+## Findings
+
+- [P1] Native implementation screenshot unavailable
+  - Location: complete Booking Confirmation screen.
+  - Impact: exact typography, token-card density, long-clinic wrapping, quick-action rhythm and theme contrast cannot be visually certified locally.
+  - Fix: pass GitHub Actions, install the stable APK, capture the confirmed screen and compare it with the reference at a matching viewport.
+
+## Device checklist
+
+- Verify centred success symbol, heading and prominent token hierarchy.
+- Verify all appointment rows remain readable with long Doctor, clinic, address and Patient names.
+- Verify estimate, instructions, quick actions and Back to Home remain visible while scrolling.
+- Verify 320 dp width, increased font size, TalkBack, Light Mode and Dark Mode.
+
+final result: blocked

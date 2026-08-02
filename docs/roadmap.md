@@ -380,3 +380,16 @@ The public ID is not an authentication secret and cannot be edited. Real Patient
 - [ ] stable APK in-place upgrade and Stage 45AB physical-device acceptance
 
 See `docs/ui-modernization-roadmap.md` and `docs/stage45ab-device-test.md`. No API contract, provider status, billing rule or local-data boundary changed in this UI stage.
+
+## Booking Confirmation UI refinement
+
+- [x] appointment-ID confirmation route
+- [x] validated token and booking detail presentation
+- [x] loading, pending, error and no-estimate states
+- [x] Calendar, share, Save placeholder and Maps callback
+- [x] responsive and accessible layouts plus previews
+- [x] pure model/formatting unit tests
+- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [ ] stable APK in-place upgrade and physical-device visual acceptance
+
+Live Queue redesign and external provider activation remain outside this screen checkpoint.

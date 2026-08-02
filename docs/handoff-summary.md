@@ -410,3 +410,11 @@ Patient App 0.33.3-selection-halo (version code 49) replaces generic clickable i
 ### Daylight selected-surface correction
 
 Patient App 0.33.4-selection-surface (version code 50) replaces the translucent selected-card fill with an opaque color blended from the active theme surface and primary container. Selectable cards also use zero elevation. This removes the daylight-only dark inner edge while preserving the normal 1 dp outline, subtle selected tint, tick and Dark Mode appearance.
+
+## Booking Confirmation UI checkpoint
+
+Patient App 0.34.0-confirmation-ui (version code 51) replaces the demo token panel with a state-driven booking confirmation journey keyed by appointment ID. It presents the token, date, independent session, Doctor, clinic, visitor and current queue estimate, with loading, pending, retry and unavailable-estimate states.
+
+Calendar uses the Android insert-event intent without permissions. Share excludes Patient identity and other sensitive local profile data. Save and Maps remain explicit placeholders; SMS, Push, Maps and Payment providers remain disabled. The existing persisted appointment, history and live queue data are unchanged.
+
+This lightweight checkout has no Gradle wrapper, local JDK, Android SDK or emulator. GitHub Actions is the authoritative compile/lint/unit/APK gate; then complete `docs/booking-confirmation-device-test.md` on a physical phone.

@@ -302,3 +302,32 @@ Patient App 0.33.3-selection-halo (version code 49) replaces generic clickable i
 ### Daylight selected-surface correction
 
 Patient App 0.33.4-selection-surface (version code 50) replaces the translucent selected-card fill with an opaque color blended from the active theme surface and primary container. Selectable cards also use zero elevation. This removes the daylight-only dark inner edge while preserving the normal 1 dp outline, subtle selected tint, tick and Dark Mode appearance.
+
+## 7. Booking Confirmation
+
+Status: implemented in 0.34.0-confirmation-ui (version code 51); GitHub Actions and physical-device visual acceptance pending.
+
+Reference: C:\Users\Poly\Documents\codex\2026-07-11\Booking_confirm.png
+
+Implemented:
+
+- reference-led confirmed state with success header, prominent validated token, appointment date, session, Doctor, clinic, visitor and queue estimate
+- appointment-ID route and StateFlow ViewModel behind a repository boundary ready for a future confirmation endpoint
+- Doctor profile, notification and Home/Appointments navigation without changing live-queue behavior
+- permission-free Calendar intent, privacy-limited share sheet, Save/PDF placeholder and Maps-ready callback
+- explicit loading, pending-token, failed/retry and no-estimate states
+- responsive scrolling layout, narrow-phone quick-action stacking, screen-reader descriptions and large-font support
+- eleven previews covering confirmed, three-digit token, small phone, large text, evening, no estimate, loading, pending, error, long clinic, family and Dark Mode states
+- unit coverage for token limits, queue text, confirmed-state eligibility and privacy-safe sharing
+
+Provider boundary:
+
+- Maps, Payments, SMS and Push remain disabled.
+- the Doctor consultation fee remains payable at the clinic.
+- Save is deliberately a local placeholder until PDF export is designed.
+
+Verification:
+
+- GitHub Actions must compile, lint, run unit tests and produce the stable APK.
+- install over the accepted Patient App and complete `docs/booking-confirmation-device-test.md`.
+- capture the confirmed state and compare it with the source reference before visual acceptance.

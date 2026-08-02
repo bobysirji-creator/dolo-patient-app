@@ -252,21 +252,6 @@ fun AppointmentHistoryScreen(list:List<Appointment>,onBack:()->Unit,onQueue:(Str
   }
  }
 }
-@Composable
-fun ConfirmationScreen(doctorId:String,session:String,appointment:Appointment?=null,onQueue:()->Unit,onDone:()->Unit){
- val doctor=DummyData.doctors.firstOrNull{it.id==doctorId}?:DummyData.doctors.first()
- Box(pageModifier().safeDrawingPadding().padding(20.dp),contentAlignment=Alignment.Center){
-  Column(Modifier.widthIn(max=440.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(14.dp)){
-   Surface(shape=CircleShape,color=MaterialTheme.colorScheme.surfaceVariant,modifier=Modifier.size(70.dp)){Icon(Icons.Outlined.Check,null,tint=DoloSuccess,modifier=Modifier.padding(17.dp))}
-   Text("Appointment booked",style=MaterialTheme.typography.headlineMedium)
-   Text("Your walk-in token is ready",style=MaterialTheme.typography.bodyLarge,color=MaterialTheme.colorScheme.onSurfaceVariant)
-   Surface(Modifier.fillMaxWidth(),shape=RoundedCornerShape(26.dp),color=MaterialTheme.colorScheme.secondary,shadowElevation=5.dp){Column(Modifier.padding(22.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(9.dp)){Text("${session.uppercase()} TOKEN",style=MaterialTheme.typography.labelLarge,color=MaterialTheme.colorScheme.onSecondary.copy(alpha=.75f));Text((appointment?.token?:0).toString(),fontSize=76.sp,fontWeight=FontWeight.ExtraBold,color=MaterialTheme.colorScheme.onSecondary);HorizontalDivider(color=MaterialTheme.colorScheme.onSecondary.copy(alpha=.2f));Text(appointment?.doctorName?:doctor.name,style=MaterialTheme.typography.titleLarge,color=MaterialTheme.colorScheme.onSecondary);Text(appointment?.patientName?:"Patient",color=MaterialTheme.colorScheme.onSecondary.copy(alpha=.82f));Text((appointment?.clinic?:doctor.clinic)+" • "+displayDate(appointment?.date?:"Today"),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSecondary.copy(alpha=.72f))}}
-   DoloCard(containerColor=MaterialTheme.colorScheme.surfaceVariant){Row(verticalAlignment=Alignment.CenterVertically){Icon(Icons.Outlined.Timer,null,tint=MaterialTheme.colorScheme.primary);Spacer(Modifier.width(10.dp));Text("Follow the live queue and travel when your turn is approaching.",style=MaterialTheme.typography.bodyMedium)}}
-   PrimaryButton("Track live queue",onQueue)
-   SecondaryButton("Return home",onDone,icon=Icons.Outlined.Home)
-  }
- }
-}
 @Composable fun LiveQueueScreen(state:PatientUiState,appointmentId:String,onBack:()->Unit,onRefresh:()->Unit,onOffline:()->Unit,onAdvance:()->Unit,onMissed:()->Unit,onComplete:()->Unit,onReschedule:()->Unit,canReschedule:(Appointment)->Boolean){
  val appointment=state.appointments.firstOrNull{it.id==appointmentId}?:state.active
  val queue=state.queues[appointmentId]?:state.queue?.takeIf{it.appointmentId==appointmentId}
