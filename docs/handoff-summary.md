@@ -404,3 +404,6 @@ Patient App 0.33.1-booking-polish (version code 47) widens and fixes the height 
 ### Appointment selection-outline correction
 
 Patient App 0.33.2-selection-outline (version code 48) keeps one neutral 1 dp outline and the same subtle elevation for selected and unselected booking cards. Selection is now communicated by a light primary-container tint, teal text/tick and accessibility state, preventing a stronger border from consuming visible card space.
+### Appointment selection-halo correction
+
+Patient App 0.33.3-selection-halo (version code 49) replaces generic clickable indications on booking choices with radio-selection semantics and a deliberately disabled visual press/focus halo. The normal thin card border remains unchanged; selection continues through the light tint, tick and accessible selected state without adding a grey outer ring.

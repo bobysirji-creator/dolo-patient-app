@@ -2,11 +2,12 @@ package com.dolo.patient.ui.booking
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -212,7 +213,7 @@ private fun SelectableSurface(
     Surface(
         modifier = Modifier.width(width).height(fixedHeight).alpha(if (enabled) 1f else .5f)
             .semantics(mergeDescendants = true) { contentDescription = description }
-            .clickable(enabled = enabled, role = Role.RadioButton, onClick = onClick),
+            .selectable(selected = selected, enabled = enabled, role = Role.RadioButton, interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onClick),
         shape = RoundedCornerShape(18.dp),
         color = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = .32f) else MaterialTheme.colorScheme.surface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
@@ -236,7 +237,7 @@ fun AppointmentDateSelector(dates: List<AppointmentDateUiModel>, selected: Local
 private fun DateOption(option: AppointmentDateUiModel, selected: Boolean, onClick: () -> Unit) {
     val foreground = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
     Surface(
-        modifier = Modifier.width(62.dp).height(78.dp).alpha(if (option.isAvailable) 1f else .45f).semantics { contentDescription = "${option.date}, ${if (option.isAvailable) "available" else "unavailable"}${if (selected) ", selected" else ""}" }.clickable(enabled = option.isAvailable, role = Role.RadioButton, onClick = onClick),
+        modifier = Modifier.width(62.dp).height(78.dp).alpha(if (option.isAvailable) 1f else .45f).semantics { contentDescription = "${option.date}, ${if (option.isAvailable) "available" else "unavailable"}${if (selected) ", selected" else ""}" }.selectable(selected = selected, enabled = option.isAvailable, role = Role.RadioButton, interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onClick),
         shape = RoundedCornerShape(15.dp), color = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = .32f) else MaterialTheme.colorScheme.surface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) { Column(Modifier.padding(vertical = 7.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
