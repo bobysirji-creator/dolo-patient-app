@@ -212,7 +212,7 @@ private fun SelectableSurface(
     content: @Composable () -> Unit
 ) {
     val selectedContainer = lerp(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.primaryContainer, 0.22f)
-        Surface(
+    Surface(
         modifier = Modifier.width(width).height(fixedHeight).alpha(if (enabled) 1f else .5f)
             .semantics(mergeDescendants = true) { contentDescription = description }
             .selectable(selected = selected, enabled = enabled, role = Role.RadioButton, interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onClick),
