@@ -408,7 +408,7 @@ Live Queue redesign and external provider activation remain outside this screen 
 - [x] preserve seeded demo login, secure token restoration and local fallback
 - [x] parser, unsafe-policy, consent and presentation regression coverage
 - [x] stable version increment to 0.35.0-stage49b (version code 52)
-- [ ] GitHub Actions compile, lint, unit tests and stable APK
-- [ ] stable APK in-place upgrade and Stage 49B physical-device acceptance
+- [x] GitHub Actions compile, lint, unit tests and stable APK
+- [x] stable APK in-place upgrade and Stage 49B physical-device acceptance
 
 Real Patient enrollment, OTP delivery, production DO-LO ID issuance and all external providers remain disabled. The Stage 49A allocator is not called by the Patient App.

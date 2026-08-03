@@ -424,3 +424,7 @@ This lightweight checkout has no Gradle wrapper, local JDK, Android SDK or emula
 Patient App 0.35.0-stage49b (version code 52) upgrades the existing fail-closed enrollment-readiness client to the complete accepted Stage 49A contract. The parser requires foundation version 49A, disabled production/profile/family enrollment, authentication-only OTP with its provider disabled, the server-owned location/phone-neutral DLO-PAT-NNNNNN policy, the reserved atomic allocator and the Terms, Privacy and Health Data consent categories.
 
 Create an Account now retrieves and presents that authoritative preparation status without opening a registration form or sending Patient data. Missing network or any unsafe contract leaves account creation disabled. The existing seeded demo OTP, hosted token restoration, local fallback and all local Patient data remain unchanged. GitHub Actions is the Android build authority; then install the stable APK over the existing app and complete docs/stage49b-device-test.md.
+
+## Stage 49B acceptance checkpoint
+
+Patient App 0.35.0-stage49b passed GitHub Actions, stable in-place APK upgrade and every Stage 49B physical-device check on 3 August 2026. Authoritative disabled registration readiness, fail-closed offline recovery, seeded demo login, session restoration and local-data isolation are accepted. Production enrollment, real OTP/SMS delivery, public-ID allocation and all external providers remain disabled.
