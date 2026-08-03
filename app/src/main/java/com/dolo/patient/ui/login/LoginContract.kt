@@ -8,7 +8,9 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.dolo.patient.auth.AuthRepository
+import com.dolo.patient.auth.PatientEnrollmentReadiness
 import com.dolo.patient.auth.PhoneValidator
+import com.dolo.patient.auth.stage49aPatientEnrollmentReadiness
 import java.util.concurrent.Executors
 
 enum class LoginError {
@@ -16,11 +18,31 @@ enum class LoginError {
     Network
 }
 
+enum class RegistrationReadinessStatus {
+    Checking,
+    FoundationReadyDisabled,
+    Unavailable
+}
+
+fun registrationReadinessStatus(
+    readiness: PatientEnrollmentReadiness?
+): RegistrationReadinessStatus =
+    if (
+        readiness != null &&
+        readiness == stage49aPatientEnrollmentReadiness(readiness.demoPatientLogin)
+    ) {
+        RegistrationReadinessStatus.FoundationReadyDisabled
+    } else {
+        RegistrationReadinessStatus.Unavailable
+    }
+
 data class LoginUiState(
     val phoneNumber: String = "",
     val isLoading: Boolean = false,
     val error: LoginError? = null,
     val accountCreationNoticeVisible: Boolean = false,
+    val registrationStatus: RegistrationReadinessStatus = RegistrationReadinessStatus.Checking,
+    val enrollmentReadiness: PatientEnrollmentReadiness? = null,
     val otpRequestedFor: String? = null
 ) {
     val isPhoneValid: Boolean get() = PhoneValidator.isValid(phoneNumber)
@@ -33,6 +55,33 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
 
     private val executor = Executors.newSingleThreadExecutor()
     private val main = Handler(Looper.getMainLooper())
+
+
+    private fun refreshEnrollmentReadiness() {
+        uiState = uiState.copy(registrationStatus = RegistrationReadinessStatus.Checking)
+        executor.execute {
+            val result = repository.enrollmentReadiness()
+            main.post {
+                uiState = result.fold(
+                    onSuccess = {
+                        uiState.copy(
+                            registrationStatus = registrationReadinessStatus(it),
+                            enrollmentReadiness = it.takeIf {
+                                registrationReadinessStatus(it) ==
+                                    RegistrationReadinessStatus.FoundationReadyDisabled
+                            }
+                        )
+                    },
+                    onFailure = {
+                        uiState.copy(
+                            registrationStatus = RegistrationReadinessStatus.Unavailable,
+                            enrollmentReadiness = null
+                        )
+                    }
+                )
+            }
+        }
+    }
 
     fun updatePhoneNumber(value: String) {
         uiState = uiState.copy(
@@ -91,6 +140,12 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
 
     fun showAccountCreationNotice() {
         uiState = uiState.copy(accountCreationNoticeVisible = true)
+        if (
+            uiState.registrationStatus !=
+            RegistrationReadinessStatus.FoundationReadyDisabled
+        ) {
+            refreshEnrollmentReadiness()
+        }
     }
 
     override fun onCleared() {

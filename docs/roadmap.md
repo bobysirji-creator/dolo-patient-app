@@ -393,3 +393,22 @@ See `docs/ui-modernization-roadmap.md` and `docs/stage45ab-device-test.md`. No A
 - [ ] stable APK in-place upgrade and physical-device visual acceptance
 
 Live Queue redesign and external provider activation remain outside this screen checkpoint.
+
+## Stage 49B - Patient enrollment-readiness client
+
+- [x] consume the complete accepted Stage 49A readiness contract over HTTPS
+- [x] require foundation version 49A and fail closed on missing or changed fields
+- [x] require production, profile and family enrollment to remain disabled
+- [x] require OTP authentication-only mode and disabled OTP provider
+- [x] require the location-neutral, phone-neutral, server-owned public-ID policy
+- [x] require Terms, Privacy and Health Data consent categories
+- [x] present authoritative account-preparation status from Create an Account
+- [x] keep registration unavailable when the network or contract is unsafe
+- [x] submit no phone, profile, family or consent data to enrollment endpoints
+- [x] preserve seeded demo login, secure token restoration and local fallback
+- [x] parser, unsafe-policy, consent and presentation regression coverage
+- [x] stable version increment to 0.35.0-stage49b (version code 52)
+- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [ ] stable APK in-place upgrade and Stage 49B physical-device acceptance
+
+Real Patient enrollment, OTP delivery, production DO-LO ID issuance and all external providers remain disabled. The Stage 49A allocator is not called by the Patient App.

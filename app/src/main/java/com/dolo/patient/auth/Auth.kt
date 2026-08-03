@@ -30,7 +30,7 @@ interface AuthRepository {
 
 class FakeAuthRepository(private val preferences: SharedPreferences) : AuthRepository {
     override fun currentSession(): PatientSession? = preferences.getString(KEY_PHONE, null)?.let(::PatientSession)
-    override fun enrollmentReadiness()=Result.success(PatientEnrollmentReadiness("FOUNDATION_ONLY","ENABLED","DISABLED","AUTHENTICATION_ONLY","DISABLED","DISABLED","DISABLED","RESERVED","OTP_PROVIDER_NOT_CONFIGURED"))
+    override fun enrollmentReadiness()=Result.success(stage49aPatientEnrollmentReadiness())
     override fun identityCard()=Result.failure<PublicIdentityCard>(IllegalStateException("Local-only demo profile has no hosted DO-LO identity."))
     override fun requestOtp(phone: String): Result<Unit> = if (PhoneValidator.isValid(phone)) Result.success(Unit) else Result.failure(IllegalArgumentException("Enter a valid 10-digit mobile number"))
     override fun verifyOtp(phone: String, otp: String): Result<PatientSession> {

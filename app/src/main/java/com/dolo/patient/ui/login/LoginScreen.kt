@@ -241,9 +241,22 @@ fun LoginScreen(
                     }
 
                     if (uiState.accountCreationNoticeVisible) {
+                        val registrationMessage = when (uiState.registrationStatus) {
+                            RegistrationReadinessStatus.Checking ->
+                                stringResource(R.string.login_registration_checking)
+                            RegistrationReadinessStatus.FoundationReadyDisabled ->
+                                stringResource(
+                                    R.string.login_registration_foundation_ready,
+                                    uiState.enrollmentReadiness?.publicIdPolicy?.format
+                                        ?: "DLO-PAT-NNNNNN"
+                                )
+                            RegistrationReadinessStatus.Unavailable ->
+                                stringResource(R.string.login_registration_status_unavailable)
+                        }
                         LoginMessage(
-                            message = stringResource(R.string.login_registration_unavailable),
-                            isError = false
+                            message = registrationMessage,
+                            isError = uiState.registrationStatus ==
+                                RegistrationReadinessStatus.Unavailable
                         )
                     }
                 }

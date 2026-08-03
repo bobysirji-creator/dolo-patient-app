@@ -12,7 +12,7 @@ Status: available from Stage 45AB.
 
 ## 1. Mobile-number login
 
-Status: implemented in `0.28.0-login-ui` (version code 34); GitHub Actions and physical-device acceptance pending.
+Status: visual implementation completed in 0.28.0-login-ui; Stage 49B authoritative fail-closed registration readiness added in 0.35.0-stage49b (version code 52).
 
 Reference: `C:\Users\Poly\Documents\codex\2026-07-11\login.png`
 

@@ -81,3 +81,6 @@ An authoritative ABSENT hosted appointment can now be rescheduled once to a serv
 ## Stage 23A clinic receipt visibility
 
 Hosted appointment history now shows whether the clinic consultation fee is pending, paid directly at the clinic, or waived, together with the generated receipt reference and clinic-recorded amount where applicable. This is a clinic receipt record—not online DO-LO payment processing—and no payment method or gateway data is consumed.
+## Stage 49B production-registration readiness
+
+Patient App 0.35.0-stage49b consumes the complete fail-closed Stage 49A enrollment-readiness contract when Create an Account is selected. It displays the reserved server-owned DLO-PAT-NNNNNN policy and future consent requirements, while production registration, real OTP delivery and all Patient-data submission remain disabled. Seeded demo login and existing local/hosted data are unchanged. Follow docs/stage49b-device-test.md after GitHub Actions builds the stable APK.

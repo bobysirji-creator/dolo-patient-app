@@ -1,5 +1,7 @@
 package com.dolo.patient.ui.login
 
+import com.dolo.patient.auth.stage49aPatientEnrollmentReadiness
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -30,5 +32,25 @@ class LoginUiStateTest {
 
         assertTrue(state.isPhoneValid)
         assertFalse(state.canSendOtp)
+    }
+
+    @Test
+    fun acceptedStage49AFoundationRemainsVisiblyDisabled() {
+        val readiness = stage49aPatientEnrollmentReadiness()
+
+        assertEquals(
+            RegistrationReadinessStatus.FoundationReadyDisabled,
+            registrationReadinessStatus(readiness)
+        )
+        assertEquals("DLO-PAT-NNNNNN", readiness.publicIdPolicy.format)
+        assertFalse(readiness.publicIdPolicy.locationEmbedded)
+    }
+
+    @Test
+    fun missingAuthoritativeReadinessFailsClosed() {
+        assertEquals(
+            RegistrationReadinessStatus.Unavailable,
+            registrationReadinessStatus(null)
+        )
     }
 }

@@ -16,7 +16,58 @@ import javax.crypto.spec.GCMParameterSpec
 
 data class PublicIdentityCard(val doloId:String,val displayName:String,val role:String,val prototype:Boolean)
 
-data class PatientEnrollmentReadiness(val stage:String,val demoPatientLogin:String,val productionPatientEnrollment:String,val otpUsage:String,val otpProvider:String,val profileEnrollment:String,val familyEnrollment:String,val doloIdIssuance:String,val reason:String)
+data class PatientPublicIdPolicy(
+    val format: String,
+    val serverOwned: Boolean,
+    val editableByPatient: Boolean,
+    val derivedFromPhone: Boolean,
+    val locationEmbedded: Boolean,
+    val locationReason: String
+)
+
+data class PatientEnrollmentReadiness(
+    val stage: String,
+    val foundationVersion: String,
+    val demoPatientLogin: String,
+    val productionPatientEnrollment: String,
+    val enrollmentTransaction: String,
+    val otpUsage: String,
+    val otpProvider: String,
+    val otpChallengeProtection: String,
+    val profileEnrollment: String,
+    val familyEnrollment: String,
+    val doloIdIssuance: String,
+    val doloIdAllocator: String,
+    val publicIdPolicy: PatientPublicIdPolicy,
+    val requiredConsents: List<String>,
+    val reason: String
+)
+
+fun stage49aPatientEnrollmentReadiness(demoPatientLogin: String = "ENABLED") =
+    PatientEnrollmentReadiness(
+        stage = "FOUNDATION_ONLY",
+        foundationVersion = "49A",
+        demoPatientLogin = demoPatientLogin,
+        productionPatientEnrollment = "DISABLED",
+        enrollmentTransaction = "CONTRACT_READY_ACTIVATION_DISABLED",
+        otpUsage = "AUTHENTICATION_ONLY",
+        otpProvider = "DISABLED",
+        otpChallengeProtection = "DEDICATED_RATE_LIMIT_REQUIRED",
+        profileEnrollment = "DISABLED",
+        familyEnrollment = "DISABLED",
+        doloIdIssuance = "RESERVED",
+        doloIdAllocator = "ATOMIC_LOCATION_NEUTRAL_READY_DISABLED",
+        publicIdPolicy = PatientPublicIdPolicy(
+            format = "DLO-PAT-NNNNNN",
+            serverOwned = true,
+            editableByPatient = false,
+            derivedFromPhone = false,
+            locationEmbedded = false,
+            locationReason = "PRIVACY_STABILITY_AND_RELOCATION_SAFETY"
+        ),
+        requiredConsents = listOf("TERMS", "PRIVACY", "HEALTH_DATA"),
+        reason = "OTP_PROVIDER_NOT_CONFIGURED"
+    )
 
 data class PrototypeTokenBundle(
     val accessToken: String,
@@ -133,7 +184,7 @@ class HttpPrototypeAuthApi(
     )
 
     private fun get(path:String,bearer:String?=null):String{
-        val connection=(URL(baseUrl+path).openConnection() as HttpURLConnection).apply{requestMethod="GET";connectTimeout=connectTimeoutMillis;readTimeout=readTimeoutMillis;setRequestProperty("Accept","application/json");setRequestProperty("User-Agent","DO-LO-Patient-Android/Stage41B");bearer?.let{setRequestProperty("Authorization","Bearer $it")};useCaches=false}
+        val connection=(URL(baseUrl+path).openConnection() as HttpURLConnection).apply{requestMethod="GET";connectTimeout=connectTimeoutMillis;readTimeout=readTimeoutMillis;setRequestProperty("Accept","application/json");setRequestProperty("User-Agent","DO-LO-Patient-Android/Stage49B");bearer?.let{setRequestProperty("Authorization","Bearer $it")};useCaches=false}
         return try{val status=connection.responseCode;val response=(if(status in 200..299)connection.inputStream else connection.errorStream)?.bufferedReader(Charsets.UTF_8)?.use(::readBounded).orEmpty();if(status !in 200..299)error("Enrollment readiness returned HTTP $status");response}finally{connection.disconnect()}
     }
 
@@ -141,7 +192,7 @@ class HttpPrototypeAuthApi(
         val connection = (URL(baseUrl + path).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"; doOutput = true; connectTimeout = connectTimeoutMillis; readTimeout = readTimeoutMillis
             setRequestProperty("Content-Type", "application/json"); setRequestProperty("Accept", "application/json")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage41B")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage49B")
             bearer?.let { setRequestProperty("Authorization", "Bearer $it") }
             useCaches = false
         }
@@ -170,7 +221,46 @@ class HttpPrototypeAuthApi(
 object PrototypeAuthJson {
     fun parseIdentityCard(json:String):PublicIdentityCard{val root=JSONObject(json);require(root.optBoolean("authoritative")&&root.getString("privacy")=="SELF_ONLY_NO_PHONE"&&root.getString("productionEnrollment")=="DISABLED");val item=root.getJSONObject("identity");val result=PublicIdentityCard(item.getString("doloId"),item.getString("displayName"),item.getString("role"),item.getBoolean("prototype"));require(result.doloId.matches(Regex("^DLO-(PAT|DOC|AST|ADM)-[0-9]{6}$"))&&result.displayName.isNotBlank()&&result.displayName.length<=120&&result.role in setOf("PATIENT","DOCTOR","ASSISTANT","ADMIN"));return result}
 
-    fun parseEnrollmentReadiness(json:String):PatientEnrollmentReadiness{val root=JSONObject(json);require(root.optBoolean("authoritative")&&root.getString("privacy")=="NO_PHONE_OR_PROFILE_ACCEPTED"&&root.getString("providers")=="DISABLED");val item=root.getJSONObject("enrollment");val result=PatientEnrollmentReadiness(item.getString("stage"),item.getString("demoPatientLogin"),item.getString("productionPatientEnrollment"),item.getString("otpUsage"),item.getString("otpProvider"),item.getString("profileEnrollment"),item.getString("familyEnrollment"),item.getString("doloIdIssuance"),item.getString("reason"));require(result.stage=="FOUNDATION_ONLY"&&result.demoPatientLogin in setOf("ENABLED","DISABLED")&&result.productionPatientEnrollment=="DISABLED"&&result.otpUsage=="AUTHENTICATION_ONLY"&&result.otpProvider=="DISABLED"&&result.profileEnrollment=="DISABLED"&&result.familyEnrollment=="DISABLED"&&result.doloIdIssuance=="RESERVED"&&result.reason=="OTP_PROVIDER_NOT_CONFIGURED");return result}
+    fun parseEnrollmentReadiness(json: String): PatientEnrollmentReadiness {
+        val root = JSONObject(json)
+        require(
+            root.optBoolean("authoritative") &&
+                root.getString("privacy") == "NO_PHONE_OR_PROFILE_ACCEPTED" &&
+                root.getString("providers") == "DISABLED"
+        )
+        val item = root.getJSONObject("enrollment")
+        val policy = item.getJSONObject("publicIdPolicy")
+        val consents = item.getJSONArray("requiredConsents")
+        val result = PatientEnrollmentReadiness(
+            stage = item.getString("stage"),
+            foundationVersion = item.getString("foundationVersion"),
+            demoPatientLogin = item.getString("demoPatientLogin"),
+            productionPatientEnrollment = item.getString("productionPatientEnrollment"),
+            enrollmentTransaction = item.getString("enrollmentTransaction"),
+            otpUsage = item.getString("otpUsage"),
+            otpProvider = item.getString("otpProvider"),
+            otpChallengeProtection = item.getString("otpChallengeProtection"),
+            profileEnrollment = item.getString("profileEnrollment"),
+            familyEnrollment = item.getString("familyEnrollment"),
+            doloIdIssuance = item.getString("doloIdIssuance"),
+            doloIdAllocator = item.getString("doloIdAllocator"),
+            publicIdPolicy = PatientPublicIdPolicy(
+                format = policy.getString("format"),
+                serverOwned = policy.getBoolean("serverOwned"),
+                editableByPatient = policy.getBoolean("editableByPatient"),
+                derivedFromPhone = policy.getBoolean("derivedFromPhone"),
+                locationEmbedded = policy.getBoolean("locationEmbedded"),
+                locationReason = policy.getString("locationReason")
+            ),
+            requiredConsents = (0 until consents.length()).map(consents::getString),
+            reason = item.getString("reason")
+        )
+        require(
+            result == stage49aPatientEnrollmentReadiness(result.demoPatientLogin) &&
+                result.demoPatientLogin in setOf("ENABLED", "DISABLED")
+        )
+        return result
+    }
 
     fun parseTokenResponse(json: String): PrototypeTokenBundle {
         val root = JSONObject(json)

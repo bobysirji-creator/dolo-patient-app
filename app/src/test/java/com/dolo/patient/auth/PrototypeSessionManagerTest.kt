@@ -29,19 +29,7 @@ class PrototypeSessionManagerTest {
     }
     private class FakeApi(private val result: PrototypeAuthResult<PrototypeTokenBundle>) : PrototypeAuthApi {
         var refreshToken: String? = null
-        override fun enrollmentReadiness() = PrototypeAuthResult.Success(
-            PatientEnrollmentReadiness(
-                "FOUNDATION_ONLY",
-                "ENABLED",
-                "DISABLED",
-                "AUTHENTICATION_ONLY",
-                "DISABLED",
-                "DISABLED",
-                "DISABLED",
-                "RESERVED",
-                "OTP_PROVIDER_NOT_CONFIGURED"
-            )
-        )
+        override fun enrollmentReadiness() = PrototypeAuthResult.Success(stage49aPatientEnrollmentReadiness())
         override fun identityCard(accessToken:String)=PrototypeAuthResult.Success(PublicIdentityCard("DLO-PAT-000002","Prototype Patient","PATIENT",true))
         override fun createDemoSession() = result
         override fun refresh(refreshToken: String): PrototypeAuthResult<PrototypeTokenBundle> { this.refreshToken = refreshToken; return result }
