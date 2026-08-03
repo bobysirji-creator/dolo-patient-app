@@ -425,7 +425,7 @@ Real Patient enrollment, OTP delivery, production DO-LO ID issuance and all exte
 - [x] preserve Stage 49B readiness, demo OTP, session restoration and local data
 - [x] JSON, fail-closed status and gate-label regression coverage
 - [x] stable version increment to 0.36.0-stage50b (version code 53)
-- [ ] GitHub Actions compile, lint, unit tests and stable APK
-- [ ] stable APK in-place upgrade and Stage 50B physical-device acceptance
+- [x] GitHub Actions compile, lint, unit tests and stable APK
+- [x] stable APK in-place upgrade and Stage 50B physical-device acceptance
 
 Production enrollment, real OTP/SMS delivery, public-ID allocation and every external provider remain disabled. The Patient App never calls an activation, enrollment or public-ID allocation transaction.

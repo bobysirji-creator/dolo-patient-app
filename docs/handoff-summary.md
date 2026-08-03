@@ -434,3 +434,7 @@ Patient App 0.35.0-stage49b passed GitHub Actions, stable in-place APK upgrade a
 Patient App 0.36.0-stage50b (version code 53) adds a strict client for Platform API 0.37.0-stage50a's read-only activation requirements. Create an Account now accepts status only when the existing Stage 49A readiness contract is safe and all seven Stage 50A gates appear in canonical order as BLOCKED with NOT_APPROVED evidence. The screen translates every gate into patient-friendly wording and retains the future location/phone-neutral DLO-PAT-NNNNNN explanation.
 
 A missing network, malformed response, changed gate, satisfied gate or Patient-input-accepting privacy marker fails closed. No form opens and no phone, profile, family or consent record is uploaded. Seeded OTP 123456, secure hosted sessions, offline fallback and all local Patient records are unchanged. GitHub Actions remains the Android build authority; install the stable APK and complete docs/stage50b-device-test.md.
+
+## Stage 50B acceptance
+
+Patient App 0.36.0-stage50b passed GitHub Actions, stable in-place APK upgrade and every Stage 50B physical-device check on 3 August 2026. All seven patient-friendly blocked prerequisites, authoritative refresh, offline fail-closed recovery, demo OTP login, hosted session restoration and local-data isolation are accepted. Production enrollment, real OTP/SMS, public-ID allocation and all external providers remain disabled.
