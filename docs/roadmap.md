@@ -412,3 +412,20 @@ Live Queue redesign and external provider activation remain outside this screen 
 - [x] stable APK in-place upgrade and Stage 49B physical-device acceptance
 
 Real Patient enrollment, OTP delivery, production DO-LO ID issuance and all external providers remain disabled. The Stage 49A allocator is not called by the Patient App.
+
+## Stage 50B - Patient activation-requirements client
+
+- [x] consume Stage 50A requirements through a read-only HTTPS GET
+- [x] strictly require foundation version 50A and authoritative no-input metadata
+- [x] require all seven known gates in canonical order as BLOCKED and NOT_APPROVED
+- [x] reject any satisfied, missing, unknown or unsafe activation contract
+- [x] present all seven prerequisites with patient-friendly labels
+- [x] retain future location/phone-neutral DLO-PAT-NNNNNN explanation
+- [x] keep account creation unavailable and submit no Patient data
+- [x] preserve Stage 49B readiness, demo OTP, session restoration and local data
+- [x] JSON, fail-closed status and gate-label regression coverage
+- [x] stable version increment to 0.36.0-stage50b (version code 53)
+- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [ ] stable APK in-place upgrade and Stage 50B physical-device acceptance
+
+Production enrollment, real OTP/SMS delivery, public-ID allocation and every external provider remain disabled. The Patient App never calls an activation, enrollment or public-ID allocation transaction.

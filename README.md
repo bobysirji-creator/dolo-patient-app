@@ -84,3 +84,7 @@ Hosted appointment history now shows whether the clinic consultation fee is pend
 ## Stage 49B production-registration readiness
 
 Patient App 0.35.0-stage49b consumes the complete fail-closed Stage 49A enrollment-readiness contract when Create an Account is selected. It displays the reserved server-owned DLO-PAT-NNNNNN policy and future consent requirements, while production registration, real OTP delivery and all Patient-data submission remain disabled. Seeded demo login and existing local/hosted data are unchanged. Follow docs/stage49b-device-test.md after GitHub Actions builds the stable APK.
+
+## Stage 50B activation-requirements client
+
+Patient App 0.36.0-stage50b validates both the accepted Stage 49A readiness contract and Stage 50A's seven blocked activation prerequisites when Create an Account is selected. It presents patient-friendly requirement names and the reserved DLO-PAT-NNNNNN format without opening a form or submitting data. Any missing, changed or unsafe contract fails closed. Demo login, secure hosted sessions and local Patient data remain unchanged. Follow docs/stage50b-device-test.md after GitHub Actions builds the stable APK.

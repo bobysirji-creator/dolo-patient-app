@@ -18,7 +18,7 @@
     <string name="login_create_account">Create an Account</string>
     <string name="login_registration_unavailable">Account creation will be available after production registration is enabled.</string>
     <string name="login_registration_checking">Checking the authoritative registration status…</string>
-    <string name="login_registration_foundation_ready">Production registration is not open yet. When enabled, DO-LO will securely assign an ID in the %1$s format. It will not contain your phone number or location. Terms, Privacy and Health Data consent will be required. No registration data is uploaded now.</string>
+    <string name="login_registration_activation_blocked">Production registration is not open. These seven safety requirements are still awaiting approval:\n%1$s\n\nFuture DO-LO ID: %2$s. No phone, profile, family or consent data is uploaded.</string>
     <string name="login_registration_status_unavailable">Registration status could not be verified. Account creation remains disabled. Check your connection and try again.</string>
     <string name="login_illustration_description">Doctor helping a Patient use healthcare services on a mobile phone</string>
     <string name="otp_title">OTP Verification</string>

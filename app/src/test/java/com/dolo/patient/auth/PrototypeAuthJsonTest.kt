@@ -39,6 +39,33 @@ class PrototypeAuthJsonTest {
         "providers": "DISABLED"
     }"""
 
+    private val requirementsJson = """{
+        "requirements": {
+            "stage": "ACTIVATION_GATES_ONLY",
+            "foundationVersion": "50A",
+            "activationDecision": "BLOCKED",
+            "productionPatientEnrollment": "DISABLED",
+            "realPatientDataAcceptance": "DISABLED",
+            "otpUsage": "AUTHENTICATION_ONLY",
+            "otpProvider": "DISABLED",
+            "distributedAbuseProtection": "REQUIRED_NOT_CONFIGURED",
+            "publicIdIssuance": "RESERVED",
+            "enrollmentTransaction": "NOT_CALLABLE",
+            "gates": [
+                {"key":"MANAGED_OTP_PROVIDER","status":"BLOCKED","evidence":"NOT_APPROVED"},
+                {"key":"DISTRIBUTED_ABUSE_PROTECTION","status":"BLOCKED","evidence":"NOT_APPROVED"},
+                {"key":"VERSIONED_LEGAL_CONSENTS","status":"BLOCKED","evidence":"NOT_APPROVED"},
+                {"key":"ACCOUNT_RECOVERY_AND_DUPLICATE_POLICY","status":"BLOCKED","evidence":"NOT_APPROVED"},
+                {"key":"RETENTION_CORRECTION_AND_DELETION_POLICY","status":"BLOCKED","evidence":"NOT_APPROVED"},
+                {"key":"INDIA_PRODUCTION_SECURITY_REVIEW","status":"BLOCKED","evidence":"NOT_APPROVED"},
+                {"key":"ATOMIC_ENROLLMENT_TRANSACTION_REVIEW","status":"BLOCKED","evidence":"NOT_APPROVED"}
+            ],
+            "nextReview": "SECURITY_LEGAL_PROVIDER_AND_OPERATIONS_APPROVAL_REQUIRED"
+        },
+        "authoritative": true,
+        "privacy": "NO_PATIENT_INPUT_ACCEPTED",
+        "providers": "DISABLED"
+    }"""
     @Test fun acceptsSelfOnlyServerOwnedIdentity() {
         val identity = PrototypeAuthJson.parseIdentityCard(identityJson)
         assertEquals("DLO-PAT-000002", identity.doloId)
@@ -88,6 +115,31 @@ class PrototypeAuthJsonTest {
                 "[\"TERMS\", \"PRIVACY\", \"HEALTH_DATA\"]",
                 "[\"TERMS\", \"PRIVACY\"]"
             )
+        )
+    }
+    @Test fun acceptsOnlyBlockedStage50AActivationRequirements() {
+        val requirements = PrototypeAuthJson.parseEnrollmentActivationRequirements(requirementsJson)
+        assertEquals("50A", requirements.foundationVersion)
+        assertEquals("BLOCKED", requirements.activationDecision)
+        assertEquals(7, requirements.gates.size)
+        assertTrue(requirements.gates.all { it.status == "BLOCKED" && it.evidence == "NOT_APPROVED" })
+        assertEquals("NOT_CALLABLE", requirements.enrollmentTransaction)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsSatisfiedActivationGate() {
+        PrototypeAuthJson.parseEnrollmentActivationRequirements(
+            requirementsJson.replace(
+                "\"status\":\"BLOCKED\"",
+                "\"status\":\"SATISFIED\""
+            )
+        )
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsPatientInputAcceptingRequirementsContract() {
+        PrototypeAuthJson.parseEnrollmentActivationRequirements(
+            requirementsJson.replace("NO_PATIENT_INPUT_ACCEPTED", "PATIENT_INPUT_ACCEPTED")
         )
     }
     @Test fun acceptsOnlySeededDummyTokenResponse() {

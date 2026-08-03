@@ -69,6 +69,54 @@ fun stage49aPatientEnrollmentReadiness(demoPatientLogin: String = "ENABLED") =
         reason = "OTP_PROVIDER_NOT_CONFIGURED"
     )
 
+data class PatientEnrollmentActivationGate(
+    val key: String,
+    val status: String,
+    val evidence: String
+)
+
+data class PatientEnrollmentActivationRequirements(
+    val stage: String,
+    val foundationVersion: String,
+    val activationDecision: String,
+    val productionPatientEnrollment: String,
+    val realPatientDataAcceptance: String,
+    val otpUsage: String,
+    val otpProvider: String,
+    val distributedAbuseProtection: String,
+    val publicIdIssuance: String,
+    val enrollmentTransaction: String,
+    val gates: List<PatientEnrollmentActivationGate>,
+    val nextReview: String
+)
+
+private val PATIENT_ENROLLMENT_ACTIVATION_GATE_KEYS = listOf(
+    "MANAGED_OTP_PROVIDER",
+    "DISTRIBUTED_ABUSE_PROTECTION",
+    "VERSIONED_LEGAL_CONSENTS",
+    "ACCOUNT_RECOVERY_AND_DUPLICATE_POLICY",
+    "RETENTION_CORRECTION_AND_DELETION_POLICY",
+    "INDIA_PRODUCTION_SECURITY_REVIEW",
+    "ATOMIC_ENROLLMENT_TRANSACTION_REVIEW"
+)
+
+fun stage50aPatientEnrollmentActivationRequirements() =
+    PatientEnrollmentActivationRequirements(
+        stage = "ACTIVATION_GATES_ONLY",
+        foundationVersion = "50A",
+        activationDecision = "BLOCKED",
+        productionPatientEnrollment = "DISABLED",
+        realPatientDataAcceptance = "DISABLED",
+        otpUsage = "AUTHENTICATION_ONLY",
+        otpProvider = "DISABLED",
+        distributedAbuseProtection = "REQUIRED_NOT_CONFIGURED",
+        publicIdIssuance = "RESERVED",
+        enrollmentTransaction = "NOT_CALLABLE",
+        gates = PATIENT_ENROLLMENT_ACTIVATION_GATE_KEYS.map {
+            PatientEnrollmentActivationGate(it, "BLOCKED", "NOT_APPROVED")
+        },
+        nextReview = "SECURITY_LEGAL_PROVIDER_AND_OPERATIONS_APPROVAL_REQUIRED"
+    )
 data class PrototypeTokenBundle(
     val accessToken: String,
     val accessExpiresAt: String,
@@ -142,6 +190,7 @@ class PrototypeSessionManager(private val store: SecureTokenStore, private val a
 
 interface PrototypeAuthApi {
     fun enrollmentReadiness(): PrototypeAuthResult<PatientEnrollmentReadiness>
+    fun enrollmentActivationRequirements(): PrototypeAuthResult<PatientEnrollmentActivationRequirements>
     fun identityCard(accessToken:String): PrototypeAuthResult<PublicIdentityCard>
     fun createDemoSession(): PrototypeAuthResult<PrototypeTokenBundle>
     fun refresh(refreshToken: String): PrototypeAuthResult<PrototypeTokenBundle>
@@ -157,6 +206,13 @@ class HttpPrototypeAuthApi(
     init { require(URL(this.baseUrl).protocol.equals("https", true)) { "Prototype auth requires HTTPS." } }
 
     override fun enrollmentReadiness():PrototypeAuthResult<PatientEnrollmentReadiness> = runCatching { PrototypeAuthJson.parseEnrollmentReadiness(get("/api/v1/auth/patient-enrollment/readiness")) }.fold({PrototypeAuthResult.Success(it)},{PrototypeAuthResult.Failure("Production registration status is temporarily unavailable.")})
+
+    override fun enrollmentActivationRequirements(): PrototypeAuthResult<PatientEnrollmentActivationRequirements> = runCatching {
+        PrototypeAuthJson.parseEnrollmentActivationRequirements(get("/api/v1/auth/patient-enrollment/requirements"))
+    }.fold(
+        { PrototypeAuthResult.Success(it) },
+        { PrototypeAuthResult.Failure("Production registration requirements are temporarily unavailable.") }
+    )
 
     override fun identityCard(accessToken:String):PrototypeAuthResult<PublicIdentityCard> = runCatching { PrototypeAuthJson.parseIdentityCard(get("/api/v1/auth/identity-card",accessToken)) }.fold({PrototypeAuthResult.Success(it)},{PrototypeAuthResult.Failure("Hosted DO-LO identity is temporarily unavailable.")})
 
@@ -184,7 +240,7 @@ class HttpPrototypeAuthApi(
     )
 
     private fun get(path:String,bearer:String?=null):String{
-        val connection=(URL(baseUrl+path).openConnection() as HttpURLConnection).apply{requestMethod="GET";connectTimeout=connectTimeoutMillis;readTimeout=readTimeoutMillis;setRequestProperty("Accept","application/json");setRequestProperty("User-Agent","DO-LO-Patient-Android/Stage49B");bearer?.let{setRequestProperty("Authorization","Bearer $it")};useCaches=false}
+        val connection=(URL(baseUrl+path).openConnection() as HttpURLConnection).apply{requestMethod="GET";connectTimeout=connectTimeoutMillis;readTimeout=readTimeoutMillis;setRequestProperty("Accept","application/json");setRequestProperty("User-Agent","DO-LO-Patient-Android/Stage50B");bearer?.let{setRequestProperty("Authorization","Bearer $it")};useCaches=false}
         return try{val status=connection.responseCode;val response=(if(status in 200..299)connection.inputStream else connection.errorStream)?.bufferedReader(Charsets.UTF_8)?.use(::readBounded).orEmpty();if(status !in 200..299)error("Enrollment readiness returned HTTP $status");response}finally{connection.disconnect()}
     }
 
@@ -192,7 +248,7 @@ class HttpPrototypeAuthApi(
         val connection = (URL(baseUrl + path).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"; doOutput = true; connectTimeout = connectTimeoutMillis; readTimeout = readTimeoutMillis
             setRequestProperty("Content-Type", "application/json"); setRequestProperty("Accept", "application/json")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage49B")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage50B")
             bearer?.let { setRequestProperty("Authorization", "Bearer $it") }
             useCaches = false
         }
@@ -262,6 +318,40 @@ object PrototypeAuthJson {
         return result
     }
 
+    fun parseEnrollmentActivationRequirements(json: String): PatientEnrollmentActivationRequirements {
+        val root = JSONObject(json)
+        require(
+            root.optBoolean("authoritative") &&
+                root.getString("privacy") == "NO_PATIENT_INPUT_ACCEPTED" &&
+                root.getString("providers") == "DISABLED"
+        )
+        val item = root.getJSONObject("requirements")
+        val gates = item.getJSONArray("gates")
+        val result = PatientEnrollmentActivationRequirements(
+            stage = item.getString("stage"),
+            foundationVersion = item.getString("foundationVersion"),
+            activationDecision = item.getString("activationDecision"),
+            productionPatientEnrollment = item.getString("productionPatientEnrollment"),
+            realPatientDataAcceptance = item.getString("realPatientDataAcceptance"),
+            otpUsage = item.getString("otpUsage"),
+            otpProvider = item.getString("otpProvider"),
+            distributedAbuseProtection = item.getString("distributedAbuseProtection"),
+            publicIdIssuance = item.getString("publicIdIssuance"),
+            enrollmentTransaction = item.getString("enrollmentTransaction"),
+            gates = (0 until gates.length()).map { index ->
+                gates.getJSONObject(index).let { gate ->
+                    PatientEnrollmentActivationGate(
+                        key = gate.getString("key"),
+                        status = gate.getString("status"),
+                        evidence = gate.getString("evidence")
+                    )
+                }
+            },
+            nextReview = item.getString("nextReview")
+        )
+        require(result == stage50aPatientEnrollmentActivationRequirements())
+        return result
+    }
     fun parseTokenResponse(json: String): PrototypeTokenBundle {
         val root = JSONObject(json)
         require(root.optJSONObject("identity")?.optBoolean("seededDummy") == true) { "Not a seeded dummy identity." }

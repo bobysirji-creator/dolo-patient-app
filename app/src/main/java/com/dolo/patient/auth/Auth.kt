@@ -22,6 +22,7 @@ data class PatientSession(val phone: String, val mode: PatientAuthMode = Patient
 interface AuthRepository {
     fun currentSession(): PatientSession?
     fun enrollmentReadiness(): Result<PatientEnrollmentReadiness>
+    fun enrollmentActivationRequirements(): Result<PatientEnrollmentActivationRequirements>
     fun identityCard(): Result<PublicIdentityCard>
     fun requestOtp(phone: String): Result<Unit>
     fun verifyOtp(phone: String, otp: String): Result<PatientSession>
@@ -31,6 +32,8 @@ interface AuthRepository {
 class FakeAuthRepository(private val preferences: SharedPreferences) : AuthRepository {
     override fun currentSession(): PatientSession? = preferences.getString(KEY_PHONE, null)?.let(::PatientSession)
     override fun enrollmentReadiness()=Result.success(stage49aPatientEnrollmentReadiness())
+    override fun enrollmentActivationRequirements() =
+        Result.success(stage50aPatientEnrollmentActivationRequirements())
     override fun identityCard()=Result.failure<PublicIdentityCard>(IllegalStateException("Local-only demo profile has no hosted DO-LO identity."))
     override fun requestOtp(phone: String): Result<Unit> = if (PhoneValidator.isValid(phone)) Result.success(Unit) else Result.failure(IllegalArgumentException("Enter a valid 10-digit mobile number"))
     override fun verifyOtp(phone: String, otp: String): Result<PatientSession> {
@@ -54,6 +57,11 @@ class PrototypeAuthRepository(
         return PatientSession(phone, if (hosted) PatientAuthMode.HOSTED_PROTOTYPE else PatientAuthMode.LOCAL_FALLBACK)
     }
     override fun enrollmentReadiness():Result<PatientEnrollmentReadiness> = when(val result=api.enrollmentReadiness()){is PrototypeAuthResult.Success->Result.success(result.value);is PrototypeAuthResult.Failure->Result.failure(IllegalStateException(result.message))}
+    override fun enrollmentActivationRequirements(): Result<PatientEnrollmentActivationRequirements> =
+        when (val result = api.enrollmentActivationRequirements()) {
+            is PrototypeAuthResult.Success -> Result.success(result.value)
+            is PrototypeAuthResult.Failure -> Result.failure(IllegalStateException(result.message))
+        }
     override fun identityCard():Result<PublicIdentityCard>{val token=PrototypeSessionManager(tokenStore,api).accessToken()?:return Result.failure(IllegalStateException("Hosted session unavailable."));return when(val result=api.identityCard(token)){is PrototypeAuthResult.Success->Result.success(result.value);is PrototypeAuthResult.Failure->Result.failure(IllegalStateException(result.message))}}
     override fun requestOtp(phone: String): Result<Unit> = if (PhoneValidator.isValid(phone)) Result.success(Unit) else Result.failure(IllegalArgumentException("Enter a valid 10-digit mobile number"))
     override fun verifyOtp(phone: String, otp: String): Result<PatientSession> {

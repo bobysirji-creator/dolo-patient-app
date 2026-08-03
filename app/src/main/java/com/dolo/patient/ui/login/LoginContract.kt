@@ -9,8 +9,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.dolo.patient.auth.AuthRepository
 import com.dolo.patient.auth.PatientEnrollmentReadiness
+import com.dolo.patient.auth.PatientEnrollmentActivationRequirements
 import com.dolo.patient.auth.PhoneValidator
 import com.dolo.patient.auth.stage49aPatientEnrollmentReadiness
+import com.dolo.patient.auth.stage50aPatientEnrollmentActivationRequirements
 import java.util.concurrent.Executors
 
 enum class LoginError {
@@ -20,21 +22,35 @@ enum class LoginError {
 
 enum class RegistrationReadinessStatus {
     Checking,
-    FoundationReadyDisabled,
+    ActivationGatesBlocked,
     Unavailable
 }
 
 fun registrationReadinessStatus(
-    readiness: PatientEnrollmentReadiness?
+    readiness: PatientEnrollmentReadiness?,
+    requirements: PatientEnrollmentActivationRequirements?
 ): RegistrationReadinessStatus =
     if (
         readiness != null &&
-        readiness == stage49aPatientEnrollmentReadiness(readiness.demoPatientLogin)
+        requirements != null &&
+        readiness == stage49aPatientEnrollmentReadiness(readiness.demoPatientLogin) &&
+        requirements == stage50aPatientEnrollmentActivationRequirements()
     ) {
-        RegistrationReadinessStatus.FoundationReadyDisabled
+        RegistrationReadinessStatus.ActivationGatesBlocked
     } else {
         RegistrationReadinessStatus.Unavailable
     }
+
+fun activationGateLabel(key: String): String = when (key) {
+    "MANAGED_OTP_PROVIDER" -> "Managed OTP provider"
+    "DISTRIBUTED_ABUSE_PROTECTION" -> "Distributed abuse protection"
+    "VERSIONED_LEGAL_CONSENTS" -> "Versioned Terms, Privacy and Health Data consent"
+    "ACCOUNT_RECOVERY_AND_DUPLICATE_POLICY" -> "Account recovery and duplicate-account policy"
+    "RETENTION_CORRECTION_AND_DELETION_POLICY" -> "Data retention, correction and deletion policy"
+    "INDIA_PRODUCTION_SECURITY_REVIEW" -> "India production security review"
+    "ATOMIC_ENROLLMENT_TRANSACTION_REVIEW" -> "Atomic enrollment transaction review"
+    else -> "Unrecognized safety requirement"
+}
 
 data class LoginUiState(
     val phoneNumber: String = "",
@@ -43,6 +59,7 @@ data class LoginUiState(
     val accountCreationNoticeVisible: Boolean = false,
     val registrationStatus: RegistrationReadinessStatus = RegistrationReadinessStatus.Checking,
     val enrollmentReadiness: PatientEnrollmentReadiness? = null,
+    val activationRequirements: PatientEnrollmentActivationRequirements? = null,
     val otpRequestedFor: String? = null
 ) {
     val isPhoneValid: Boolean get() = PhoneValidator.isValid(phoneNumber)
@@ -60,23 +77,17 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
     private fun refreshEnrollmentReadiness() {
         uiState = uiState.copy(registrationStatus = RegistrationReadinessStatus.Checking)
         executor.execute {
-            val result = repository.enrollmentReadiness()
+            val readiness = repository.enrollmentReadiness().getOrNull()
+            val requirements = repository.enrollmentActivationRequirements().getOrNull()
             main.post {
-                uiState = result.fold(
-                    onSuccess = {
-                        uiState.copy(
-                            registrationStatus = registrationReadinessStatus(it),
-                            enrollmentReadiness = it.takeIf {
-                                registrationReadinessStatus(it) ==
-                                    RegistrationReadinessStatus.FoundationReadyDisabled
-                            }
-                        )
+                val status = registrationReadinessStatus(readiness, requirements)
+                uiState = uiState.copy(
+                    registrationStatus = status,
+                    enrollmentReadiness = readiness.takeIf {
+                        status == RegistrationReadinessStatus.ActivationGatesBlocked
                     },
-                    onFailure = {
-                        uiState.copy(
-                            registrationStatus = RegistrationReadinessStatus.Unavailable,
-                            enrollmentReadiness = null
-                        )
+                    activationRequirements = requirements.takeIf {
+                        status == RegistrationReadinessStatus.ActivationGatesBlocked
                     }
                 )
             }
@@ -140,12 +151,7 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
 
     fun showAccountCreationNotice() {
         uiState = uiState.copy(accountCreationNoticeVisible = true)
-        if (
-            uiState.registrationStatus !=
-            RegistrationReadinessStatus.FoundationReadyDisabled
-        ) {
-            refreshEnrollmentReadiness()
-        }
+        refreshEnrollmentReadiness()
     }
 
     override fun onCleared() {

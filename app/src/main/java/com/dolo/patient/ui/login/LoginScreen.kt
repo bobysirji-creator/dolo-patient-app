@@ -244,12 +244,17 @@ fun LoginScreen(
                         val registrationMessage = when (uiState.registrationStatus) {
                             RegistrationReadinessStatus.Checking ->
                                 stringResource(R.string.login_registration_checking)
-                            RegistrationReadinessStatus.FoundationReadyDisabled ->
+                            RegistrationReadinessStatus.ActivationGatesBlocked -> {
+                                val gateList = uiState.activationRequirements?.gates
+                                    ?.joinToString("\n") { "• ${activationGateLabel(it.key)}" }
+                                    .orEmpty()
                                 stringResource(
-                                    R.string.login_registration_foundation_ready,
+                                    R.string.login_registration_activation_blocked,
+                                    gateList,
                                     uiState.enrollmentReadiness?.publicIdPolicy?.format
                                         ?: "DLO-PAT-NNNNNN"
                                 )
+                            }
                             RegistrationReadinessStatus.Unavailable ->
                                 stringResource(R.string.login_registration_status_unavailable)
                         }
