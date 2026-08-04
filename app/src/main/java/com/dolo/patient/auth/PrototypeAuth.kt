@@ -117,6 +117,48 @@ fun stage50aPatientEnrollmentActivationRequirements() =
         },
         nextReview = "SECURITY_LEGAL_PROVIDER_AND_OPERATIONS_APPROVAL_REQUIRED"
     )
+data class PatientEnrollmentConsentRequirement(
+    val category: String,
+    val version: String,
+    val lifecycle: String,
+    val language: String,
+    val content: String,
+    val collection: String
+)
+
+data class PatientEnrollmentConsentCatalog(
+    val stage: String,
+    val foundationVersion: String,
+    val activationGate: String,
+    val activationGateStatus: String,
+    val legalReview: String,
+    val patientConsentCollection: String,
+    val requirements: List<PatientEnrollmentConsentRequirement>,
+    val privacy: String,
+    val reason: String
+)
+
+fun stage51aPatientEnrollmentConsentCatalog() =
+    PatientEnrollmentConsentCatalog(
+        stage = "CONSENT_CATALOG_FOUNDATION_ONLY",
+        foundationVersion = "51A",
+        activationGate = "VERSIONED_LEGAL_CONSENTS",
+        activationGateStatus = "BLOCKED",
+        legalReview = "REQUIRED",
+        patientConsentCollection = "DISABLED",
+        requirements = listOf("TERMS", "PRIVACY", "HEALTH_DATA").map {
+            PatientEnrollmentConsentRequirement(
+                category = it,
+                version = "RESERVED",
+                lifecycle = "RESERVED",
+                language = "en-IN",
+                content = "NOT_PUBLISHED",
+                collection = "DISABLED"
+            )
+        },
+        privacy = "NO_PATIENT_CONSENT_ACCEPTED",
+        reason = "APPROVED_DOCUMENT_VERSIONS_NOT_CONFIGURED"
+    )
 data class PrototypeTokenBundle(
     val accessToken: String,
     val accessExpiresAt: String,
@@ -191,6 +233,7 @@ class PrototypeSessionManager(private val store: SecureTokenStore, private val a
 interface PrototypeAuthApi {
     fun enrollmentReadiness(): PrototypeAuthResult<PatientEnrollmentReadiness>
     fun enrollmentActivationRequirements(): PrototypeAuthResult<PatientEnrollmentActivationRequirements>
+    fun enrollmentConsentCatalog(): PrototypeAuthResult<PatientEnrollmentConsentCatalog>
     fun identityCard(accessToken:String): PrototypeAuthResult<PublicIdentityCard>
     fun createDemoSession(): PrototypeAuthResult<PrototypeTokenBundle>
     fun refresh(refreshToken: String): PrototypeAuthResult<PrototypeTokenBundle>
@@ -212,6 +255,14 @@ class HttpPrototypeAuthApi(
     }.fold(
         { PrototypeAuthResult.Success(it) },
         { PrototypeAuthResult.Failure("Production registration requirements are temporarily unavailable.") }
+    )
+    override fun enrollmentConsentCatalog(): PrototypeAuthResult<PatientEnrollmentConsentCatalog> = runCatching {
+        PrototypeAuthJson.parseEnrollmentConsentCatalog(
+            get("/api/v1/auth/patient-enrollment/consent-requirements")
+        )
+    }.fold(
+        { PrototypeAuthResult.Success(it) },
+        { PrototypeAuthResult.Failure("Production consent catalog is temporarily unavailable.") }
     )
 
     override fun identityCard(accessToken:String):PrototypeAuthResult<PublicIdentityCard> = runCatching { PrototypeAuthJson.parseIdentityCard(get("/api/v1/auth/identity-card",accessToken)) }.fold({PrototypeAuthResult.Success(it)},{PrototypeAuthResult.Failure("Hosted DO-LO identity is temporarily unavailable.")})
@@ -240,7 +291,7 @@ class HttpPrototypeAuthApi(
     )
 
     private fun get(path:String,bearer:String?=null):String{
-        val connection=(URL(baseUrl+path).openConnection() as HttpURLConnection).apply{requestMethod="GET";connectTimeout=connectTimeoutMillis;readTimeout=readTimeoutMillis;setRequestProperty("Accept","application/json");setRequestProperty("User-Agent","DO-LO-Patient-Android/Stage50B");bearer?.let{setRequestProperty("Authorization","Bearer $it")};useCaches=false}
+        val connection=(URL(baseUrl+path).openConnection() as HttpURLConnection).apply{requestMethod="GET";connectTimeout=connectTimeoutMillis;readTimeout=readTimeoutMillis;setRequestProperty("Accept","application/json");setRequestProperty("User-Agent","DO-LO-Patient-Android/Stage51B");bearer?.let{setRequestProperty("Authorization","Bearer $it")};useCaches=false}
         return try{val status=connection.responseCode;val response=(if(status in 200..299)connection.inputStream else connection.errorStream)?.bufferedReader(Charsets.UTF_8)?.use(::readBounded).orEmpty();if(status !in 200..299)error("Enrollment readiness returned HTTP $status");response}finally{connection.disconnect()}
     }
 
@@ -248,7 +299,7 @@ class HttpPrototypeAuthApi(
         val connection = (URL(baseUrl + path).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"; doOutput = true; connectTimeout = connectTimeoutMillis; readTimeout = readTimeoutMillis
             setRequestProperty("Content-Type", "application/json"); setRequestProperty("Accept", "application/json")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage50B")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage51B")
             bearer?.let { setRequestProperty("Authorization", "Bearer $it") }
             useCaches = false
         }
@@ -350,6 +401,40 @@ object PrototypeAuthJson {
             nextReview = item.getString("nextReview")
         )
         require(result == stage50aPatientEnrollmentActivationRequirements())
+        return result
+    }
+    fun parseEnrollmentConsentCatalog(json: String): PatientEnrollmentConsentCatalog {
+        val root = JSONObject(json)
+        require(
+            root.optBoolean("authoritative") &&
+                root.getString("privacy") == "NO_PATIENT_INPUT_ACCEPTED" &&
+                root.getString("providers") == "DISABLED"
+        )
+        val item = root.getJSONObject("catalog")
+        val requirements = item.getJSONArray("requirements")
+        val result = PatientEnrollmentConsentCatalog(
+            stage = item.getString("stage"),
+            foundationVersion = item.getString("foundationVersion"),
+            activationGate = item.getString("activationGate"),
+            activationGateStatus = item.getString("activationGateStatus"),
+            legalReview = item.getString("legalReview"),
+            patientConsentCollection = item.getString("patientConsentCollection"),
+            requirements = (0 until requirements.length()).map { index ->
+                requirements.getJSONObject(index).let { requirement ->
+                    PatientEnrollmentConsentRequirement(
+                        category = requirement.getString("category"),
+                        version = requirement.getString("version"),
+                        lifecycle = requirement.getString("lifecycle"),
+                        language = requirement.getString("language"),
+                        content = requirement.getString("content"),
+                        collection = requirement.getString("collection")
+                    )
+                }
+            },
+            privacy = item.getString("privacy"),
+            reason = item.getString("reason")
+        )
+        require(result == stage51aPatientEnrollmentConsentCatalog())
         return result
     }
     fun parseTokenResponse(json: String): PrototypeTokenBundle {

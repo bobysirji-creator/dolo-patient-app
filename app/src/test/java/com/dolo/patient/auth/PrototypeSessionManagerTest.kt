@@ -32,6 +32,8 @@ class PrototypeSessionManagerTest {
         override fun enrollmentReadiness() = PrototypeAuthResult.Success(stage49aPatientEnrollmentReadiness())
         override fun enrollmentActivationRequirements() =
             PrototypeAuthResult.Success(stage50aPatientEnrollmentActivationRequirements())
+        override fun enrollmentConsentCatalog() =
+            PrototypeAuthResult.Success(stage51aPatientEnrollmentConsentCatalog())
         override fun identityCard(accessToken:String)=PrototypeAuthResult.Success(PublicIdentityCard("DLO-PAT-000002","Prototype Patient","PATIENT",true))
         override fun createDemoSession() = result
         override fun refresh(refreshToken: String): PrototypeAuthResult<PrototypeTokenBundle> { this.refreshToken = refreshToken; return result }

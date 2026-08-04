@@ -246,13 +246,19 @@ fun LoginScreen(
                                 stringResource(R.string.login_registration_checking)
                             RegistrationReadinessStatus.ActivationGatesBlocked -> {
                                 val gateList = uiState.activationRequirements?.gates
-                                    ?.joinToString("\n") { "• ${activationGateLabel(it.key)}" }
+                                    ?.joinToString("\n") { "- ${activationGateLabel(it.key)}" }
+                                    .orEmpty()
+                                val consentList = uiState.consentCatalog?.requirements
+                                    ?.joinToString("\n") {
+                                        "- ${consentCategoryLabel(it.category)}: reserved, not published"
+                                    }
                                     .orEmpty()
                                 stringResource(
                                     R.string.login_registration_activation_blocked,
                                     gateList,
                                     uiState.enrollmentReadiness?.publicIdPolicy?.format
-                                        ?: "DLO-PAT-NNNNNN"
+                                        ?: "DLO-PAT-NNNNNN",
+                                    consentList
                                 )
                             }
                             RegistrationReadinessStatus.Unavailable ->

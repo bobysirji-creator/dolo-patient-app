@@ -429,3 +429,22 @@ Real Patient enrollment, OTP delivery, production DO-LO ID issuance and all exte
 - [x] stable APK in-place upgrade and Stage 50B physical-device acceptance
 
 Production enrollment, real OTP/SMS delivery, public-ID allocation and every external provider remain disabled. The Patient App never calls an activation, enrollment or public-ID allocation transaction.
+
+## Stage 51B - reserved consent-catalog Patient client
+
+- [x] consume the accepted Stage 51A catalog using a read-only HTTPS GET
+- [x] require authoritative no-input metadata and providers disabled
+- [x] require foundation version 51A and the versioned-legal-consents gate blocked
+- [x] require Terms, Privacy and Health Data in canonical order
+- [x] require every document to remain reserved, unpublished and non-collecting
+- [x] fail closed on missing, reordered, published, collectable or unsafe content
+- [x] show the three document statuses under Create an Account
+- [x] keep the seven Stage 50A blocked gates visible
+- [x] submit no phone, profile, family or consent data
+- [x] preserve seeded demo login, session restoration and local data
+- [x] parser, unsafe-catalog and presentation regression coverage
+- [x] stable version increment to 0.37.0-stage51b (version code 54)
+- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [ ] stable APK in-place upgrade and Stage 51B physical-device acceptance
+
+Production enrollment, legal acceptance, real OTP/SMS, public-ID allocation and every external provider remain disabled. Reserved catalog entries are not legal documents.

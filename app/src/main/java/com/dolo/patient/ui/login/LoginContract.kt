@@ -10,9 +10,11 @@ import androidx.lifecycle.ViewModelProvider
 import com.dolo.patient.auth.AuthRepository
 import com.dolo.patient.auth.PatientEnrollmentReadiness
 import com.dolo.patient.auth.PatientEnrollmentActivationRequirements
+import com.dolo.patient.auth.PatientEnrollmentConsentCatalog
 import com.dolo.patient.auth.PhoneValidator
 import com.dolo.patient.auth.stage49aPatientEnrollmentReadiness
 import com.dolo.patient.auth.stage50aPatientEnrollmentActivationRequirements
+import com.dolo.patient.auth.stage51aPatientEnrollmentConsentCatalog
 import java.util.concurrent.Executors
 
 enum class LoginError {
@@ -28,19 +30,28 @@ enum class RegistrationReadinessStatus {
 
 fun registrationReadinessStatus(
     readiness: PatientEnrollmentReadiness?,
-    requirements: PatientEnrollmentActivationRequirements?
+    requirements: PatientEnrollmentActivationRequirements?,
+    consentCatalog: PatientEnrollmentConsentCatalog?
 ): RegistrationReadinessStatus =
     if (
         readiness != null &&
         requirements != null &&
+        consentCatalog != null &&
         readiness == stage49aPatientEnrollmentReadiness(readiness.demoPatientLogin) &&
-        requirements == stage50aPatientEnrollmentActivationRequirements()
+        requirements == stage50aPatientEnrollmentActivationRequirements() &&
+        consentCatalog == stage51aPatientEnrollmentConsentCatalog()
     ) {
         RegistrationReadinessStatus.ActivationGatesBlocked
     } else {
         RegistrationReadinessStatus.Unavailable
     }
 
+fun consentCategoryLabel(category: String): String = when (category) {
+    "TERMS" -> "Terms"
+    "PRIVACY" -> "Privacy"
+    "HEALTH_DATA" -> "Health Data"
+    else -> "Unrecognized consent document"
+}
 fun activationGateLabel(key: String): String = when (key) {
     "MANAGED_OTP_PROVIDER" -> "Managed OTP provider"
     "DISTRIBUTED_ABUSE_PROTECTION" -> "Distributed abuse protection"
@@ -60,6 +71,7 @@ data class LoginUiState(
     val registrationStatus: RegistrationReadinessStatus = RegistrationReadinessStatus.Checking,
     val enrollmentReadiness: PatientEnrollmentReadiness? = null,
     val activationRequirements: PatientEnrollmentActivationRequirements? = null,
+    val consentCatalog: PatientEnrollmentConsentCatalog? = null,
     val otpRequestedFor: String? = null
 ) {
     val isPhoneValid: Boolean get() = PhoneValidator.isValid(phoneNumber)
@@ -79,14 +91,18 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
         executor.execute {
             val readiness = repository.enrollmentReadiness().getOrNull()
             val requirements = repository.enrollmentActivationRequirements().getOrNull()
+            val consentCatalog = repository.enrollmentConsentCatalog().getOrNull()
             main.post {
-                val status = registrationReadinessStatus(readiness, requirements)
+                val status = registrationReadinessStatus(readiness, requirements, consentCatalog)
                 uiState = uiState.copy(
                     registrationStatus = status,
                     enrollmentReadiness = readiness.takeIf {
                         status == RegistrationReadinessStatus.ActivationGatesBlocked
                     },
                     activationRequirements = requirements.takeIf {
+                        status == RegistrationReadinessStatus.ActivationGatesBlocked
+                    },
+                    consentCatalog = consentCatalog.takeIf {
                         status == RegistrationReadinessStatus.ActivationGatesBlocked
                     }
                 )

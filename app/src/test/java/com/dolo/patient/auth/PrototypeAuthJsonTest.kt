@@ -66,6 +66,26 @@ class PrototypeAuthJsonTest {
         "privacy": "NO_PATIENT_INPUT_ACCEPTED",
         "providers": "DISABLED"
     }"""
+    private val consentCatalogJson = """{
+        "catalog": {
+            "stage": "CONSENT_CATALOG_FOUNDATION_ONLY",
+            "foundationVersion": "51A",
+            "activationGate": "VERSIONED_LEGAL_CONSENTS",
+            "activationGateStatus": "BLOCKED",
+            "legalReview": "REQUIRED",
+            "patientConsentCollection": "DISABLED",
+            "requirements": [
+                {"category":"TERMS","version":"RESERVED","lifecycle":"RESERVED","language":"en-IN","content":"NOT_PUBLISHED","collection":"DISABLED"},
+                {"category":"PRIVACY","version":"RESERVED","lifecycle":"RESERVED","language":"en-IN","content":"NOT_PUBLISHED","collection":"DISABLED"},
+                {"category":"HEALTH_DATA","version":"RESERVED","lifecycle":"RESERVED","language":"en-IN","content":"NOT_PUBLISHED","collection":"DISABLED"}
+            ],
+            "privacy": "NO_PATIENT_CONSENT_ACCEPTED",
+            "reason": "APPROVED_DOCUMENT_VERSIONS_NOT_CONFIGURED"
+        },
+        "authoritative": true,
+        "privacy": "NO_PATIENT_INPUT_ACCEPTED",
+        "providers": "DISABLED"
+    }"""
     @Test fun acceptsSelfOnlyServerOwnedIdentity() {
         val identity = PrototypeAuthJson.parseIdentityCard(identityJson)
         assertEquals("DLO-PAT-000002", identity.doloId)
@@ -140,6 +160,27 @@ class PrototypeAuthJsonTest {
     fun rejectsPatientInputAcceptingRequirementsContract() {
         PrototypeAuthJson.parseEnrollmentActivationRequirements(
             requirementsJson.replace("NO_PATIENT_INPUT_ACCEPTED", "PATIENT_INPUT_ACCEPTED")
+        )
+    }
+    @Test
+    fun acceptsOnlyReservedStage51AConsentCatalog() {
+        val catalog = PrototypeAuthJson.parseEnrollmentConsentCatalog(consentCatalogJson)
+        assertEquals("51A", catalog.foundationVersion)
+        assertEquals(listOf("TERMS", "PRIVACY", "HEALTH_DATA"), catalog.requirements.map { it.category })
+        assertTrue(catalog.requirements.all {
+            it.version == "RESERVED" &&
+                it.content == "NOT_PUBLISHED" &&
+                it.collection == "DISABLED"
+        })
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsPublishedOrCollectableConsentCatalog() {
+        PrototypeAuthJson.parseEnrollmentConsentCatalog(
+            consentCatalogJson.replace(
+                ""collection":"DISABLED"",
+                ""collection":"ENABLED""
+            )
         )
     }
     @Test fun acceptsOnlySeededDummyTokenResponse() {

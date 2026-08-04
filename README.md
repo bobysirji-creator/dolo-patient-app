@@ -88,3 +88,7 @@ Patient App 0.35.0-stage49b consumes the complete fail-closed Stage 49A enrollme
 ## Stage 50B activation-requirements client
 
 Patient App 0.36.0-stage50b validates both the accepted Stage 49A readiness contract and Stage 50A's seven blocked activation prerequisites when Create an Account is selected. It presents patient-friendly requirement names and the reserved DLO-PAT-NNNNNN format without opening a form or submitting data. Any missing, changed or unsafe contract fails closed. Demo login, secure hosted sessions and local Patient data remain unchanged. Follow docs/stage50b-device-test.md after GitHub Actions builds the stable APK.
+
+## Stage 51B reserved consent-catalog client
+
+Create an Account reads the Platform API's Stage 51A catalog and displays Terms, Privacy and Health Data only as reserved, unpublished requirements. It fails closed on any changed contract and submits no Patient data or legal acceptance. Production enrollment, real OTP/SMS and all external providers remain disabled.

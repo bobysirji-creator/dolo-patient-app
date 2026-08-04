@@ -438,3 +438,9 @@ A missing network, malformed response, changed gate, satisfied gate or Patient-i
 ## Stage 50B acceptance
 
 Patient App 0.36.0-stage50b passed GitHub Actions, stable in-place APK upgrade and every Stage 50B physical-device check on 3 August 2026. All seven patient-friendly blocked prerequisites, authoritative refresh, offline fail-closed recovery, demo OTP login, hosted session restoration and local-data isolation are accepted. Production enrollment, real OTP/SMS, public-ID allocation and all external providers remain disabled.
+
+## Stage 51B implementation checkpoint
+
+Patient App 0.37.0-stage51b (version code 54) adds a strict client for Platform API 0.38.0-stage51a's read-only consent catalog. Create an Account now verifies Terms, Privacy and Health Data in canonical order and displays each as reserved and not published, alongside the seven already blocked activation prerequisites.
+
+Any missing, reordered, published, collectable or otherwise unsafe catalog fails closed. The App sends no Patient input to the endpoint and exposes no consent checkbox or registration action. Seeded OTP 123456, secure hosted session restoration, local fallback and existing local Patient data remain unchanged. GitHub Actions is the Android build authority; install the stable APK over the existing app and complete docs/stage51b-device-test.md.

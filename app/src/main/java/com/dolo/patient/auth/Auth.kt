@@ -23,6 +23,7 @@ interface AuthRepository {
     fun currentSession(): PatientSession?
     fun enrollmentReadiness(): Result<PatientEnrollmentReadiness>
     fun enrollmentActivationRequirements(): Result<PatientEnrollmentActivationRequirements>
+    fun enrollmentConsentCatalog(): Result<PatientEnrollmentConsentCatalog>
     fun identityCard(): Result<PublicIdentityCard>
     fun requestOtp(phone: String): Result<Unit>
     fun verifyOtp(phone: String, otp: String): Result<PatientSession>
@@ -34,6 +35,8 @@ class FakeAuthRepository(private val preferences: SharedPreferences) : AuthRepos
     override fun enrollmentReadiness()=Result.success(stage49aPatientEnrollmentReadiness())
     override fun enrollmentActivationRequirements() =
         Result.success(stage50aPatientEnrollmentActivationRequirements())
+    override fun enrollmentConsentCatalog() =
+        Result.success(stage51aPatientEnrollmentConsentCatalog())
     override fun identityCard()=Result.failure<PublicIdentityCard>(IllegalStateException("Local-only demo profile has no hosted DO-LO identity."))
     override fun requestOtp(phone: String): Result<Unit> = if (PhoneValidator.isValid(phone)) Result.success(Unit) else Result.failure(IllegalArgumentException("Enter a valid 10-digit mobile number"))
     override fun verifyOtp(phone: String, otp: String): Result<PatientSession> {
@@ -59,6 +62,11 @@ class PrototypeAuthRepository(
     override fun enrollmentReadiness():Result<PatientEnrollmentReadiness> = when(val result=api.enrollmentReadiness()){is PrototypeAuthResult.Success->Result.success(result.value);is PrototypeAuthResult.Failure->Result.failure(IllegalStateException(result.message))}
     override fun enrollmentActivationRequirements(): Result<PatientEnrollmentActivationRequirements> =
         when (val result = api.enrollmentActivationRequirements()) {
+            is PrototypeAuthResult.Success -> Result.success(result.value)
+            is PrototypeAuthResult.Failure -> Result.failure(IllegalStateException(result.message))
+        }
+    override fun enrollmentConsentCatalog(): Result<PatientEnrollmentConsentCatalog> =
+        when (val result = api.enrollmentConsentCatalog()) {
             is PrototypeAuthResult.Success -> Result.success(result.value)
             is PrototypeAuthResult.Failure -> Result.failure(IllegalStateException(result.message))
         }

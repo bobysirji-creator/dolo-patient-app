@@ -335,3 +335,7 @@ Verification:
 ## Stage 50B registration safety transparency
 
 The existing Login/Create an Account surface now presents the seven authoritative blocked production prerequisites returned by Platform API Stage 50A. It remains a status-only message: there is no registration form, activation action or Patient-data submission. Any unsafe or unavailable contract uses the existing accessible error surface and keeps account creation disabled.
+
+## Stage 51B reserved consent-catalog status
+
+The Login/Create an Account notice now verifies the authoritative Stage 51A catalog and lists Terms, Privacy and Health Data as reserved and unpublished. There is no legal-content viewer, checkbox, accept button or registration form. Any unsafe or unavailable catalog uses the existing error surface and keeps account creation disabled.

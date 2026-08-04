@@ -2,6 +2,7 @@ package com.dolo.patient.ui.login
 
 import com.dolo.patient.auth.stage49aPatientEnrollmentReadiness
 import com.dolo.patient.auth.stage50aPatientEnrollmentActivationRequirements
+import com.dolo.patient.auth.stage51aPatientEnrollmentConsentCatalog
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -36,14 +37,15 @@ class LoginUiStateTest {
     }
 
     @Test
-    fun acceptedStage49AFoundationAndStage50AGatesRemainVisiblyDisabled() {
+    fun acceptedStage49AStage50AAndStage51AContractsRemainVisiblyDisabled() {
         val readiness = stage49aPatientEnrollmentReadiness()
 
         assertEquals(
             RegistrationReadinessStatus.ActivationGatesBlocked,
             registrationReadinessStatus(
                 readiness,
-                stage50aPatientEnrollmentActivationRequirements()
+                stage50aPatientEnrollmentActivationRequirements(),
+                stage51aPatientEnrollmentConsentCatalog()
             )
         )
         assertEquals("DLO-PAT-NNNNNN", readiness.publicIdPolicy.format)
@@ -54,7 +56,7 @@ class LoginUiStateTest {
     fun missingAuthoritativeReadinessFailsClosed() {
         assertEquals(
             RegistrationReadinessStatus.Unavailable,
-            registrationReadinessStatus(null, null)
+            registrationReadinessStatus(null, null, null)
         )
     }
 
@@ -65,10 +67,39 @@ class LoginUiStateTest {
         )
         assertEquals(
             RegistrationReadinessStatus.Unavailable,
-            registrationReadinessStatus(stage49aPatientEnrollmentReadiness(), unsafe)
+            registrationReadinessStatus(
+                stage49aPatientEnrollmentReadiness(),
+                unsafe,
+                stage51aPatientEnrollmentConsentCatalog()
+            )
         )
     }
 
+    @Test
+    fun publishedOrMissingConsentCatalogFailsClosed() {
+        val unsafe = stage51aPatientEnrollmentConsentCatalog().copy(
+            patientConsentCollection = "ENABLED"
+        )
+        assertEquals(
+            RegistrationReadinessStatus.Unavailable,
+            registrationReadinessStatus(
+                stage49aPatientEnrollmentReadiness(),
+                stage50aPatientEnrollmentActivationRequirements(),
+                unsafe
+            )
+        )
+    }
+
+    @Test
+    fun allConsentDocumentsHavePatientFriendlyLabels() {
+        val catalog = stage51aPatientEnrollmentConsentCatalog()
+        assertEquals(3, catalog.requirements.size)
+        assertTrue(
+            catalog.requirements.all {
+                consentCategoryLabel(it.category) != "Unrecognized consent document"
+            }
+        )
+    }
     @Test
     fun allSevenActivationGatesHavePatientFriendlyLabels() {
         val requirements = stage50aPatientEnrollmentActivationRequirements()
