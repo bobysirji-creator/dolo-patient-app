@@ -178,8 +178,8 @@ class PrototypeAuthJsonTest {
     fun rejectsPublishedOrCollectableConsentCatalog() {
         PrototypeAuthJson.parseEnrollmentConsentCatalog(
             consentCatalogJson.replace(
-                ""collection":"DISABLED"",
-                ""collection":"ENABLED""
+                "\"collection\":\"DISABLED\"",
+                "\"collection\":\"ENABLED\""
             )
         )
     }
