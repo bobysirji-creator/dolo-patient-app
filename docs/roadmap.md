@@ -444,7 +444,11 @@ Production enrollment, real OTP/SMS delivery, public-ID allocation and every ext
 - [x] preserve seeded demo login, session restoration and local data
 - [x] parser, unsafe-catalog and presentation regression coverage
 - [x] stable version increment to 0.37.0-stage51b (version code 54)
-- [ ] GitHub Actions compile, lint, unit tests and stable APK
-- [ ] stable APK in-place upgrade and Stage 51B physical-device acceptance
+- [x] GitHub Actions compile, lint, unit tests and stable APK
+- [x] stable APK in-place upgrade and Stage 51B physical-device acceptance
 
 Production enrollment, legal acceptance, real OTP/SMS, public-ID allocation and every external provider remain disabled. Reserved catalog entries are not legal documents.
+
+## Stages 52-64 - production-capable ecosystem roadmap
+
+The cross-app production sequence, dependencies and completion rules are maintained in docs/ecosystem-roadmap-52-64.md. App-specific implementation and acceptance checkpoints will be added here as each stage reaches this repository.

@@ -444,3 +444,7 @@ Patient App 0.36.0-stage50b passed GitHub Actions, stable in-place APK upgrade a
 Patient App 0.37.0-stage51b (version code 54) adds a strict client for Platform API 0.38.0-stage51a's read-only consent catalog. Create an Account now verifies Terms, Privacy and Health Data in canonical order and displays each as reserved and not published, alongside the seven already blocked activation prerequisites.
 
 Any missing, reordered, published, collectable or otherwise unsafe catalog fails closed. The App sends no Patient input to the endpoint and exposes no consent checkbox or registration action. Seeded OTP 123456, secure hosted session restoration, local fallback and existing local Patient data remain unchanged. GitHub Actions is the Android build authority; install the stable APK over the existing app and complete docs/stage51b-device-test.md.
+
+## Stage 51B acceptance
+
+Patient App 0.37.0-stage51b passed GitHub Actions, stable in-place APK upgrade and every Stage 51B physical-device check on 4 August 2026. The authoritative reserved/unpublished Terms, Privacy and Health Data catalog, seven blocked activation gates, offline fail-closed recovery, demo login, session restoration and local-data isolation are accepted. No legal acceptance or Patient enrollment was enabled.
