@@ -92,3 +92,7 @@ Patient App 0.36.0-stage50b validates both the accepted Stage 49A readiness cont
 ## Stage 51B reserved consent-catalog client
 
 Create an Account reads the Platform API's Stage 51A catalog and displays Terms, Privacy and Health Data only as reserved, unpublished requirements. It fails closed on any changed contract and submits no Patient data or legal acceptance. Production enrollment, real OTP/SMS and all external providers remain disabled.
+
+## Stage 52B-P prototype legal-document viewer
+
+Create an Account can now open three integrity-verified hosted test drafts in a responsive Compose viewer. Every screen is visibly marked not legally approved. The acknowledgement button is a memory-only UI simulation and creates no consent or account. Deploy the API first, build the stable APK through GitHub Actions and follow `docs/stage52bp-device-test.md`.

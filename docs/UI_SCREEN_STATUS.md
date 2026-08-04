@@ -339,3 +339,7 @@ The existing Login/Create an Account surface now presents the seven authoritativ
 ## Stage 51B reserved consent-catalog status
 
 The Login/Create an Account notice now verifies the authoritative Stage 51A catalog and lists Terms, Privacy and Health Data as reserved and unpublished. There is no legal-content viewer, checkbox, accept button or registration form. Any unsafe or unavailable catalog uses the existing error surface and keeps account creation disabled.
+
+## Stage 52B-P - test legal-document viewer
+
+The Login account-creation notice now lists three hosted test drafts. Each opens in a full-screen responsive Compose dialog with a prominent not-approved banner, version/language metadata, scrollable sections, a screen-reader heading and a labelled close action. The simulated acknowledgement is visibly described as a UI test, remains only in ViewModel memory and is not consent.

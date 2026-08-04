@@ -81,7 +81,10 @@ fun LoginRoute(
         uiState = state,
         onPhoneNumberChange = viewModel::updatePhoneNumber,
         onSendOtp = viewModel::sendOtp,
-        onCreateAccount = viewModel::showAccountCreationNotice
+        onCreateAccount = viewModel::showAccountCreationNotice,
+        onOpenLegalDocument = viewModel::openLegalDocument,
+        onCloseLegalDocument = viewModel::closeLegalDocument,
+        onAcknowledgeLegalDocument = viewModel::simulateLegalAcknowledgement
     )
 }
 
@@ -91,6 +94,9 @@ fun LoginScreen(
     onPhoneNumberChange: (String) -> Unit,
     onSendOtp: () -> Unit,
     onCreateAccount: () -> Unit,
+    onOpenLegalDocument: (String) -> Unit = {},
+    onCloseLegalDocument: () -> Unit = {},
+    onAcknowledgeLegalDocument: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val invalidMessage = stringResource(R.string.login_invalid_phone)
@@ -269,10 +275,25 @@ fun LoginScreen(
                             isError = uiState.registrationStatus ==
                                 RegistrationReadinessStatus.Unavailable
                         )
+                        uiState.legalDocumentPreview?.let { preview ->
+                            LegalPreviewLinks(
+                                preview = preview,
+                                acknowledgedCategories = uiState.simulatedAcknowledgements,
+                                onOpenDocument = onOpenLegalDocument
+                            )
+                        }
                     }
                 }
             }
         }
+    }
+    uiState.selectedLegalDocument?.let { document ->
+        LegalDocumentPreviewDialog(
+            document = document,
+            acknowledged = document.category in uiState.simulatedAcknowledgements,
+            onDismiss = onCloseLegalDocument,
+            onAcknowledge = { onAcknowledgeLegalDocument(document.category) }
+        )
     }
 }
 

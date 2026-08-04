@@ -448,3 +448,7 @@ Any missing, reordered, published, collectable or otherwise unsafe catalog fails
 ## Stage 51B acceptance
 
 Patient App 0.37.0-stage51b passed GitHub Actions, stable in-place APK upgrade and every Stage 51B physical-device check on 4 August 2026. The authoritative reserved/unpublished Terms, Privacy and Health Data catalog, seven blocked activation gates, offline fail-closed recovery, demo login, session restoration and local-data isolation are accepted. No legal acceptance or Patient enrollment was enabled.
+
+## Stage 52B-P implementation checkpoint
+
+Patient App `0.38.0-stage52bp` (version code 55) adds a strict hosted legal-preview parser and a responsive Compose viewer for Terms, Privacy and Health Data. Every document must be `DRAFT_TEST_ONLY`, carry a matching SHA-256 digest, have null approval/effective-date metadata and keep consent disabled. The visible test acknowledgement is memory-only and no HTTP acceptance operation exists. Existing local Patient data is untouched. GitHub Actions remains the Android build gate; deploy API `0.40.0-stage52bp` first and then follow `docs/stage52bp-device-test.md`.

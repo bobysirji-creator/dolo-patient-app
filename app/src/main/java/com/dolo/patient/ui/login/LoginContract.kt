@@ -11,6 +11,8 @@ import com.dolo.patient.auth.AuthRepository
 import com.dolo.patient.auth.PatientEnrollmentReadiness
 import com.dolo.patient.auth.PatientEnrollmentActivationRequirements
 import com.dolo.patient.auth.PatientEnrollmentConsentCatalog
+import com.dolo.patient.auth.PatientLegalDocumentPreview
+import com.dolo.patient.auth.PatientLegalPreviewDocument
 import com.dolo.patient.auth.PhoneValidator
 import com.dolo.patient.auth.stage49aPatientEnrollmentReadiness
 import com.dolo.patient.auth.stage50aPatientEnrollmentActivationRequirements
@@ -72,10 +74,15 @@ data class LoginUiState(
     val enrollmentReadiness: PatientEnrollmentReadiness? = null,
     val activationRequirements: PatientEnrollmentActivationRequirements? = null,
     val consentCatalog: PatientEnrollmentConsentCatalog? = null,
+    val legalDocumentPreview: PatientLegalDocumentPreview? = null,
+    val selectedLegalDocumentCategory: String? = null,
+    val simulatedAcknowledgements: Set<String> = emptySet(),
     val otpRequestedFor: String? = null
 ) {
     val isPhoneValid: Boolean get() = PhoneValidator.isValid(phoneNumber)
     val canSendOtp: Boolean get() = isPhoneValid && !isLoading
+    val selectedLegalDocument: PatientLegalPreviewDocument? get() =
+        legalDocumentPreview?.documents?.firstOrNull { it.category == selectedLegalDocumentCategory }
 }
 
 class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
@@ -92,6 +99,7 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
             val readiness = repository.enrollmentReadiness().getOrNull()
             val requirements = repository.enrollmentActivationRequirements().getOrNull()
             val consentCatalog = repository.enrollmentConsentCatalog().getOrNull()
+            val legalDocumentPreview = repository.legalDocumentPreview().getOrNull()
             main.post {
                 val status = registrationReadinessStatus(readiness, requirements, consentCatalog)
                 uiState = uiState.copy(
@@ -100,6 +108,9 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
                         status == RegistrationReadinessStatus.ActivationGatesBlocked
                     },
                     activationRequirements = requirements.takeIf {
+                        status == RegistrationReadinessStatus.ActivationGatesBlocked
+                    },
+                    legalDocumentPreview = legalDocumentPreview.takeIf {
                         status == RegistrationReadinessStatus.ActivationGatesBlocked
                     },
                     consentCatalog = consentCatalog.takeIf {
@@ -163,6 +174,24 @@ class LoginViewModel(private val repository: AuthRepository) : ViewModel() {
 
     fun consumeOtpNavigation() {
         uiState = uiState.copy(otpRequestedFor = null)
+    }
+
+    fun openLegalDocument(category: String) {
+        if (uiState.legalDocumentPreview?.documents?.any { it.category == category } == true) {
+            uiState = uiState.copy(selectedLegalDocumentCategory = category)
+        }
+    }
+
+    fun closeLegalDocument() {
+        uiState = uiState.copy(selectedLegalDocumentCategory = null)
+    }
+
+    fun simulateLegalAcknowledgement(category: String) {
+        if (uiState.selectedLegalDocument?.category == category) {
+            uiState = uiState.copy(
+                simulatedAcknowledgements = uiState.simulatedAcknowledgements + category
+            )
+        }
     }
 
     fun showAccountCreationNotice() {

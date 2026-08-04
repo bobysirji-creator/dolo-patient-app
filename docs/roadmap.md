@@ -452,3 +452,16 @@ Production enrollment, legal acceptance, real OTP/SMS, public-ID allocation and 
 ## Stages 52-64 - production-capable ecosystem roadmap
 
 The cross-app production sequence, dependencies and completion rules are maintained in docs/ecosystem-roadmap-52-64.md. App-specific implementation and acceptance checkpoints will be added here as each stage reaches this repository.
+
+## Stage 52B-P - prototype legal-document viewer
+
+- [x] verify a strict hosted test-only document contract and SHA-256 content
+- [x] list Terms, Privacy and Health Data previews from account creation
+- [x] show responsive accessible document viewer with permanent test banner
+- [x] simulate acknowledgement in memory only
+- [x] keep registration and production consent disabled
+- [x] preserve local Patient data and existing login/booking workflows
+- [ ] GitHub Actions lint, unit tests and stable APK build
+- [ ] physical-device checklist
+
+Stage 52B-F remains deferred until legally approved content and approval metadata are available.

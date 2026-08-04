@@ -234,6 +234,7 @@ interface PrototypeAuthApi {
     fun enrollmentReadiness(): PrototypeAuthResult<PatientEnrollmentReadiness>
     fun enrollmentActivationRequirements(): PrototypeAuthResult<PatientEnrollmentActivationRequirements>
     fun enrollmentConsentCatalog(): PrototypeAuthResult<PatientEnrollmentConsentCatalog>
+    fun legalDocumentPreview(): PrototypeAuthResult<PatientLegalDocumentPreview>
     fun identityCard(accessToken:String): PrototypeAuthResult<PublicIdentityCard>
     fun createDemoSession(): PrototypeAuthResult<PrototypeTokenBundle>
     fun refresh(refreshToken: String): PrototypeAuthResult<PrototypeTokenBundle>
@@ -265,6 +266,8 @@ class HttpPrototypeAuthApi(
         { PrototypeAuthResult.Failure("Production consent catalog is temporarily unavailable.") }
     )
 
+    override fun legalDocumentPreview():PrototypeAuthResult<PatientLegalDocumentPreview> = runCatching { PrototypeAuthJson.parseLegalDocumentPreview(get("/api/v1/auth/patient-enrollment/legal-document-preview")) }.fold({PrototypeAuthResult.Success(it)},{PrototypeAuthResult.Failure("Test legal-document preview is temporarily unavailable.")})
+
     override fun identityCard(accessToken:String):PrototypeAuthResult<PublicIdentityCard> = runCatching { PrototypeAuthJson.parseIdentityCard(get("/api/v1/auth/identity-card",accessToken)) }.fold({PrototypeAuthResult.Success(it)},{PrototypeAuthResult.Failure("Hosted DO-LO identity is temporarily unavailable.")})
 
     override fun createDemoSession() = call(
@@ -291,7 +294,7 @@ class HttpPrototypeAuthApi(
     )
 
     private fun get(path:String,bearer:String?=null):String{
-        val connection=(URL(baseUrl+path).openConnection() as HttpURLConnection).apply{requestMethod="GET";connectTimeout=connectTimeoutMillis;readTimeout=readTimeoutMillis;setRequestProperty("Accept","application/json");setRequestProperty("User-Agent","DO-LO-Patient-Android/Stage51B");bearer?.let{setRequestProperty("Authorization","Bearer $it")};useCaches=false}
+        val connection=(URL(baseUrl+path).openConnection() as HttpURLConnection).apply{requestMethod="GET";connectTimeout=connectTimeoutMillis;readTimeout=readTimeoutMillis;setRequestProperty("Accept","application/json");setRequestProperty("User-Agent","DO-LO-Patient-Android/Stage52BP");bearer?.let{setRequestProperty("Authorization","Bearer $it")};useCaches=false}
         return try{val status=connection.responseCode;val response=(if(status in 200..299)connection.inputStream else connection.errorStream)?.bufferedReader(Charsets.UTF_8)?.use(::readBounded).orEmpty();if(status !in 200..299)error("Enrollment readiness returned HTTP $status");response}finally{connection.disconnect()}
     }
 
@@ -299,7 +302,7 @@ class HttpPrototypeAuthApi(
         val connection = (URL(baseUrl + path).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"; doOutput = true; connectTimeout = connectTimeoutMillis; readTimeout = readTimeoutMillis
             setRequestProperty("Content-Type", "application/json"); setRequestProperty("Accept", "application/json")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage51B")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage52BP")
             bearer?.let { setRequestProperty("Authorization", "Bearer $it") }
             useCaches = false
         }
@@ -326,6 +329,8 @@ class HttpPrototypeAuthApi(
 }
 
 object PrototypeAuthJson {
+    fun parseLegalDocumentPreview(json:String):PatientLegalDocumentPreview = parsePatientLegalDocumentPreview(json)
+
     fun parseIdentityCard(json:String):PublicIdentityCard{val root=JSONObject(json);require(root.optBoolean("authoritative")&&root.getString("privacy")=="SELF_ONLY_NO_PHONE"&&root.getString("productionEnrollment")=="DISABLED");val item=root.getJSONObject("identity");val result=PublicIdentityCard(item.getString("doloId"),item.getString("displayName"),item.getString("role"),item.getBoolean("prototype"));require(result.doloId.matches(Regex("^DLO-(PAT|DOC|AST|ADM)-[0-9]{6}$"))&&result.displayName.isNotBlank()&&result.displayName.length<=120&&result.role in setOf("PATIENT","DOCTOR","ASSISTANT","ADMIN"));return result}
 
     fun parseEnrollmentReadiness(json: String): PatientEnrollmentReadiness {

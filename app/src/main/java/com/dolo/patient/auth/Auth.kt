@@ -24,6 +24,7 @@ interface AuthRepository {
     fun enrollmentReadiness(): Result<PatientEnrollmentReadiness>
     fun enrollmentActivationRequirements(): Result<PatientEnrollmentActivationRequirements>
     fun enrollmentConsentCatalog(): Result<PatientEnrollmentConsentCatalog>
+    fun legalDocumentPreview(): Result<PatientLegalDocumentPreview>
     fun identityCard(): Result<PublicIdentityCard>
     fun requestOtp(phone: String): Result<Unit>
     fun verifyOtp(phone: String, otp: String): Result<PatientSession>
@@ -37,6 +38,7 @@ class FakeAuthRepository(private val preferences: SharedPreferences) : AuthRepos
         Result.success(stage50aPatientEnrollmentActivationRequirements())
     override fun enrollmentConsentCatalog() =
         Result.success(stage51aPatientEnrollmentConsentCatalog())
+    override fun legalDocumentPreview() = Result.success(stage52bpPatientLegalDocumentPreview())
     override fun identityCard()=Result.failure<PublicIdentityCard>(IllegalStateException("Local-only demo profile has no hosted DO-LO identity."))
     override fun requestOtp(phone: String): Result<Unit> = if (PhoneValidator.isValid(phone)) Result.success(Unit) else Result.failure(IllegalArgumentException("Enter a valid 10-digit mobile number"))
     override fun verifyOtp(phone: String, otp: String): Result<PatientSession> {
@@ -70,6 +72,7 @@ class PrototypeAuthRepository(
             is PrototypeAuthResult.Success -> Result.success(result.value)
             is PrototypeAuthResult.Failure -> Result.failure(IllegalStateException(result.message))
         }
+    override fun legalDocumentPreview():Result<PatientLegalDocumentPreview> = when(val result=api.legalDocumentPreview()){is PrototypeAuthResult.Success->Result.success(result.value);is PrototypeAuthResult.Failure->Result.failure(IllegalStateException(result.message))}
     override fun identityCard():Result<PublicIdentityCard>{val token=PrototypeSessionManager(tokenStore,api).accessToken()?:return Result.failure(IllegalStateException("Hosted session unavailable."));return when(val result=api.identityCard(token)){is PrototypeAuthResult.Success->Result.success(result.value);is PrototypeAuthResult.Failure->Result.failure(IllegalStateException(result.message))}}
     override fun requestOtp(phone: String): Result<Unit> = if (PhoneValidator.isValid(phone)) Result.success(Unit) else Result.failure(IllegalArgumentException("Enter a valid 10-digit mobile number"))
     override fun verifyOtp(phone: String, otp: String): Result<PatientSession> {
