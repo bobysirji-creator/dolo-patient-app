@@ -96,3 +96,7 @@ Create an Account reads the Platform API's Stage 51A catalog and displays Terms,
 ## Stage 52B-P prototype legal-document viewer
 
 Create an Account can now open three integrity-verified hosted test drafts in a responsive Compose viewer. Every screen is visibly marked not legally approved. The acknowledgement button is a memory-only UI simulation and creates no consent or account. Deploy the API first, build the stable APK through GitHub Actions and follow `docs/stage52bp-device-test.md`.
+
+## Stage 53B-P recovery simulation
+
+Hosted Prototype Sync includes a clearly labelled, seeded-dummy Account recovery test lab. It sends only one of three fixed scenario enums and the mandatory no-account-change acknowledgement; it never submits a phone number, evidence document, profile field or merge target. See `docs/stage53bp-device-test.md`.

@@ -465,3 +465,18 @@ The cross-app production sequence, dependencies and completion rules are maintai
 - [ ] physical-device checklist
 
 Stage 52B-F remains deferred until legally approved content and approval metadata are available.
+
+## Stage 53B-P - seeded recovery simulation client
+
+- [x] expose only three predefined dummy recovery scenarios
+- [x] submit enum-only simulation requests with a stable idempotency key
+- [x] reject account-changing, phone-bearing or internal-user payloads
+- [x] show authoritative case status and append-only audit events
+- [x] keep real recovery, mobile change, account merge and production enrollment disabled
+- [x] preserve seeded login, hosted booking and all local Patient data
+- [x] parser and unsafe-payload regression coverage
+- [x] stable version increment to 0.39.0-stage53bp (version code 56)
+- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [ ] stable APK in-place upgrade and Stage 53B-P physical-device acceptance
+
+Stage 53B-F remains policy-, legal-, privacy- and security-gated. This prototype cannot alter an account.

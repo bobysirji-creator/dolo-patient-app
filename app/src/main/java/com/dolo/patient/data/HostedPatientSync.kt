@@ -33,6 +33,8 @@ data class HostedCommunication(
 )
 data class HostedReview(val id: String, val appointmentId: String, val patientName: String, val doctorName: String, val clinicName: String, val rating: Int, val comment: String, val status: String, val submittedAt: String)
 data class HostedSupportRequest(val id:String,val category:String,val subject:String,val message:String,val status:String,val adminNote:String,val submittedAt:String,val updatedAt:String)
+data class HostedPrototypeRecoveryEvent(val sequence:String,val actorRole:String,val action:String,val outcome:String,val occurredAt:String)
+data class HostedPrototypeRecoveryCase(val id:String,val patientDoloId:String,val caseType:String,val status:String,val outcome:String,val createdAt:String,val updatedAt:String,val events:List<HostedPrototypeRecoveryEvent>)
 data class HostedNotification(val cursor:String,val appointmentId:String,val patientName:String,val tokenNumber:Int,val kind:String,val title:String,val message:String,val occurredAt:String,val read:Boolean)
 data class HostedPreferences(val appointmentServiceUpdates:Boolean,val healthInformation:Boolean,val promotionalMessages:Boolean,val inAppMessages:Boolean,val preferredLanguage:String,val consentVersion:String,val consentedAt:String?,val smsUsage:String,val healthSegmentationBasis:String)
 data class HostedTargetedCampaign(
@@ -45,7 +47,7 @@ data class HostedTargetedCampaign(
     val endsOn: String
 )
 data class HostedBootstrap(val profile: HostedProfile, val clinic: HostedClinic, val sessions: List<HostedSession>, val profiles: List<HostedProfile> = listOf(profile), val rescheduleWindowDays: Int = 10, val rescheduleSessions: List<HostedSession> = sessions)
-data class HostedSyncSnapshot(val bootstrap: HostedBootstrap, val appointments: List<HostedAppointment>, val live: List<HostedLiveQueue>, val communications: List<HostedCommunication> = emptyList(), val reviews: List<HostedReview> = emptyList(), val supportRequests: List<HostedSupportRequest> = emptyList(), val notifications: List<HostedNotification> = emptyList(), val preferences: HostedPreferences? = null, val targetedCampaigns: List<HostedTargetedCampaign> = emptyList())
+data class HostedSyncSnapshot(val bootstrap: HostedBootstrap, val appointments: List<HostedAppointment>, val live: List<HostedLiveQueue>, val communications: List<HostedCommunication> = emptyList(), val reviews: List<HostedReview> = emptyList(), val supportRequests: List<HostedSupportRequest> = emptyList(), val notifications: List<HostedNotification> = emptyList(), val preferences: HostedPreferences? = null, val targetedCampaigns: List<HostedTargetedCampaign> = emptyList(), val prototypeRecoveryCases: List<HostedPrototypeRecoveryCase> = emptyList())
 data class HostedServerError(val code: String, val message: String)
 
 object HostedHomePresentation {
@@ -86,6 +88,7 @@ object HostedReceiptPresentation {
 }
 
 object HostedSupportKeys { fun preferenceKey(subject:String,message:String):String="hosted_support_key_${subject.hashCode()}_${message.hashCode()}" }
+object HostedPrototypeRecoveryKeys { fun preferenceKey(caseType:String):String="hosted_recovery_key_$caseType" }
 
 object HostedReviewKeys {
     fun preferenceKey(appointmentId: String): String = "hosted_review_key_$appointmentId"
@@ -114,6 +117,7 @@ interface HostedPatientSyncApi {
     fun reschedule(appointmentId: String, targetSessionId: String): HostedResult<HostedSyncSnapshot>
     fun submitReview(appointmentId: String, rating: Int, comment: String): HostedResult<HostedSyncSnapshot>
     fun submitSupportRequest(category:String,subject:String,message:String):HostedResult<HostedSyncSnapshot>
+    fun submitPrototypeRecoveryCase(caseType:String):HostedResult<HostedSyncSnapshot>
     fun markNotificationsRead(readThroughCursor:String):HostedResult<HostedSyncSnapshot>
     fun updatePreferences(preferences:HostedPreferences):HostedResult<HostedSyncSnapshot>
 }
@@ -204,7 +208,16 @@ object HostedNotificationJson {
     fun parse(json:String):List<HostedNotification>{val root=JSONObject(json);require(root.optBoolean("authoritative"));val items=root.getJSONArray("notifications");return buildList{for(index in 0 until items.length()){val item=items.getJSONObject(index);add(HostedNotification(item.getString("cursor"),item.getString("appointmentId"),item.getString("patientName"),item.getInt("tokenNumber"),item.getString("kind"),item.getString("title"),item.getString("message"),item.getString("occurredAt"),item.getBoolean("read")))}}}
 }object HostedSupportJson {
     fun parse(json:String):List<HostedSupportRequest>{val root=JSONObject(json);require(root.optBoolean("authoritative"));val items=root.getJSONArray("supportRequests");return buildList{for(index in 0 until items.length()){val item=items.getJSONObject(index);val status=item.getString("status");require(status in setOf("OPEN","IN_PROGRESS","RESOLVED","CLOSED"));add(HostedSupportRequest(item.getString("id"),item.getString("category"),item.getString("subject"),item.getString("message"),status,item.optString("adminNote"),item.getString("submittedAt"),item.getString("updatedAt")))}}}
-}object HostedAppointmentJson {
+}
+object HostedPrototypeRecoveryJson {
+    private val types=setOf("VERIFIED_MOBILE_CHANGE","LOST_DEVICE","DUPLICATE_ACCOUNT")
+    private val statuses=setOf("OPEN","UNDER_REVIEW","CLOSED")
+    fun parse(json:String):List<HostedPrototypeRecoveryCase>{
+        val root=JSONObject(json);require(root.optBoolean("authoritative")&&root.optBoolean("simulationOnly")&&!root.optBoolean("accountChange"));val items=root.getJSONArray("cases")
+        return buildList{for(index in 0 until items.length()){val item=items.getJSONObject(index);val type=item.getString("caseType");val status=item.getString("status");require(type in types&&status in statuses&&item.getString("patientDoloId").matches(Regex("^DLO-PAT-[0-9]{6}$"))&&!item.has("phone")&&!item.has("patientUserId"));val eventItems=item.getJSONArray("events");val events=buildList{for(eventIndex in 0 until eventItems.length()){val event=eventItems.getJSONObject(eventIndex);add(HostedPrototypeRecoveryEvent(event.getString("sequence"),event.getString("actorRole"),event.getString("action"),event.getString("outcome"),event.getString("occurredAt")))}};add(HostedPrototypeRecoveryCase(item.getString("id"),item.getString("patientDoloId"),type,status,item.getString("outcome"),item.getString("createdAt"),item.getString("updatedAt"),events))}}
+    }
+}
+object HostedAppointmentJson {
     fun parse(json: String): List<HostedAppointment> {
         val appointments = JSONObject(json).getJSONArray("appointments")
         return buildList {
@@ -328,6 +341,11 @@ class HttpHostedPatientSyncApi(
         val keyName=HostedSupportKeys.preferenceKey(subject.trim(),message.trim());val idempotency=preferences.getString(keyName,null)?: ("android26b-"+UUID.randomUUID()).also{preferences.edit().putString(keyName,it).apply()}
         request("POST","/api/v1/patient/support-requests",JSONObject().put("category",category).put("subject",subject.trim()).put("message",message.trim()).toString(),mapOf("Idempotency-Key" to idempotency));load()
     }
+    override fun submitPrototypeRecoveryCase(caseType:String):HostedResult<HostedSyncSnapshot> = guarded {
+        require(caseType in setOf("VERIFIED_MOBILE_CHANGE","LOST_DEVICE","DUPLICATE_ACCOUNT")){"Choose a supported test scenario."}
+        val keyName=HostedPrototypeRecoveryKeys.preferenceKey(caseType);val idempotency=preferences.getString(keyName,null)?: ("android53bp-"+UUID.randomUUID()).also{preferences.edit().putString(keyName,it).apply()}
+        request("POST","/api/v1/patient/prototype-recovery-cases",JSONObject().put("caseType",caseType).put("acknowledgement","SIMULATION_ONLY_NO_ACCOUNT_CHANGE").toString(),mapOf("Idempotency-Key" to idempotency));load()
+    }
     override fun updatePreferences(preferences:HostedPreferences):HostedResult<HostedSyncSnapshot> = guarded {
         request("PUT","/api/v1/patient/preferences",JSONObject().put("appointmentServiceUpdates",preferences.appointmentServiceUpdates).put("healthInformation",preferences.healthInformation).put("promotionalMessages",preferences.promotionalMessages).put("inAppMessages",preferences.inAppMessages).put("preferredLanguage",preferences.preferredLanguage).put("consentVersion","2026-07").toString());load()
     }
@@ -346,7 +364,8 @@ class HttpHostedPatientSyncApi(
         val notifications = HostedNotificationJson.parse(request("GET", "/api/v1/patient/notifications?after=0&limit=100"))
         val communicationPreferences = HostedPreferencesJson.parse(request("GET", "/api/v1/patient/preferences"))
         val targetedCampaigns = HostedTargetedCampaignJson.parse(request("GET", "/api/v1/patient/campaigns"))
-        return HostedSyncSnapshot(bootstrap, appointments, live, communications, reviews, supportRequests, notifications, communicationPreferences, targetedCampaigns)
+        val prototypeRecoveryCases = HostedPrototypeRecoveryJson.parse(request("GET", "/api/v1/patient/prototype-recovery-cases"))
+        return HostedSyncSnapshot(bootstrap, appointments, live, communications, reviews, supportRequests, notifications, communicationPreferences, targetedCampaigns, prototypeRecoveryCases)
     }
 
     private fun <T> guarded(block: () -> T): HostedResult<T> = runCatching(block).fold(
@@ -377,7 +396,7 @@ class HttpHostedPatientSyncApi(
             readTimeout = 25_000
             setRequestProperty("Accept", "application/json")
             setRequestProperty("Authorization", "Bearer $token")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage36B")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage53BP")
             headers.forEach { (key, value) -> setRequestProperty(key, value) }
             if (body != null) {
                 doOutput = true
@@ -445,6 +464,7 @@ class HostedPatientSyncViewModel(private val api: HostedPatientSyncApi) : ViewMo
     fun reschedule(appointmentId: String, targetSessionId: String) { execute { api.reschedule(appointmentId, targetSessionId) } }
     fun submitReview(appointmentId: String, rating: Int, comment: String) { execute { api.submitReview(appointmentId, rating, comment) } }
     fun submitSupportRequest(category:String,subject:String,message:String){execute{api.submitSupportRequest(category,subject,message)}}
+    fun submitPrototypeRecoveryCase(caseType:String){execute{api.submitPrototypeRecoveryCase(caseType)}}
     fun markHostedNotificationsRead(cursor:String){execute{api.markNotificationsRead(cursor)}}
     fun updatePreferences(preferences:HostedPreferences){execute{api.updatePreferences(preferences)}}
 

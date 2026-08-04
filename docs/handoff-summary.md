@@ -452,3 +452,7 @@ Patient App 0.37.0-stage51b passed GitHub Actions, stable in-place APK upgrade a
 ## Stage 52B-P implementation checkpoint
 
 Patient App `0.38.0-stage52bp` (version code 55) adds a strict hosted legal-preview parser and a responsive Compose viewer for Terms, Privacy and Health Data. Every document must be `DRAFT_TEST_ONLY`, carry a matching SHA-256 digest, have null approval/effective-date metadata and keep consent disabled. The visible test acknowledgement is memory-only and no HTTP acceptance operation exists. Existing local Patient data is untouched. GitHub Actions remains the Android build gate; deploy API `0.40.0-stage52bp` first and then follow `docs/stage52bp-device-test.md`.
+
+## Stage 53B-P implementation checkpoint
+
+Patient App `0.39.0-stage53bp` (version code 56) adds an Account recovery test lab inside Hosted Prototype Sync. It can create only VERIFIED_MOBILE_CHANGE, LOST_DEVICE or DUPLICATE_ACCOUNT simulation cases for the seeded Patient and displays the server-authoritative status/audit trail. The client rejects account-changing, phone-bearing and internal-user payloads. No real phone, credential, profile or account record can be changed or merged. Deploy Platform API `0.42.0-stage53bp`, build the stable APK through GitHub Actions, then follow `docs/stage53bp-device-test.md`.

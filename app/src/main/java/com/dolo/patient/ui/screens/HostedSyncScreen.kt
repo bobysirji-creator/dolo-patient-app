@@ -15,6 +15,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -84,6 +85,7 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
             snapshot.preferences?.let { preferences ->
                 item { PatientCommunicationPreferenceCard(preferences, state.loading, viewModel::updatePreferences) }
             }
+            item { PrototypeRecoverySimulationCard(snapshot.prototypeRecoveryCases,state.loading,viewModel::submitPrototypeRecoveryCase) }
             item { Text("Targeted DO-LO messages", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
             if (snapshot.targetedCampaigns.isEmpty()) {
                 item { Text("No active targeted in-app message matches this hosted Patient and the current communication preferences.") }
@@ -225,6 +227,31 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+    }
+}
+@Composable
+private fun PrototypeRecoverySimulationCard(cases:List<com.dolo.patient.data.HostedPrototypeRecoveryCase>,loading:Boolean,onCreate:(String)->Unit){
+    val options=listOf("VERIFIED_MOBILE_CHANGE" to "Mobile-number change","LOST_DEVICE" to "Lost device","DUPLICATE_ACCOUNT" to "Duplicate account")
+    Card(colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.tertiaryContainer)){
+        Column(Modifier.padding(16.dp),verticalArrangement=Arrangement.spacedBy(8.dp)){
+            Text("Account recovery test lab",style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.Bold)
+            Text("Seeded dummy simulation only. It does not collect a mobile number or identity document, change login credentials, transfer ownership, or merge accounts.",style=MaterialTheme.typography.bodySmall)
+            options.forEach{(type,label)->
+                val existing=cases.firstOrNull{it.caseType==type}
+                OutlinedButton(onClick={onCreate(type)},enabled=!loading&&existing==null,modifier=Modifier.fillMaxWidth()){
+                    Text(existing?.let{"$label: ${it.status.replace('_',' ')}"}?:"Simulate $label")
+                }
+            }
+            cases.forEach{item->
+                Card(colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surface)){
+                    Column(Modifier.padding(12.dp),verticalArrangement=Arrangement.spacedBy(3.dp)){
+                        Text(item.caseType.replace('_',' '),fontWeight=FontWeight.Bold)
+                        Text("${item.status.replace('_',' ')} - ${item.outcome.replace('_',' ')}")
+                        Text("${item.events.size} immutable audit event(s). No account change.",style=MaterialTheme.typography.bodySmall)
                     }
                 }
             }
