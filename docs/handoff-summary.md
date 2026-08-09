@@ -467,3 +467,7 @@ Patient App 0.40.1-stage59cp (version code 58) aligns the refund validator with 
 Patient App 0.41.0-stage60a (version code 59) adds an approximate-location Near me flow backed by Platform API 0.53.0-stage60a. Nearby mode excludes local demo Doctors, shows authoritative hosted clinics ordered by approximate straight-line distance, and never persists the Patient coordinate. Clinic cards carry verified coordinates and their navigation action opens Google Maps when available, with a universal browser/map fallback.
 
 The implementation uses Android coarse foreground location only. There is no Maps SDK, embedded map, API key, background permission or tracking. Permission denial, location-off, offline, no-coordinate and missing-map-handler states fail safely. GitHub Actions is the Android build authority; then install the stable APK and follow docs/stage60a-device-test.md.
+
+## Stage 60A nearby fallback correction
+
+Patient App 0.41.1-stage60a (version code 60) keeps the complete hosted clinic catalog separate from the latest nearby result. An empty 50 km search now offers Show all hosted clinics, restoring the seeded clinic and its external navigation action without mislabelling that distant clinic as nearby.

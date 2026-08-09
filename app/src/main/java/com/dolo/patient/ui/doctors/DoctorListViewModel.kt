@@ -99,6 +99,7 @@ class DoctorListViewModel(
             is DoctorListUiEvent.FavouriteClicked -> toggleFavourite(event.doctorId)
             DoctorListUiEvent.Retry -> loadDoctors()
             DoctorListUiEvent.Refresh -> loadDoctors(isRefresh = true)
+            DoctorListUiEvent.ShowAllHostedClicked -> showAllHosted()
             else -> Unit
         }
     }
@@ -124,10 +125,16 @@ class DoctorListViewModel(
     }
 
     fun activateNearbyMode() {
-        if (hostedOnly) return
+        if (uiState.value.isNearbyMode) return
         hostedOnly = true
         hostedDoctors = emptyList()
-        uiState.value = uiState.value.copy(doctors = emptyList())
+        uiState.value = uiState.value.copy(doctors = emptyList(), isNearbyMode = true)
+        recompute()
+    }
+
+    private fun showAllHosted() {
+        hostedDoctors = emptyList()
+        uiState.value = uiState.value.copy(doctors = emptyList(), isNearbyMode = false)
         recompute()
     }
 

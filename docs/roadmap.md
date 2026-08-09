@@ -509,3 +509,9 @@ Real payment processing remains deferred behind every production Stage 59 provid
 - [ ] stable in-place upgrade and Stage 60A physical-device acceptance
 
 The App requests no background location and performs no location tracking. Road distance, traffic and embedded turn-by-turn navigation are not claimed.
+
+### Stage 60A empty-nearby recovery correction
+
+- [x] preserve the ordinary authoritative hosted-clinic catalog separately from nearby results
+- [x] show a specific no-clinics-within-50-km state
+- [x] provide Show all hosted clinics so navigation remains testable outside Mumbai

@@ -79,6 +79,7 @@ data class PlatformConnectionState(
     val serviceVersion: String = "",
     val capabilities: PlatformCapabilities? = null,
     val clinics: List<PlatformClinic> = emptyList(),
+    val nearbyClinics: List<PlatformClinic> = emptyList(),
     val message: String = "Connection has not been checked yet.",
     val checkedAtMillis: Long? = null,
     val isFindingNearby: Boolean = false
@@ -325,14 +326,14 @@ class PlatformConnectionViewModel(private val api: PlatformApi) : ViewModel() {
 
     fun findNearby(latitude: Double, longitude: Double) {
         if (uiState.isFindingNearby) return
-        uiState = uiState.copy(isFindingNearby = true, message = "Finding nearby clinics...")
+        uiState = uiState.copy(nearbyClinics = emptyList(), isFindingNearby = true, message = "Finding nearby clinics...")
         executor.execute {
             val result = api.fetchNearbyClinics(latitude, longitude)
             mainHandler.post {
                 uiState = when (result) {
                     is PlatformResult.Success -> uiState.copy(
                         status = PlatformConnectionStatus.CONNECTED,
-                        clinics = result.value,
+                        nearbyClinics = result.value,
                         message = if (result.value.isEmpty()) {
                             "No registered clinics were found within 50 km."
                         } else {

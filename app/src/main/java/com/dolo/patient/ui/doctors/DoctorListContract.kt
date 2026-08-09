@@ -72,7 +72,8 @@ data class DoctorListUiState(
     val isLoading: Boolean = true,
     val isRefreshing: Boolean = false,
     val errorMessage: String? = null,
-    val favouriteUpdateDoctorId: String? = null
+    val favouriteUpdateDoctorId: String? = null,
+    val isNearbyMode: Boolean = false
 ) {
     val hasNoSearchResults: Boolean get() = !isLoading && errorMessage == null && searchQuery.isNotBlank() && filteredDoctors.isEmpty()
     val hasNoDoctors: Boolean get() = !isLoading && errorMessage == null && searchQuery.isBlank() && doctors.isEmpty()
@@ -88,6 +89,7 @@ sealed interface DoctorListUiEvent {
     data class SortChanged(val sort: DoctorSortOption) : DoctorListUiEvent
     data class FiltersChanged(val filters: DoctorFilterState) : DoctorListUiEvent
     data object NearMeClicked : DoctorListUiEvent
+    data object ShowAllHostedClicked : DoctorListUiEvent
     data object ClearSearch : DoctorListUiEvent
     data object Retry : DoctorListUiEvent
     data object Refresh : DoctorListUiEvent

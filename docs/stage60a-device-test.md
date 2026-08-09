@@ -1,6 +1,6 @@
 # Stage 60A Patient device test
 
-Use the stable Patient APK 0.41.0-stage60a after Platform API 0.53.0-stage60a is live.
+Use the stable Patient APK 0.41.1-stage60a after Platform API 0.53.0-stage60a is live.
 
 ## Upgrade and safety
 
@@ -16,6 +16,8 @@ Use the stable Patient APK 0.41.0-stage60a after Platform API 0.53.0-stage60a is
 - [ ] Only authoritative hosted clinics appear in nearby mode; local demo Doctors are not mixed into these results.
 - [ ] If the phone is within 50 km of the seeded Mumbai clinic, it appears with Distance sorting and an approximate distance.
 - [ ] If the phone is outside that radius, a clear no-nearby-clinics result appears instead of invented Doctors.
+- [ ] When no nearby clinic is found, tap Show all hosted clinics.
+- [ ] The ordinary hosted catalog restores Dr. Ananya Mehta and the Mumbai prototype clinic without calling it nearby.
 - [ ] The screen states that the result is based on approximate straight-line distance, not road travel time.
 - [ ] A clinic without verified coordinates cannot silently claim a distance.
 

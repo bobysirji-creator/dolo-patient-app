@@ -75,8 +75,9 @@ fun DoctorListRoute(
     )
 ) {
     val state by viewModel.uiState
+    val clinicSource = if (state.isNearbyMode) platformState.nearbyClinics else platformState.clinics
     val hostedDoctors = if (platformState.status == PlatformConnectionStatus.CONNECTED) {
-        platformState.clinics
+        clinicSource
             .filter { clinic ->
                 categoryId.equals("all", ignoreCase = true) ||
                     PlatformDiscovery.matches(clinic, categoryName, "") ||
@@ -288,7 +289,17 @@ fun DoctorListScreen(
                     }
                 }
                 state.hasNoDoctors -> item {
-                    DoctorListMessage(Icons.Outlined.MedicalServices, "No Doctors are currently available in this category", "Please check again later or explore another specialty.")
+                    if (state.isNearbyMode) {
+                        DoctorListMessage(
+                            Icons.Outlined.LocationOff,
+                            "No hosted clinics found within 50 km",
+                            "Your location may be outside the current prototype clinic area.",
+                            "Show all hosted clinics"
+                        ) { onEvent(DoctorListUiEvent.ShowAllHostedClicked) }
+                    } else {
+                        DoctorListMessage(Icons.Outlined.MedicalServices, "No Doctors are currently available in this category", "Please check again later or explore another specialty.")
+                }
+                    }
                 }
                 state.hasFilteredEmptyState -> item {
                     DoctorListMessage(Icons.Outlined.FilterList, "No Doctors match these filters", "Remove one or more filters to see more Doctors.", "Clear Filters") {
