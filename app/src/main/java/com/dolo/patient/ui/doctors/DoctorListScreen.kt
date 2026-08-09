@@ -1,5 +1,8 @@
 package com.dolo.patient.ui.doctors
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -22,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -36,6 +40,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dolo.patient.R
 import com.dolo.patient.data.PatientUiState
+import com.dolo.patient.location.ApproximateLocationProvider
+import com.dolo.patient.location.ApproximateLocationResult
+import com.dolo.patient.location.ClinicNavigation
 import com.dolo.patient.platform.*
 import com.dolo.patient.ui.components.BrandLogo
 import com.dolo.patient.ui.home.DoloPatientBottomNavigation
@@ -55,6 +62,7 @@ fun DoctorListRoute(
     onHostedDoctorSelected: (String) -> Unit,
     onBookNow: (String) -> Unit,
     onRefreshHosted: () -> Unit,
+    onFindNearby: (Double, Double) -> Unit,
     onFavourite: (String) -> Unit,
     onHome: () -> Unit,
     onAppointments: () -> Unit,
@@ -83,6 +91,32 @@ fun DoctorListRoute(
 
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    var nearbyRequestStarted by remember { mutableStateOf(false) }
+    val handleLocationResult: (ApproximateLocationResult) -> Unit = { result ->
+        when (result) {
+            is ApproximateLocationResult.Available -> {
+                nearbyRequestStarted = true
+                viewModel.onEvent(DoctorListUiEvent.SortChanged(DoctorSortOption.DISTANCE))
+                viewModel.activateNearbyMode()
+                onFindNearby(result.latitude, result.longitude)
+            }
+            is ApproximateLocationResult.Unavailable -> scope.launch {
+                snackbar.showSnackbar(result.message)
+            }
+        }
+    }
+    val locationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) ApproximateLocationProvider.request(context, handleLocationResult)
+        else scope.launch { snackbar.showSnackbar("Location permission was not granted. You can still search by city.") }
+    }
+    LaunchedEffect(platformState.isFindingNearby, platformState.message) {
+        if (nearbyRequestStarted && !platformState.isFindingNearby) {
+            nearbyRequestStarted = false
+            snackbar.showSnackbar(platformState.message)
+        }
+    }
+
     var callbackDialog by remember { mutableStateOf(false) }
 
     DoctorListScreen(
@@ -100,11 +134,25 @@ fun DoctorListRoute(
                     if (it.isHostedProfile) onHostedDoctorSelected(it.id) else onBookNow(it.id)
                 }
                 is DoctorListUiEvent.FavouriteClicked -> onFavourite(event.doctorId)
-                DoctorListUiEvent.NearMeClicked -> scope.launch {
-                    snackbar.showSnackbar("Near-me search will be available when Maps is enabled.")
+                DoctorListUiEvent.NearMeClicked -> {
+                    if (ApproximateLocationProvider.hasPermission(context)) {
+                        ApproximateLocationProvider.request(context, handleLocationResult)
+                    } else {
+                        locationPermission.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+                    }
                 }
-                is DoctorListUiEvent.ClinicLocationClicked -> scope.launch {
-                    snackbar.showSnackbar("Clinic navigation will be available when Maps is enabled.")
+                is DoctorListUiEvent.ClinicLocationClicked -> {
+                    val doctor = state.doctors.firstOrNull { it.id == event.doctorId }
+                    val latitude = doctor?.latitude
+                    val longitude = doctor?.longitude
+                    when {
+                        latitude == null || longitude == null -> scope.launch {
+                            snackbar.showSnackbar("Navigation is unavailable because this clinic has no verified coordinates.")
+                        }
+                        !ClinicNavigation.open(context, latitude, longitude) -> scope.launch {
+                            snackbar.showSnackbar("No compatible maps app or browser was found.")
+                        }
+                    }
                 }
                 DoctorListUiEvent.RequestCallbackClicked -> callbackDialog = true
                 DoctorListUiEvent.Retry, DoctorListUiEvent.Refresh -> onRefreshHosted()
@@ -155,7 +203,10 @@ private fun PlatformClinic.toDoctorListItem(): DoctorListItemUiModel =
         reviewCount = publishedReviewCount,
         experienceYears = experienceYears,
         clinicName = name,
-        clinicAddress = city,
+        clinicAddress = listOf(addressLine, city, pincode).filter(String::isNotBlank).joinToString(", "),
+        distanceKm = distanceMeters?.div(1_000.0),
+        latitude = latitude,
+        longitude = longitude,
         consultationFee = consultationFeeMinor / 100,
         availability = DoctorAvailabilityUiModel(DoctorAvailabilityType.AVAILABLE_TODAY, "Available Today"),
         isHostedProfile = true

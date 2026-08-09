@@ -494,3 +494,18 @@ Stage 53B-F remains policy-, legal-, privacy- and security-gated. This prototype
 - [ ] stable APK in-place upgrade and Stage 59C-P physical-device acceptance
 
 Real payment processing remains deferred behind every production Stage 59 provider, merchant, accounting, security, legal and release-policy dependency.
+## Stage 60A - nearby clinics and external navigation
+
+- [x] request approximate foreground location only after Near me is tapped
+- [x] send bounded coordinates to the hosted nearby endpoint without local persistence
+- [x] show only authoritative hosted clinics in nearby mode
+- [x] sort and display approximate straight-line distance
+- [x] hand navigation to Google Maps or another compatible device app/browser
+- [x] require no Google Maps SDK or API key
+- [x] preserve denial, location-off, offline and no-coordinate fallback paths
+- [x] add parser and API-free navigation URL tests
+- [x] stable version increment to 0.41.0-stage60a (version code 59)
+- [ ] GitHub Actions lint, unit tests and stable APK
+- [ ] stable in-place upgrade and Stage 60A physical-device acceptance
+
+The App requests no background location and performs no location tracking. Road distance, traffic and embedded turn-by-turn navigation are not claimed.

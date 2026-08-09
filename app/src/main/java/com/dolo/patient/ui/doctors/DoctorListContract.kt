@@ -33,7 +33,9 @@ data class DoctorListItemUiModel(
     val availability: DoctorAvailabilityUiModel,
     val isVerified: Boolean = true,
     val isFavourite: Boolean = false,
-    val isHostedProfile: Boolean = false
+    val isHostedProfile: Boolean = false,
+    val latitude: Double? = null,
+    val longitude: Double? = null
 ) {
     val accessibleSummary: String
         get() = name + ", " + specialty + ", rating " + rating + ", " + experienceYears +

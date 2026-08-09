@@ -82,6 +82,7 @@ class DoctorListViewModel(
     private var localDoctors: List<DoctorListItemUiModel> = emptyList()
     private var hostedDoctors: List<DoctorListItemUiModel> = emptyList()
 
+    private var hostedOnly = false
     var uiState = mutableStateOf(DoctorListUiState(category = category))
         private set
 
@@ -119,6 +120,14 @@ class DoctorListViewModel(
         hostedDoctors = updated
         val merged = allDoctors().distinctBy { it.id }
         uiState.value = uiState.value.copy(doctors = merged)
+        recompute()
+    }
+
+    fun activateNearbyMode() {
+        if (hostedOnly) return
+        hostedOnly = true
+        hostedDoctors = emptyList()
+        uiState.value = uiState.value.copy(doctors = emptyList())
         recompute()
     }
 
@@ -172,7 +181,8 @@ class DoctorListViewModel(
         }
     }
 
-    private fun allDoctors(): List<DoctorListItemUiModel> = localDoctors + hostedDoctors
+    private fun allDoctors(): List<DoctorListItemUiModel> =
+        if (hostedOnly) hostedDoctors else localDoctors + hostedDoctors
 }
 
 class DoctorListViewModelFactory(

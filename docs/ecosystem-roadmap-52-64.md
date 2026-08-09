@@ -211,3 +211,8 @@ The Android ecosystem is production-capable after Stage 64 only when every requi
 - [ ] both Android GitHub Actions builds and physical-device acceptance
 
 This checkpoint presents Stage 59B-P mechanics only and does not satisfy production Stage 59 dependencies.
+## Stage 60 sequencing refinement - provider-free first
+
+Stage 60A uses approximate foreground Patient location, authoritative clinic coordinates, backend straight-line distance and an external device-map navigation handoff. No Maps API key, embedded map, road routing, traffic service or background tracking is required.
+
+Stage 60B retains consent-aware Push delivery and operational delivery infrastructure. Embedded maps and road-distance features can be reconsidered later without changing the clinic/appointment architecture.

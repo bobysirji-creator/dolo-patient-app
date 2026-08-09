@@ -40,7 +40,13 @@ data class PlatformClinic(
     val about: String,
     val consultationFeeMinor: Int,
     val publishedReviewCount: Int,
-    val publishedRatingAverage: Double?
+    val publishedRatingAverage: Double?,
+    val addressLine: String = "",
+    val state: String = "",
+    val pincode: String = "",
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val distanceMeters: Int? = null
 )
 
 object PlatformDiscovery {
@@ -74,7 +80,8 @@ data class PlatformConnectionState(
     val capabilities: PlatformCapabilities? = null,
     val clinics: List<PlatformClinic> = emptyList(),
     val message: String = "Connection has not been checked yet.",
-    val checkedAtMillis: Long? = null
+    val checkedAtMillis: Long? = null,
+    val isFindingNearby: Boolean = false
 )
 
 sealed interface PlatformResult<out T> {
@@ -84,6 +91,7 @@ sealed interface PlatformResult<out T> {
 
 interface PlatformApi {
     fun fetchPublicSnapshot(): PlatformResult<PlatformSnapshot>
+    fun fetchNearbyClinics(latitude: Double, longitude: Double): PlatformResult<List<PlatformClinic>>
 }
 
 class HttpPlatformApi(
@@ -117,16 +125,78 @@ class HttpPlatformApi(
         }
     )
 
+    override fun fetchNearbyClinics(
+        latitude: Double,
+        longitude: Double
+    ): PlatformResult<List<PlatformClinic>> = runCatching {
+        require(latitude in -90.0..90.0 && longitude in -180.0..180.0) {
+            "The approximate location is invalid."
+        }
+        val body = JSONObject()
+            .put("latitude", latitude)
+            .put("longitude", longitude)
+            .put("radiusKm", 50)
+            .put("limit", 30)
+            .toString()
+        PlatformJson.parseClinics(post("/api/v1/clinics/nearby", body))
+    }.fold(
+        onSuccess = { PlatformResult.Success(it) },
+        onFailure = { error ->
+            PlatformResult.Failure(
+                when (error) {
+                    is java.net.SocketTimeoutException -> "Nearby search took too long. Please retry."
+                    is java.net.UnknownHostException -> "You are offline. Your local data remains safe."
+                    else -> error.message?.take(180) ?: "Nearby clinics could not be loaded."
+                }
+            )
+        }
+    )
+
     private fun get(path: String): String {
         val connection = (URL(baseUrl + path).openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"
             connectTimeout = connectTimeoutMillis
             readTimeout = readTimeoutMillis
             setRequestProperty("Accept", "application/json")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage26B")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage60A")
             useCaches = false
         }
         return try {
+            val status = connection.responseCode
+            val stream = if (status in 200..299) connection.inputStream else connection.errorStream
+            val body = stream?.bufferedReader(Charsets.UTF_8)?.use { reader ->
+                val output = StringBuilder()
+                val buffer = CharArray(8_192)
+                while (true) {
+                    val count = reader.read(buffer)
+                    if (count < 0) break
+                    if (output.length + count > MAX_RESPONSE_CHARS) {
+                        error("The hosted response was unexpectedly large.")
+                    }
+                    output.append(buffer, 0, count)
+                }
+                output.toString()
+            }.orEmpty()
+            if (status !in 200..299) error("The hosted service returned HTTP $status.")
+            body
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    private fun post(path: String, jsonBody: String): String {
+        val connection = (URL(baseUrl + path).openConnection() as HttpURLConnection).apply {
+            requestMethod = "POST"
+            connectTimeout = connectTimeoutMillis
+            readTimeout = readTimeoutMillis
+            doOutput = true
+            setRequestProperty("Accept", "application/json")
+            setRequestProperty("Content-Type", "application/json; charset=utf-8")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage60A")
+            useCaches = false
+        }
+        return try {
+            connection.outputStream.use { it.write(jsonBody.toByteArray(Charsets.UTF_8)) }
             val status = connection.responseCode
             val stream = if (status in 200..299) connection.inputStream else connection.errorStream
             val body = stream?.bufferedReader(Charsets.UTF_8)?.use { reader ->
@@ -201,12 +271,21 @@ object PlatformJson {
                         about = doctor.optString("about"),
                         consultationFeeMinor = clinic.optInt("consultationFeeMinor", 0).coerceAtLeast(0),
                         publishedReviewCount = clinic.optInt("publishedReviewCount", 0).coerceAtLeast(0),
-                        publishedRatingAverage = if (clinic.isNull("publishedRatingAverage")) null else clinic.optDouble("publishedRatingAverage").takeIf { it.isFinite() && it in 1.0..5.0 }
+                        publishedRatingAverage = if (clinic.isNull("publishedRatingAverage")) null else clinic.optDouble("publishedRatingAverage").takeIf { it.isFinite() && it in 1.0..5.0 },
+                        addressLine = clinic.optString("addressLine"),
+                        state = clinic.optString("state"),
+                        pincode = clinic.optString("pincode"),
+                        latitude = clinic.optionalCoordinate("latitude", -90.0, 90.0),
+                        longitude = clinic.optionalCoordinate("longitude", -180.0, 180.0),
+                        distanceMeters = if (clinic.isNull("distanceMeters")) null else clinic.optInt("distanceMeters").takeIf { it >= 0 }
                     )
                 )
             }
         }
     }
+
+    private fun JSONObject.optionalCoordinate(name: String, minimum: Double, maximum: Double): Double? =
+        if (isNull(name)) null else optDouble(name).takeIf { it.isFinite() && it in minimum..maximum }
 }
 
 class PlatformConnectionViewModel(private val api: PlatformApi) : ViewModel() {
@@ -238,6 +317,34 @@ class PlatformConnectionViewModel(private val api: PlatformApi) : ViewModel() {
                         status = PlatformConnectionStatus.OFFLINE,
                         message = result.message,
                         checkedAtMillis = System.currentTimeMillis()
+                    )
+                }
+            }
+        }
+    }
+
+    fun findNearby(latitude: Double, longitude: Double) {
+        if (uiState.isFindingNearby) return
+        uiState = uiState.copy(isFindingNearby = true, message = "Finding nearby clinics...")
+        executor.execute {
+            val result = api.fetchNearbyClinics(latitude, longitude)
+            mainHandler.post {
+                uiState = when (result) {
+                    is PlatformResult.Success -> uiState.copy(
+                        status = PlatformConnectionStatus.CONNECTED,
+                        clinics = result.value,
+                        message = if (result.value.isEmpty()) {
+                            "No registered clinics were found within 50 km."
+                        } else {
+                            "Nearby clinics are sorted by approximate straight-line distance."
+                        },
+                        checkedAtMillis = System.currentTimeMillis(),
+                        isFindingNearby = false
+                    )
+                    is PlatformResult.Failure -> uiState.copy(
+                        message = result.message,
+                        checkedAtMillis = System.currentTimeMillis(),
+                        isFindingNearby = false
                     )
                 }
             }

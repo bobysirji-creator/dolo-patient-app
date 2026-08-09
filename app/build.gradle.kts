@@ -23,8 +23,8 @@ android {
         applicationId = "com.dolo.patient"
         minSdk = 26
         targetSdk = 35
-        versionCode = 58
-        versionName = "0.40.1-stage59cp"
+        versionCode = 59
+        versionName = "0.41.0-stage60a"
         buildConfigField(
             "String",
             "DOLO_API_BASE_URL",
@@ -63,6 +63,7 @@ android {
     kotlinOptions { jvmTarget = "17" }
 
     lint {
+    implementation("androidx.core:core-ktx:1.15.0")
         abortOnError = true
         checkDependencies = true
         htmlReport = true
