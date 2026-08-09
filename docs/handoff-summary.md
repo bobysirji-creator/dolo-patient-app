@@ -456,3 +456,6 @@ Patient App `0.38.0-stage52bp` (version code 55) adds a strict hosted legal-prev
 ## Stage 53B-P implementation checkpoint
 
 Patient App `0.39.0-stage53bp` (version code 56) adds an Account recovery test lab inside Hosted Prototype Sync. It can create only VERIFIED_MOBILE_CHANGE, LOST_DEVICE or DUPLICATE_ACCOUNT simulation cases for the seeded Patient and displays the server-authoritative status/audit trail. The client rejects account-changing, phone-bearing and internal-user payloads. No real phone, credential, profile or account record can be changed or merged. Deploy Platform API `0.42.0-stage53bp`, build the stable APK through GitHub Actions, then follow `docs/stage53bp-device-test.md`.
+## Stage 59C-P implementation checkpoint
+
+Patient App 0.40.0-stage59cp (version code 57) adds a clearly labelled synthetic payment test lab inside Hosted Prototype Sync. It displays the five committed Stage 59B-P outcomes, stores only a per-scenario idempotency key, and validates the server no-real-money boundary. It cannot collect payment or Patient details, create an appointment, mutate the service-charge ledger, contact a provider, or move money. Build the stable APK through GitHub Actions and follow docs/stage59cp-device-test.md together with Admin App 0.19.0-stage59cp.

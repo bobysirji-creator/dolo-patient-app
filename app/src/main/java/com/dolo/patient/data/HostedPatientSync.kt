@@ -46,6 +46,17 @@ data class HostedTargetedCampaign(
     val startsOn: String,
     val endsOn: String
 )
+data class HostedPrototypePayment(
+    val id: String,
+    val syntheticPaymentId: String,
+    val scenario: String,
+    val status: String,
+    val amountMinor: Int,
+    val currency: String,
+    val bookingEligible: Boolean,
+    val refundStatus: String,
+    val createdAt: String
+)
 data class HostedBootstrap(val profile: HostedProfile, val clinic: HostedClinic, val sessions: List<HostedSession>, val profiles: List<HostedProfile> = listOf(profile), val rescheduleWindowDays: Int = 10, val rescheduleSessions: List<HostedSession> = sessions)
 data class HostedSyncSnapshot(val bootstrap: HostedBootstrap, val appointments: List<HostedAppointment>, val live: List<HostedLiveQueue>, val communications: List<HostedCommunication> = emptyList(), val reviews: List<HostedReview> = emptyList(), val supportRequests: List<HostedSupportRequest> = emptyList(), val notifications: List<HostedNotification> = emptyList(), val preferences: HostedPreferences? = null, val targetedCampaigns: List<HostedTargetedCampaign> = emptyList(), val prototypeRecoveryCases: List<HostedPrototypeRecoveryCase> = emptyList())
 data class HostedServerError(val code: String, val message: String)
@@ -89,6 +100,7 @@ object HostedReceiptPresentation {
 
 object HostedSupportKeys { fun preferenceKey(subject:String,message:String):String="hosted_support_key_${subject.hashCode()}_${message.hashCode()}" }
 object HostedPrototypeRecoveryKeys { fun preferenceKey(caseType:String):String="hosted_recovery_key_$caseType" }
+object HostedPrototypePaymentKeys { fun preferenceKey(scenario:String):String="hosted_payment_key_$scenario" }
 
 object HostedReviewKeys {
     fun preferenceKey(appointmentId: String): String = "hosted_review_key_$appointmentId"
@@ -118,6 +130,7 @@ interface HostedPatientSyncApi {
     fun submitReview(appointmentId: String, rating: Int, comment: String): HostedResult<HostedSyncSnapshot>
     fun submitSupportRequest(category:String,subject:String,message:String):HostedResult<HostedSyncSnapshot>
     fun submitPrototypeRecoveryCase(caseType:String):HostedResult<HostedSyncSnapshot>
+    fun simulatePrototypePayment(scenario:String):HostedResult<HostedPrototypePayment>
     fun markNotificationsRead(readThroughCursor:String):HostedResult<HostedSyncSnapshot>
     fun updatePreferences(preferences:HostedPreferences):HostedResult<HostedSyncSnapshot>
 }
@@ -130,6 +143,26 @@ object HostedErrorJson {
             message = error.optString("message", "Hosted API returned HTTP $status")
         )
     }.getOrDefault(HostedServerError("HTTP_$status", "Hosted API returned HTTP $status"))
+}
+
+object HostedPrototypePaymentJson {
+    private val scenarios=setOf("CAPTURE_SUCCESS","ZERO_CHARGE","PAYMENT_FAILED","PAYMENT_EXPIRED","REFUND_AFTER_CAPTURE")
+    private val statuses=setOf("CAPTURED_TEST_ONLY","ZERO_CHARGE_TEST_ONLY","FAILED_TEST_ONLY","EXPIRED_TEST_ONLY","REFUNDED_TEST_ONLY")
+    fun parse(json:String):HostedPrototypePayment {
+        val root=JSONObject(json)
+        require(root.optBoolean("authoritative")&&root.optBoolean("syntheticOnly")&&!root.optBoolean("realMoneyMoved"))
+        val item=root.getJSONObject("transaction")
+        val result=HostedPrototypePayment(item.getString("id"),item.getString("syntheticPaymentId"),item.getString("scenario"),item.getString("status"),item.getInt("amountMinor"),item.getString("currency"),item.getBoolean("bookingEligible"),item.getString("refundStatus"),item.getString("createdAt"))
+        require(result.syntheticPaymentId.matches(Regex("^DLO-PAY-SIM-[0-9]{6}$"))&&result.scenario in scenarios&&result.status in statuses&&result.amountMinor>=0&&result.currency=="INR"&&!item.optBoolean("realMoneyMoved"))
+        when(result.scenario){
+            "CAPTURE_SUCCESS"->require(result.status=="CAPTURED_TEST_ONLY"&&result.bookingEligible&&result.refundStatus=="NOT_REQUESTED")
+            "ZERO_CHARGE"->require(result.status=="ZERO_CHARGE_TEST_ONLY"&&result.amountMinor==0&&result.bookingEligible)
+            "PAYMENT_FAILED"->require(result.status=="FAILED_TEST_ONLY"&&!result.bookingEligible)
+            "PAYMENT_EXPIRED"->require(result.status=="EXPIRED_TEST_ONLY"&&!result.bookingEligible)
+            "REFUND_AFTER_CAPTURE"->require(result.status=="REFUNDED_TEST_ONLY"&&!result.bookingEligible&&result.refundStatus=="REFUNDED_TEST_ONLY")
+        }
+        return result
+    }
 }
 
 object HostedCommunicationJson {
@@ -346,6 +379,13 @@ class HttpHostedPatientSyncApi(
         val keyName=HostedPrototypeRecoveryKeys.preferenceKey(caseType);val idempotency=preferences.getString(keyName,null)?: ("android53bp-"+UUID.randomUUID()).also{preferences.edit().putString(keyName,it).apply()}
         request("POST","/api/v1/patient/prototype-recovery-cases",JSONObject().put("caseType",caseType).put("acknowledgement","SIMULATION_ONLY_NO_ACCOUNT_CHANGE").toString(),mapOf("Idempotency-Key" to idempotency));load()
     }
+    override fun simulatePrototypePayment(scenario:String):HostedResult<HostedPrototypePayment> = guarded {
+        require(scenario in setOf("CAPTURE_SUCCESS","ZERO_CHARGE","PAYMENT_FAILED","PAYMENT_EXPIRED","REFUND_AFTER_CAPTURE")){"Choose a supported synthetic payment outcome."}
+        val keyName=HostedPrototypePaymentKeys.preferenceKey(scenario)
+        val idempotency=preferences.getString(keyName,null)?: ("patient-android59cp-"+UUID.randomUUID()).also{preferences.edit().putString(keyName,it).apply()}
+        HostedPrototypePaymentJson.parse(request("POST","/api/v1/payments/prototype/transactions",JSONObject().put("scenario",scenario).put("acknowledgement","SYNTHETIC_PAYMENT_TEST_ONLY_NO_REAL_MONEY").toString(),mapOf("Idempotency-Key" to idempotency)))
+    }
+
     override fun updatePreferences(preferences:HostedPreferences):HostedResult<HostedSyncSnapshot> = guarded {
         request("PUT","/api/v1/patient/preferences",JSONObject().put("appointmentServiceUpdates",preferences.appointmentServiceUpdates).put("healthInformation",preferences.healthInformation).put("promotionalMessages",preferences.promotionalMessages).put("inAppMessages",preferences.inAppMessages).put("preferredLanguage",preferences.preferredLanguage).put("consentVersion","2026-07").toString());load()
     }
@@ -396,7 +436,7 @@ class HttpHostedPatientSyncApi(
             readTimeout = 25_000
             setRequestProperty("Accept", "application/json")
             setRequestProperty("Authorization", "Bearer $token")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage53BP")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage59CP")
             headers.forEach { (key, value) -> setRequestProperty(key, value) }
             if (body != null) {
                 doOutput = true
@@ -441,7 +481,8 @@ data class HostedSyncUiState(
     val snapshot: HostedSyncSnapshot? = null,
     val message: String = "Connect to the seeded hosted identity to begin.",
     val error: Boolean = false,
-    val doctorUnavailable: Boolean = false
+    val doctorUnavailable: Boolean = false,
+    val prototypePayment: HostedPrototypePayment? = null
 )
 
 object HostedSyncStateReducer {
@@ -465,6 +506,11 @@ class HostedPatientSyncViewModel(private val api: HostedPatientSyncApi) : ViewMo
     fun submitReview(appointmentId: String, rating: Int, comment: String) { execute { api.submitReview(appointmentId, rating, comment) } }
     fun submitSupportRequest(category:String,subject:String,message:String){execute{api.submitSupportRequest(category,subject,message)}}
     fun submitPrototypeRecoveryCase(caseType:String){execute{api.submitPrototypeRecoveryCase(caseType)}}
+    fun simulatePrototypePayment(scenario:String){
+        if(uiState.loading)return
+        uiState=uiState.copy(loading=true,message="Running a no-money synthetic payment...",error=false)
+        executor.execute{val result=api.simulatePrototypePayment(scenario);main.post{uiState=when(result){is HostedResult.Success->uiState.copy(loading=false,prototypePayment=result.value,message="Synthetic outcome received. No real money moved.",error=false);is HostedResult.Failure->uiState.copy(loading=false,message=result.message,error=true)}}}
+    }
     fun markHostedNotificationsRead(cursor:String){execute{api.markNotificationsRead(cursor)}}
     fun updatePreferences(preferences:HostedPreferences){execute{api.updatePreferences(preferences)}}
 
@@ -475,7 +521,7 @@ class HostedPatientSyncViewModel(private val api: HostedPatientSyncApi) : ViewMo
             val result = call()
             main.post {
                 uiState = when (result) {
-                    is HostedResult.Success -> HostedSyncUiState(snapshot = result.value, message = "Server data is authoritative for this seeded dummy flow.")
+                    is HostedResult.Success -> uiState.copy(loading=false,snapshot=result.value,message="Server data is authoritative for this seeded dummy flow.",error=false,doctorUnavailable=false)
                     is HostedResult.Failure -> HostedSyncStateReducer.failure(uiState, result)
                 }
             }

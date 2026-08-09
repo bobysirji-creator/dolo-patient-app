@@ -86,6 +86,7 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                 item { PatientCommunicationPreferenceCard(preferences, state.loading, viewModel::updatePreferences) }
             }
             item { PrototypeRecoverySimulationCard(snapshot.prototypeRecoveryCases,state.loading,viewModel::submitPrototypeRecoveryCase) }
+            item { PrototypePaymentSimulationCard(state.prototypePayment,state.loading,viewModel::simulatePrototypePayment) }
             item { Text("Targeted DO-LO messages", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
             if (snapshot.targetedCampaigns.isEmpty()) {
                 item { Text("No active targeted in-app message matches this hosted Patient and the current communication preferences.") }

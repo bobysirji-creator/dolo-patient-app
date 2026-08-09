@@ -202,4 +202,12 @@ Dependency: signed operational, legal, security and business launch approval.
 
 ## Completion definition
 
-The Android ecosystem is production-capable after Stage 64 only when every required dependency is supplied, all hosted/physical-device checks pass, real-data handling is approved, external providers are monitored, and rollback/recovery evidence is current. Passing a code test alone does not satisfy legal, security, provider or operational gates.
+The Android ecosystem is production-capable after Stage 64 only when every required dependency is supplied, all hosted/physical-device checks pass, real-data handling is approved, external providers are monitored, and rollback/recovery evidence is current. Passing a code test alone does not satisfy legal, security, provider or operational gates.### Stage 59C-P cross-app presentation checkpoint
+
+- [x] Patient and Admin test-only outcome presentation implemented
+- [x] captured, zero-charge, failed, expired and refunded states supported
+- [x] stable client idempotency and strict synthetic-response validation
+- [x] no payment credentials, provider, appointment, billing ledger or money movement
+- [ ] both Android GitHub Actions builds and physical-device acceptance
+
+This checkpoint presents Stage 59B-P mechanics only and does not satisfy production Stage 59 dependencies.

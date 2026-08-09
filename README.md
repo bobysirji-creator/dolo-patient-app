@@ -100,3 +100,6 @@ Create an Account can now open three integrity-verified hosted test drafts in a 
 ## Stage 53B-P recovery simulation
 
 Hosted Prototype Sync includes a clearly labelled, seeded-dummy Account recovery test lab. It sends only one of three fixed scenario enums and the mandatory no-account-change acknowledgement; it never submits a phone number, evidence document, profile field or merge target. See `docs/stage53bp-device-test.md`.
+## Stage 59C-P synthetic payment presentation
+
+Hosted Prototype Sync now presents five fixed, server-authoritative synthetic payment outcomes. The App sends only a scenario enum and mandatory no-real-money acknowledgement, reuses a per-scenario idempotency key, and rejects responses that do not remain synthetic. No payment credential, Patient, appointment, provider or real financial record is involved. See docs/stage59cp-device-test.md.

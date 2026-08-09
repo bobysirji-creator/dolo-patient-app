@@ -480,3 +480,17 @@ Stage 52B-F remains deferred until legally approved content and approval metadat
 - [ ] stable APK in-place upgrade and Stage 53B-P physical-device acceptance
 
 Stage 53B-F remains policy-, legal-, privacy- and security-gated. This prototype cannot alter an account.
+## Stage 59C-P - Patient synthetic payment presentation
+
+- [x] present captured, zero-charge, failed, expired and refunded test outcomes
+- [x] accept only authoritative synthetic INR responses with no real-money marker
+- [x] reuse a persisted per-scenario idempotency key
+- [x] show synthetic reference, status, test amount, eligibility and refund state
+- [x] collect no card, UPI, bank, Patient, family or appointment information
+- [x] preserve local data and keep provider, appointment and billing-ledger mutation disabled
+- [x] parser and unsafe-response regression coverage
+- [x] stable version increment to 0.40.0-stage59cp (version code 57)
+- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [ ] stable APK in-place upgrade and Stage 59C-P physical-device acceptance
+
+Real payment processing remains deferred behind every production Stage 59 provider, merchant, accounting, security, legal and release-policy dependency.
