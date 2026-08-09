@@ -300,7 +300,6 @@ fun DoctorListScreen(
                         DoctorListMessage(Icons.Outlined.MedicalServices, "No Doctors are currently available in this category", "Please check again later or explore another specialty.")
                 }
                     }
-                }
                 state.hasFilteredEmptyState -> item {
                     DoctorListMessage(Icons.Outlined.FilterList, "No Doctors match these filters", "Remove one or more filters to see more Doctors.", "Clear Filters") {
                         onEvent(DoctorListUiEvent.FiltersChanged(DoctorFilterState()))
