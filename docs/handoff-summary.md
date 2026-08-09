@@ -459,3 +459,6 @@ Patient App `0.39.0-stage53bp` (version code 56) adds an Account recovery test l
 ## Stage 59C-P implementation checkpoint
 
 Patient App 0.40.0-stage59cp (version code 57) adds a clearly labelled synthetic payment test lab inside Hosted Prototype Sync. It displays the five committed Stage 59B-P outcomes, stores only a per-scenario idempotency key, and validates the server no-real-money boundary. It cannot collect payment or Patient details, create an appointment, mutate the service-charge ledger, contact a provider, or move money. Build the stable APK through GitHub Actions and follow docs/stage59cp-device-test.md together with Admin App 0.19.0-stage59cp.
+## Stage 59C-P refunded-outcome correction
+
+Patient App 0.40.1-stage59cp (version code 58) aligns the refund validator with the accepted API contract. Capture qualified the synthetic transaction before its later synthetic refund, so the server correctly returns bookingEligible true together with REFUNDED_TEST_ONLY. The valid result now renders while every no-money and data-isolation boundary remains unchanged.

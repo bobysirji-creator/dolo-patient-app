@@ -39,13 +39,14 @@ internal fun PrototypePaymentSimulationCard(payment: HostedPrototypePayment?, lo
                 }
             }
             payment?.let {
+                val eligibilityLabel=if(it.scenario=="REFUND_AFTER_CAPTURE")"Qualified at capture" else "Booking eligible"
                 Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
                     Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         Text(it.syntheticPaymentId, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.primary)
                         Text(it.status.replace('_', ' '), fontWeight = FontWeight.Bold)
                         Text("Scenario: ${it.scenario.replace('_', ' ')}")
                         Text("Test amount: ${it.currency} ${formatPrototypeAmount(it.amountMinor)}")
-                        Text("Booking eligible: ${if (it.bookingEligible) "Yes" else "No"} | Refund: ${it.refundStatus.replace('_', ' ')}")
+                        Text("$eligibilityLabel: ${if (it.bookingEligible) "Yes" else "No"} | Refund: ${it.refundStatus.replace('_', ' ')}")
                         Text("Synthetic only - no real payment, appointment or billing-ledger change.", style = MaterialTheme.typography.bodySmall)
                     }
                 }

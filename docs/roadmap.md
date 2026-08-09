@@ -489,7 +489,7 @@ Stage 53B-F remains policy-, legal-, privacy- and security-gated. This prototype
 - [x] collect no card, UPI, bank, Patient, family or appointment information
 - [x] preserve local data and keep provider, appointment and billing-ledger mutation disabled
 - [x] parser and unsafe-response regression coverage
-- [x] stable version increment to 0.40.0-stage59cp (version code 57)
+- [x] corrective version increment to 0.40.1-stage59cp (version code 58)
 - [ ] GitHub Actions compile, lint, unit tests and stable APK
 - [ ] stable APK in-place upgrade and Stage 59C-P physical-device acceptance
 

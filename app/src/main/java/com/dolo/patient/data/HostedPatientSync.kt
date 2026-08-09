@@ -159,7 +159,7 @@ object HostedPrototypePaymentJson {
             "ZERO_CHARGE"->require(result.status=="ZERO_CHARGE_TEST_ONLY"&&result.amountMinor==0&&result.bookingEligible)
             "PAYMENT_FAILED"->require(result.status=="FAILED_TEST_ONLY"&&!result.bookingEligible)
             "PAYMENT_EXPIRED"->require(result.status=="EXPIRED_TEST_ONLY"&&!result.bookingEligible)
-            "REFUND_AFTER_CAPTURE"->require(result.status=="REFUNDED_TEST_ONLY"&&!result.bookingEligible&&result.refundStatus=="REFUNDED_TEST_ONLY")
+            "REFUND_AFTER_CAPTURE"->require(result.status=="REFUNDED_TEST_ONLY"&&result.bookingEligible&&result.refundStatus=="REFUNDED_TEST_ONLY")
         }
         return result
     }
