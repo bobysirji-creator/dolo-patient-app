@@ -52,6 +52,8 @@ class HostedPatientSyncTest {
         assertFalse(preferences.promotionalMessages)
         assertNull(preferences.consentedAt)
         assertEquals("OTP_ONLY", preferences.smsUsage)
+        assertFalse(preferences.pushNotifications)
+        assertEquals("PROVIDER_DISABLED", preferences.pushDeliveryState)
         assertEquals("CONSULTED_DOCTOR_SPECIALTY_HISTORY", preferences.healthSegmentationBasis)
     }
     @Test

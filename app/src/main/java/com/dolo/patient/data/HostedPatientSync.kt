@@ -229,13 +229,13 @@ object HostedPreferencesJson {
             healthInformation = item.getBoolean("healthInformation"),
             promotionalMessages = item.getBoolean("promotionalMessages"),
             inAppMessages = item.getBoolean("inAppMessages"),
-            pushNotifications = item.getBoolean("pushNotifications"),
+            pushNotifications = item.optBoolean("pushNotifications", false),
             preferredLanguage = item.getString("preferredLanguage"),
             consentVersion = item.getString("consentVersion"),
             consentedAt = item.optNullableString("consentedAt"),
             smsUsage = item.getString("smsUsage"),
             healthSegmentationBasis = item.getString("healthSegmentationBasis"),
-            pushDeliveryState = item.getString("pushDeliveryState")
+            pushDeliveryState = item.optString("pushDeliveryState", "PROVIDER_DISABLED")
         )
     }
 }
