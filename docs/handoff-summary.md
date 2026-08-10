@@ -476,3 +476,9 @@ Patient App 0.41.1-stage60a (version code 60) keeps the complete hosted clinic c
 Patient App 0.42.0-stage60b (version code 61) adds explicit Push consent to hosted Communication preferences and preserves it through Platform API 0.54.0-stage60b. The UI states that Android system delivery remains unavailable until a provider is securely connected. No Push SDK, notification permission, device token or provider credential is present.
 
 GitHub Actions is the Android compile/lint/test/APK authority because this lightweight checkout has no Gradle wrapper. Install the stable APK over the existing app and follow docs/stage60b-device-test.md.
+
+## Stage 60C implementation checkpoint
+
+Patient App `0.43.0-stage60c` (version code 62) connects the registered `com.dolo.patient` Android client to Firebase Cloud Messaging without committing its Firebase configuration. GitHub Actions reconstructs `google-services.json` from the protected repository secret and verifies the package before building. The App requests Android notification permission only when the Patient saves enabled Push consent, creates a dedicated Appointment updates channel, displays only fixed generic notification text, and accepts only bounded appointment routes. It stores only a SHA-256 token fingerprint locally and never logs or displays the raw token.
+
+This checkpoint does not enable Render-to-FCM delivery. The Platform API remains fail-closed until a dedicated Firebase sender service account is stored in Render, device endpoint registration/revocation and encrypted token storage are implemented, and the Stage 60B outbox worker is connected. GitHub Actions remains the Android build authority; then install the stable APK and follow `docs/stage60c-device-test.md`.

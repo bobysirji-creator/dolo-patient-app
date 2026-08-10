@@ -27,6 +27,29 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
+      - name: Require Firebase Android configuration
+        if: github.event_name != 'pull_request'
+        shell: bash
+        env:
+          FIREBASE_CONFIG_BASE64: ${{ secrets.FIREBASE_GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          : "${FIREBASE_CONFIG_BASE64:?Missing FIREBASE_GOOGLE_SERVICES_JSON_BASE64 Actions secret}"
+      - name: Restore Firebase Android configuration
+        if: github.event_name != 'pull_request'
+        shell: bash
+        env:
+          FIREBASE_CONFIG_BASE64: ${{ secrets.FIREBASE_GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          printf '%s' "$FIREBASE_CONFIG_BASE64" | base64 --decode > app/google-services.json
+          test "$(node -e "const c=require('./app/google-services.json');process.stdout.write(c.client.some(x=>x.client_info?.android_client_info?.package_name==='com.dolo.patient')?'yes':'no')")" = yes
+          chmod 600 app/google-services.json
+      - name: Provide pull-request Firebase placeholder
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          cat > app/google-services.json <<'JSON'
+          {"project_info":{"project_number":"100000000000","project_id":"dolo-ci-placeholder","storage_bucket":"dolo-ci-placeholder.appspot.com"},"client":[{"client_info":{"mobilesdk_app_id":"1:100000000000:android:0000000000000000","android_client_info":{"package_name":"com.dolo.patient"}},"oauth_client":[],"api_key":[{"current_key":"AIzaSyDoloCiPlaceholder000000000000000"}],"services":{"appinvite_service":{"other_platform_oauth_client":[]}}}],"configuration_version":"1"}
+          JSON
       - name: Require stable signing secrets
         if: github.event_name != 'pull_request'
         shell: bash

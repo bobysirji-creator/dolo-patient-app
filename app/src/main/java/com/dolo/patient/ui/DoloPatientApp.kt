@@ -37,7 +37,7 @@ import com.dolo.patient.ui.screens.*
 import kotlinx.coroutines.delay
 
 object Routes{const val Splash="splash";const val Login="login";const val Home="home";const val Categories="categories";const val Doctors="doctors/{category}";const val CategoryDoctors="doctors/{categoryId}/{categoryName}";const val DoctorDetails="doctor/{doctorId}";const val Booking="booking/{doctorId}";const val Confirmation="confirmation/{appointmentId}";const val History="history";const val Favourites="favourites";const val Queue="queue/{appointmentId}";const val Profile="profile";const val Notifications="notifications";const val Support="support";const val Integrations="integrations";const val HostedSync="hosted-sync";const val AllQueues="all-queues";const val HostedDoctorDetails="hosted-doctor/{clinicId}";const val Review="review/{doctorId}/{appointmentId}"}
-@Composable fun DoloPatientApp(authRepository:AuthRepository,patientRepository:PatientRepository,platformApi:PlatformApi,hostedSyncApi:HostedPatientSyncApi,darkModeEnabled:Boolean=false,onDarkModeChange:(Boolean)->Unit={}){
+@Composable fun DoloPatientApp(authRepository:AuthRepository,patientRepository:PatientRepository,platformApi:PlatformApi,hostedSyncApi:HostedPatientSyncApi,darkModeEnabled:Boolean=false,initialNotificationDestination:String?=null,onNotificationDestinationHandled:()->Unit={},onDarkModeChange:(Boolean)->Unit={}){
  val nav=rememberNavController();val auth:AuthViewModel=viewModel(factory=AuthViewModelFactory(authRepository));val login:LoginViewModel=viewModel(factory=LoginViewModelFactory(authRepository));val otp:OtpVerificationViewModel=viewModel(factory=OtpVerificationViewModelFactory(AuthOtpRepository(authRepository)));val patient:PatientViewModel=viewModel(factory=PatientViewModelFactory(patientRepository));val platform:PlatformConnectionViewModel=viewModel(factory=PlatformConnectionViewModelFactory(platformApi));val hosted:HostedPatientSyncViewModel=viewModel(factory=HostedPatientSyncViewModelFactory(hostedSyncApi))
  NavHost(
   nav,
@@ -65,6 +65,12 @@ object Routes{const val Splash="splash";const val Login="login";const val Home="
   }
   composable(Routes.Home){
    val hostedMode=auth.uiState.session?.mode==PatientAuthMode.HOSTED_PROTOTYPE
+   androidx.compose.runtime.LaunchedEffect(initialNotificationDestination){
+    initialNotificationDestination?.let{destination->
+     nav.navigate(destination){launchSingleTop=true}
+     onNotificationDestinationHandled()
+    }
+   }
    androidx.compose.runtime.LaunchedEffect(hostedMode){if(hostedMode){while(true){hosted.refresh();delay(15_000)}}}
    PatientHomeRoute(patientState=patient.uiState,hostedState=if(hostedMode)hosted.uiState else null,darkModeEnabled=darkModeEnabled,onDarkModeChange=onDarkModeChange,onSearchDoctors={patient.search("");nav.navigate("doctors/All")},onNearMe={patient.search("");nav.navigate("doctors/All")},onAllQueues={nav.navigate(Routes.AllQueues)},onQueue={nav.navigate("queue/"+it)},onNotifications={nav.navigate(Routes.Notifications)},onFavorites={nav.navigate(Routes.Favourites)},onDoctor={nav.navigate("doctor/"+it)},onBookDoctor={nav.navigate("booking/"+it)},onAppointments={nav.navigate(Routes.History)},onBook={nav.navigate(Routes.Categories)},onHistory={nav.navigate(Routes.History)},onProfile={nav.navigate(Routes.Profile)},onSupport={nav.navigate(Routes.Support)},onLogout={auth.logout();nav.navigate(Routes.Login){popUpTo(Routes.Home){inclusive=true}}},onRefreshQueues=patient::refreshAllQueues,onRefreshHosted=hosted::refresh,onHostedSync={nav.navigate(Routes.HostedSync)})
   }

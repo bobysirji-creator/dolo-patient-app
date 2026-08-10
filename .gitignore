@@ -3,3 +3,5 @@
 *.keystore
 *.p12
 DOLO_SIGNING_*.txt
+# Recreated from the protected GitHub Actions secret during CI.
+app/google-services.json

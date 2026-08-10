@@ -1,5 +1,6 @@
 package com.dolo.patient
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,12 +15,18 @@ import com.dolo.patient.auth.PrototypeSessionManager
 import com.dolo.patient.data.LocalPatientRepository
 import com.dolo.patient.data.HttpHostedPatientSyncApi
 import com.dolo.patient.platform.HttpPlatformApi
+import com.dolo.patient.push.DoloPushNotifications
+import com.dolo.patient.push.PushNotificationPolicy
 import com.dolo.patient.ui.DoloPatientApp
 import com.dolo.patient.ui.theme.DoloTheme
 
 class MainActivity : ComponentActivity() {
+    private val notificationDestination = mutableStateOf<String?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        notificationDestination.value = intent.notificationDestination()
+        DoloPushNotifications.createChannel(this)
         val storage=getSharedPreferences("dolo_session",MODE_PRIVATE)
         val tokenStore=AndroidKeystoreTokenStore(storage)
         val authApi=HttpPrototypeAuthApi(BuildConfig.DOLO_API_BASE_URL)
@@ -36,6 +43,8 @@ class MainActivity : ComponentActivity() {
                     platformApi = platformApi,
                     hostedSyncApi = hostedSyncApi,
                     darkModeEnabled = darkModeEnabled,
+                    initialNotificationDestination = notificationDestination.value,
+                    onNotificationDestinationHandled = { notificationDestination.value = null },
                     onDarkModeChange = { enabled ->
                         darkModeEnabled = enabled
                         storage.edit().putBoolean("patient_dark_mode", enabled).apply()
@@ -44,4 +53,14 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        notificationDestination.value = intent.notificationDestination()
+    }
 }
+
+private fun Intent.notificationDestination(): String? =
+    getStringExtra(PushNotificationPolicy.EXTRA_DESTINATION)
+        ?.takeIf { it.matches(Regex("^queue/[A-Za-z0-9_-]{1,80}$")) }

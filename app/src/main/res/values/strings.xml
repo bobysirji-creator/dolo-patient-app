@@ -44,4 +44,9 @@
     <string name="otp_illustration_description">Doctor standing near a female Patient securely using a mobile phone</string>
     <string name="otp_back_description">Back to mobile-number login</string>
     <string name="otp_timer_description">One-Time Password countdown timer</string>
-    <string name="otp_security_description">Secure and encrypted sign-in</string></resources>
+    <string name="otp_security_description">Secure and encrypted sign-in</string>
+    <string name="push_channel_appointments_id">dolo_appointment_updates</string>
+    <string name="push_channel_appointments_name">Appointment updates</string>
+    <string name="push_channel_appointments_description">Privacy-safe appointment and queue updates from DO-LO</string>
+    <string name="push_notification_title">DO-LO appointment update</string>
+    <string name="push_notification_body">Your appointment or queue status changed. Open DO-LO for details.</string></resources>

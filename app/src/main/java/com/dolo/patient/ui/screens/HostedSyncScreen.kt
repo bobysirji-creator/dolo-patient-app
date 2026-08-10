@@ -1,5 +1,12 @@
 package com.dolo.patient.ui.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,11 +40,24 @@ import com.dolo.patient.data.HostedReschedulePolicy
 import com.dolo.patient.data.HostedReceiptPresentation
 import com.dolo.patient.data.HostedPreferences
 import com.dolo.patient.ui.components.ScreenTitle
+import com.dolo.patient.push.PushRegistrationState
 import kotlinx.coroutines.delay
 
 @Composable
 fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) {
     val state = viewModel.uiState
+    val context = LocalContext.current
+    var firebaseRegistrationReady by rememberSaveable { mutableStateOf(PushRegistrationState(context).hasFirebaseRegistration()) }
+    var notificationPermissionMessage by rememberSaveable { mutableStateOf<String?>(null) }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        notificationPermissionMessage = if (granted) {
+            "Android notification permission granted."
+        } else {
+            "Android notification permission was not granted. You can enable it later in system settings."
+        }
+    }
     var selectedProfileId by rememberSaveable { mutableStateOf<String?>(null) }
     var rescheduleAppointmentId by rememberSaveable { mutableStateOf<String?>(null) }
     var rescheduleSessionId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -50,6 +70,13 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
         while (true) {
             delay(15_000)
             viewModel.refresh()
+        }
+    }
+    LaunchedEffect(Unit) {
+        repeat(20) {
+            firebaseRegistrationReady = PushRegistrationState(context).hasFirebaseRegistration()
+            if (firebaseRegistrationReady) return@LaunchedEffect
+            delay(1_000)
         }
     }
     LazyColumn(
@@ -83,7 +110,24 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                 )
             }
             snapshot.preferences?.let { preferences ->
-                item { PatientCommunicationPreferenceCard(preferences, state.loading, viewModel::updatePreferences) }
+                item {
+                    PatientCommunicationPreferenceCard(
+                        current = preferences,
+                        loading = state.loading,
+                        permissionMessage = notificationPermissionMessage,
+                        firebaseRegistrationReady = firebaseRegistrationReady,
+                        onRequestPushPermission = {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+                            ) {
+                                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            } else {
+                                notificationPermissionMessage = "Android notification permission granted."
+                            }
+                        },
+                        onSave = viewModel::updatePreferences
+                    )
+                }
             }
             item { PrototypeRecoverySimulationCard(snapshot.prototypeRecoveryCases,state.loading,viewModel::submitPrototypeRecoveryCase) }
             item { PrototypePaymentSimulationCard(state.prototypePayment,state.loading,viewModel::simulatePrototypePayment) }
@@ -260,7 +304,14 @@ private fun PrototypeRecoverySimulationCard(cases:List<com.dolo.patient.data.Hos
     }
 }
 @Composable
-private fun PatientCommunicationPreferenceCard(current:HostedPreferences,loading:Boolean,onSave:(HostedPreferences)->Unit){
+private fun PatientCommunicationPreferenceCard(
+    current: HostedPreferences,
+    loading: Boolean,
+    permissionMessage: String?,
+    firebaseRegistrationReady: Boolean,
+    onRequestPushPermission: () -> Unit,
+    onSave: (HostedPreferences) -> Unit
+) {
     var appointmentUpdates by rememberSaveable(current.consentedAt){mutableStateOf(current.appointmentServiceUpdates)}
     var healthInformation by rememberSaveable(current.consentedAt){mutableStateOf(current.healthInformation)}
     var promotions by rememberSaveable(current.consentedAt){mutableStateOf(current.promotionalMessages)}
@@ -276,9 +327,18 @@ private fun PatientCommunicationPreferenceCard(current:HostedPreferences,loading
         PreferenceSwitch("In-app messages",inApp){inApp=it}
         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){FilterChip(language=="en",{language="en"},{Text("English")});FilterChip(language=="hi",{language="hi"},{Text("Hindi")})}
         PreferenceSwitch("Push notifications",push){push=it}
-        Text("Push consent is saved now. Android system delivery remains unavailable until a Push provider is securely connected.",style=MaterialTheme.typography.bodySmall)
+        Text("The Firebase client is connected. Server delivery remains disabled until its managed backend credential is configured.",style=MaterialTheme.typography.bodySmall)
+        permissionMessage?.let { Text(it,style=MaterialTheme.typography.bodySmall,fontWeight=FontWeight.SemiBold) }
+        Text(if(firebaseRegistrationReady) "Firebase device registration ready." else "Waiting for Firebase device registration.",style=MaterialTheme.typography.bodySmall,fontWeight=FontWeight.SemiBold)
         Text("SMS is reserved only for OTP authentication and is never used for promotions.",style=MaterialTheme.typography.bodySmall,fontWeight=FontWeight.SemiBold)
-        Button({onSave(current.copy(appointmentServiceUpdates=appointmentUpdates,healthInformation=healthInformation,promotionalMessages=promotions,inAppMessages=inApp,pushNotifications=push,preferredLanguage=language))},enabled=!loading,modifier=Modifier.fillMaxWidth()){Text("Save preferences")}
+        Button(
+            onClick={
+                if(push) onRequestPushPermission()
+                onSave(current.copy(appointmentServiceUpdates=appointmentUpdates,healthInformation=healthInformation,promotionalMessages=promotions,inAppMessages=inApp,pushNotifications=push,preferredLanguage=language))
+            },
+            enabled=!loading,
+            modifier=Modifier.fillMaxWidth()
+        ){Text("Save preferences")}
     }}
 }
 @Composable

@@ -526,3 +526,19 @@ The App requests no background location and performs no location tracking. Road 
 - [ ] in-place upgrade and Stage 60B physical-device acceptance
 
 No Firebase/Push SDK, Android notification permission, device token or provider credential is added in this provider-disabled foundation.
+
+## Stage 60C - Firebase Patient client foundation
+
+- [x] verify the supplied Firebase Android configuration belongs to `com.dolo.patient`
+- [x] restore `google-services.json` from a protected GitHub Actions secret and keep it outside Git
+- [x] add the current Google services plugin, Firebase BoM and main Cloud Messaging module
+- [x] add Android 13+ notification permission and contextual consent request
+- [x] create the privacy-safe Appointment updates notification channel
+- [x] handle foreground Firebase messages with fixed generic lock-screen content
+- [x] allow only bounded `/appointments/{id}` routes into the authenticated queue screen
+- [x] retain only a SHA-256 registration-token fingerprint locally; never log or display the raw token
+- [x] add registration/policy tests and version 0.43.0-stage60c (version code 62)
+- [ ] GitHub Actions lint, unit tests and stable APK
+- [ ] stable in-place upgrade and Stage 60C physical-device acceptance
+
+Render-to-FCM sending remains disabled. The next checkpoint requires a dedicated least-privilege Firebase service account stored only in Render, an authenticated device-endpoint API, encrypted server-side token storage, logout/device revocation and the Stage 60B outbox sender worker.
