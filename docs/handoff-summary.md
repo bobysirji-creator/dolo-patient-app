@@ -485,3 +485,7 @@ This checkpoint does not enable Render-to-FCM delivery. The Platform API remains
 
 ## Stage 60D
 Patient version 0.44.0-stage60d registers the current Firebase token only after explicit hosted Push consent, revokes the installation when Push is disabled, and relies on server-side logout cleanup. Raw tokens are transient and are never displayed or stored by custom Patient code.
+
+## Stage 60D device registration correction
+
+Patient App 0.44.1-stage60d distinguishes a configured Push provider from this phone being registered. When hosted preferences already allow Push but the API reports `DEVICE_REGISTRATION_REQUIRED`, opening Hosted Prototype Sync obtains the current Firebase token and re-registers this installation once. Manual Save preferences also records and registers the current token. The screen confirms `DEVICE_REGISTERED` only after the hosted API finds an active endpoint; local Firebase readiness alone is no longer presented as server registration.

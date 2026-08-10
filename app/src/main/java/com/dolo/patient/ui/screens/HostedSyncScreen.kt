@@ -50,6 +50,7 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
     val context = LocalContext.current
     var firebaseRegistrationReady by rememberSaveable { mutableStateOf(PushRegistrationState(context).hasFirebaseRegistration()) }
     var notificationPermissionMessage by rememberSaveable { mutableStateOf<String?>(null) }
+    var automaticPushRegistrationAttempted by rememberSaveable { mutableStateOf(false) }
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -78,6 +79,24 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
             firebaseRegistrationReady = PushRegistrationState(context).hasFirebaseRegistration()
             if (firebaseRegistrationReady) return@LaunchedEffect
             delay(1_000)
+        }
+    }
+    val currentPushPreferences = state.snapshot?.preferences
+    LaunchedEffect(currentPushPreferences?.pushDeliveryState, currentPushPreferences?.pushNotifications) {
+        val preferences = currentPushPreferences ?: return@LaunchedEffect
+        if (preferences.pushNotifications &&
+            preferences.pushDeliveryState == "DEVICE_REGISTRATION_REQUIRED" &&
+            !automaticPushRegistrationAttempted
+        ) {
+            automaticPushRegistrationAttempted = true
+            val registration = PushRegistrationState(context)
+            FirebaseMessaging.getInstance().token
+                .addOnSuccessListener { token ->
+                    registration.record(token)
+                    firebaseRegistrationReady = true
+                    viewModel.updatePreferences(preferences, token, registration.installationId())
+                }
+                .addOnFailureListener { viewModel.pushRegistrationFailed() }
         }
     }
     LazyColumn(
@@ -128,7 +147,7 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                         },
                         onSave = { saved ->
                             val registration=PushRegistrationState(context)
-                            if(saved.pushNotifications) FirebaseMessaging.getInstance().token.addOnSuccessListener { token -> viewModel.updatePreferences(saved,token,registration.installationId()) }.addOnFailureListener { viewModel.pushRegistrationFailed() }
+                            if(saved.pushNotifications) FirebaseMessaging.getInstance().token.addOnSuccessListener { token -> registration.record(token); firebaseRegistrationReady=true; viewModel.updatePreferences(saved,token,registration.installationId()) }.addOnFailureListener { viewModel.pushRegistrationFailed() }
                             else viewModel.updatePreferences(saved,null,registration.installationId())
                         }
                     )
@@ -342,7 +361,7 @@ private fun PatientCommunicationPreferenceCard(
                 Text(message,modifier=Modifier.fillMaxWidth().padding(12.dp),style=MaterialTheme.typography.bodySmall,fontWeight=FontWeight.SemiBold)
             }
         }
-        Text(if(firebaseRegistrationReady) "Firebase device registration ready." else "Waiting for Firebase device registration.",style=MaterialTheme.typography.bodySmall,fontWeight=FontWeight.SemiBold)
+        Text(when(current.pushDeliveryState){"DEVICE_REGISTERED"->"This phone is registered for appointment Push notifications.";"DEVICE_REGISTRATION_REQUIRED"->if(firebaseRegistrationReady) "Firebase is ready; securing this phone with DO-LO now." else "Waiting for Firebase device registration.";else->"Push provider is not available."},style=MaterialTheme.typography.bodySmall,fontWeight=FontWeight.SemiBold)
         Text("SMS is reserved only for OTP authentication and is never used for promotions.",style=MaterialTheme.typography.bodySmall,fontWeight=FontWeight.SemiBold)
         Button(
             onClick={
