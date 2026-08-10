@@ -537,7 +537,8 @@ No Firebase/Push SDK, Android notification permission, device token or provider 
 - [x] handle foreground Firebase messages with fixed generic lock-screen content
 - [x] allow only bounded `/appointments/{id}` routes into the authenticated queue screen
 - [x] retain only a SHA-256 registration-token fingerprint locally; never log or display the raw token
-- [x] add registration/policy tests and version 0.43.0-stage60c (version code 62)
+- [x] add registration/policy tests and corrective version 0.43.1-stage60c (version code 63)
+- [x] show a prominent denial notice confirming login, booking, queue tracking and local data remain available
 - [ ] GitHub Actions lint, unit tests and stable APK
 - [ ] stable in-place upgrade and Stage 60C physical-device acceptance
 

@@ -1,6 +1,6 @@
 # Stage 60C Patient Firebase client checklist
 
-Run this checklist only after Patient App GitHub Actions passes for `0.43.0-stage60c` and the stable APK is installed over the existing app.
+Run this checklist only after Patient App GitHub Actions passes for `0.43.1-stage60c` and the stable APK is installed over the existing app.
 
 ## Upgrade and existing-data safety
 

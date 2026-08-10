@@ -55,7 +55,7 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
         notificationPermissionMessage = if (granted) {
             "Android notification permission granted."
         } else {
-            "Android notification permission was not granted. You can enable it later in system settings."
+            "Notification permission was denied. Login, booking, queue tracking and local data continue to work normally. You can enable notifications later in Android App info > Notifications."
         }
     }
     var selectedProfileId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -328,7 +328,15 @@ private fun PatientCommunicationPreferenceCard(
         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){FilterChip(language=="en",{language="en"},{Text("English")});FilterChip(language=="hi",{language="hi"},{Text("Hindi")})}
         PreferenceSwitch("Push notifications",push){push=it}
         Text("The Firebase client is connected. Server delivery remains disabled until its managed backend credential is configured.",style=MaterialTheme.typography.bodySmall)
-        permissionMessage?.let { Text(it,style=MaterialTheme.typography.bodySmall,fontWeight=FontWeight.SemiBold) }
+        permissionMessage?.let { message ->
+            Card(
+                colors=CardDefaults.cardColors(
+                    containerColor=if(message.startsWith("Notification permission was denied")) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer
+                )
+            ){
+                Text(message,modifier=Modifier.fillMaxWidth().padding(12.dp),style=MaterialTheme.typography.bodySmall,fontWeight=FontWeight.SemiBold)
+            }
+        }
         Text(if(firebaseRegistrationReady) "Firebase device registration ready." else "Waiting for Firebase device registration.",style=MaterialTheme.typography.bodySmall,fontWeight=FontWeight.SemiBold)
         Text("SMS is reserved only for OTP authentication and is never used for promotions.",style=MaterialTheme.typography.bodySmall,fontWeight=FontWeight.SemiBold)
         Button(
