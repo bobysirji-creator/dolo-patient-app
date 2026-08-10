@@ -132,7 +132,7 @@ interface HostedPatientSyncApi {
     fun submitPrototypeRecoveryCase(caseType:String):HostedResult<HostedSyncSnapshot>
     fun simulatePrototypePayment(scenario:String):HostedResult<HostedPrototypePayment>
     fun markNotificationsRead(readThroughCursor:String):HostedResult<HostedSyncSnapshot>
-    fun updatePreferences(preferences:HostedPreferences):HostedResult<HostedSyncSnapshot>
+    fun updatePreferences(preferences:HostedPreferences,pushToken:String?,installationId:String):HostedResult<HostedSyncSnapshot>
 }
 
 object HostedErrorJson {
@@ -388,10 +388,14 @@ class HttpHostedPatientSyncApi(
         HostedPrototypePaymentJson.parse(request("POST","/api/v1/payments/prototype/transactions",JSONObject().put("scenario",scenario).put("acknowledgement","SYNTHETIC_PAYMENT_TEST_ONLY_NO_REAL_MONEY").toString(),mapOf("Idempotency-Key" to idempotency)))
     }
 
-    override fun updatePreferences(preferences:HostedPreferences):HostedResult<HostedSyncSnapshot> = guarded {
-        request("PUT","/api/v1/patient/preferences",JSONObject().put("appointmentServiceUpdates",preferences.appointmentServiceUpdates).put("healthInformation",preferences.healthInformation).put("promotionalMessages",preferences.promotionalMessages).put("inAppMessages",preferences.inAppMessages).put("pushNotifications",preferences.pushNotifications).put("preferredLanguage",preferences.preferredLanguage).put("consentVersion","2026-08").toString());load()
+    override fun updatePreferences(preferences:HostedPreferences,pushToken:String?,installationId:String):HostedResult<HostedSyncSnapshot> = guarded {
+        request("PUT","/api/v1/patient/preferences",JSONObject().put("appointmentServiceUpdates",preferences.appointmentServiceUpdates).put("healthInformation",preferences.healthInformation).put("promotionalMessages",preferences.promotionalMessages).put("inAppMessages",preferences.inAppMessages).put("pushNotifications",preferences.pushNotifications).put("preferredLanguage",preferences.preferredLanguage).put("consentVersion","2026-08").toString())
+        if(preferences.pushNotifications){
+            require(!pushToken.isNullOrBlank()){ "Firebase registration token is unavailable. Retry while online." }
+            request("POST","/api/v1/patient/push-endpoints",JSONObject().put("installationId",installationId).put("token",pushToken).toString())
+        }else request("DELETE","/api/v1/patient/push-endpoints/$installationId")
+        load()
     }
-
     override fun markNotificationsRead(readThroughCursor:String):HostedResult<HostedSyncSnapshot> = guarded {
         require(readThroughCursor.matches(Regex("^(0|[1-9][0-9]{0,18})$"))){"Invalid notification cursor."}
         request("PUT","/api/v1/patient/notifications",JSONObject().put("readThroughCursor",readThroughCursor).toString());load()
@@ -514,7 +518,8 @@ class HostedPatientSyncViewModel(private val api: HostedPatientSyncApi) : ViewMo
         executor.execute{val result=api.simulatePrototypePayment(scenario);main.post{uiState=when(result){is HostedResult.Success->uiState.copy(loading=false,prototypePayment=result.value,message="Synthetic outcome received. No real money moved.",error=false);is HostedResult.Failure->uiState.copy(loading=false,message=result.message,error=true)}}}
     }
     fun markHostedNotificationsRead(cursor:String){execute{api.markNotificationsRead(cursor)}}
-    fun updatePreferences(preferences:HostedPreferences){execute{api.updatePreferences(preferences)}}
+    fun updatePreferences(preferences:HostedPreferences,pushToken:String?,installationId:String){execute{api.updatePreferences(preferences,pushToken,installationId)}}
+    fun pushRegistrationFailed(){uiState=uiState.copy(loading=false,message="Firebase device registration failed. Retry while online.",error=true)}
 
     private fun execute(call: () -> HostedResult<HostedSyncSnapshot>) {
         if (uiState.loading) return

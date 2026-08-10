@@ -41,6 +41,7 @@ import com.dolo.patient.data.HostedReceiptPresentation
 import com.dolo.patient.data.HostedPreferences
 import com.dolo.patient.ui.components.ScreenTitle
 import com.dolo.patient.push.PushRegistrationState
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.delay
 
 @Composable
@@ -125,7 +126,11 @@ fun HostedSyncScreen(onBack: () -> Unit, viewModel: HostedPatientSyncViewModel) 
                                 notificationPermissionMessage = "Android notification permission granted."
                             }
                         },
-                        onSave = viewModel::updatePreferences
+                        onSave = { saved ->
+                            val registration=PushRegistrationState(context)
+                            if(saved.pushNotifications) FirebaseMessaging.getInstance().token.addOnSuccessListener { token -> viewModel.updatePreferences(saved,token,registration.installationId()) }.addOnFailureListener { viewModel.pushRegistrationFailed() }
+                            else viewModel.updatePreferences(saved,null,registration.installationId())
+                        }
                     )
                 }
             }
@@ -327,7 +332,7 @@ private fun PatientCommunicationPreferenceCard(
         PreferenceSwitch("In-app messages",inApp){inApp=it}
         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){FilterChip(language=="en",{language="en"},{Text("English")});FilterChip(language=="hi",{language="hi"},{Text("Hindi")})}
         PreferenceSwitch("Push notifications",push){push=it}
-        Text("The Firebase client is connected. Server delivery remains disabled until its managed backend credential is configured.",style=MaterialTheme.typography.bodySmall)
+        Text("Firebase device registration is sent securely to DO-LO only after you enable Push notifications. You can revoke it by turning Push off.",style=MaterialTheme.typography.bodySmall)
         permissionMessage?.let { message ->
             Card(
                 colors=CardDefaults.cardColors(

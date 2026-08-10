@@ -15,6 +15,7 @@ import com.dolo.patient.MainActivity
 import com.dolo.patient.R
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import java.util.UUID
 
 class DoloFirebaseMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
@@ -70,10 +71,17 @@ class PushRegistrationState(context: Context) {
     fun hasFirebaseRegistration(): Boolean =
         !preferences.getString(KEY_FINGERPRINT, null).isNullOrBlank()
 
+    fun installationId():String {
+        val existing=preferences.getString(KEY_INSTALLATION_ID,null)
+        if(existing!=null&&existing.matches(Regex("^android-[0-9a-f-]{36}$"))) return existing
+        return "android-${UUID.randomUUID()}".also { preferences.edit().putString(KEY_INSTALLATION_ID,it).apply() }
+    }
+
     private companion object {
         const val PREFERENCES = "dolo_push_registration"
         const val KEY_FINGERPRINT = "fcm_token_sha256"
         const val KEY_UPDATED_AT = "fcm_token_updated_at"
+        const val KEY_INSTALLATION_ID = "installation_id"
     }
 }
 

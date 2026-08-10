@@ -543,3 +543,5 @@ No Firebase/Push SDK, Android notification permission, device token or provider 
 - [ ] stable in-place upgrade and Stage 60C physical-device acceptance
 
 Render-to-FCM sending remains disabled. The next checkpoint requires a dedicated least-privilege Firebase service account stored only in Render, an authenticated device-endpoint API, encrypted server-side token storage, logout/device revocation and the Stage 60B outbox sender worker.
+
+- Stage 60D: real authenticated FCM endpoint registration and delivery - implementation complete; protected Render activation and physical-device checklist pending.
