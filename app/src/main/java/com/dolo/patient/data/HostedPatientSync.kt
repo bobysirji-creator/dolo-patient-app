@@ -36,7 +36,7 @@ data class HostedSupportRequest(val id:String,val category:String,val subject:St
 data class HostedPrototypeRecoveryEvent(val sequence:String,val actorRole:String,val action:String,val outcome:String,val occurredAt:String)
 data class HostedPrototypeRecoveryCase(val id:String,val patientDoloId:String,val caseType:String,val status:String,val outcome:String,val createdAt:String,val updatedAt:String,val events:List<HostedPrototypeRecoveryEvent>)
 data class HostedNotification(val cursor:String,val appointmentId:String,val patientName:String,val tokenNumber:Int,val kind:String,val title:String,val message:String,val occurredAt:String,val read:Boolean)
-data class HostedPreferences(val appointmentServiceUpdates:Boolean,val healthInformation:Boolean,val promotionalMessages:Boolean,val inAppMessages:Boolean,val preferredLanguage:String,val consentVersion:String,val consentedAt:String?,val smsUsage:String,val healthSegmentationBasis:String)
+data class HostedPreferences(val appointmentServiceUpdates:Boolean,val healthInformation:Boolean,val promotionalMessages:Boolean,val inAppMessages:Boolean,val pushNotifications:Boolean,val preferredLanguage:String,val consentVersion:String,val consentedAt:String?,val smsUsage:String,val healthSegmentationBasis:String,val pushDeliveryState:String)
 data class HostedTargetedCampaign(
     val id: String,
     val type: String,
@@ -229,11 +229,13 @@ object HostedPreferencesJson {
             healthInformation = item.getBoolean("healthInformation"),
             promotionalMessages = item.getBoolean("promotionalMessages"),
             inAppMessages = item.getBoolean("inAppMessages"),
+            pushNotifications = item.getBoolean("pushNotifications"),
             preferredLanguage = item.getString("preferredLanguage"),
             consentVersion = item.getString("consentVersion"),
             consentedAt = item.optNullableString("consentedAt"),
             smsUsage = item.getString("smsUsage"),
-            healthSegmentationBasis = item.getString("healthSegmentationBasis")
+            healthSegmentationBasis = item.getString("healthSegmentationBasis"),
+            pushDeliveryState = item.getString("pushDeliveryState")
         )
     }
 }
@@ -387,7 +389,7 @@ class HttpHostedPatientSyncApi(
     }
 
     override fun updatePreferences(preferences:HostedPreferences):HostedResult<HostedSyncSnapshot> = guarded {
-        request("PUT","/api/v1/patient/preferences",JSONObject().put("appointmentServiceUpdates",preferences.appointmentServiceUpdates).put("healthInformation",preferences.healthInformation).put("promotionalMessages",preferences.promotionalMessages).put("inAppMessages",preferences.inAppMessages).put("preferredLanguage",preferences.preferredLanguage).put("consentVersion","2026-07").toString());load()
+        request("PUT","/api/v1/patient/preferences",JSONObject().put("appointmentServiceUpdates",preferences.appointmentServiceUpdates).put("healthInformation",preferences.healthInformation).put("promotionalMessages",preferences.promotionalMessages).put("inAppMessages",preferences.inAppMessages).put("pushNotifications",preferences.pushNotifications).put("preferredLanguage",preferences.preferredLanguage).put("consentVersion","2026-08").toString());load()
     }
 
     override fun markNotificationsRead(readThroughCursor:String):HostedResult<HostedSyncSnapshot> = guarded {

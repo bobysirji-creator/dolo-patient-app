@@ -266,6 +266,7 @@ private fun PatientCommunicationPreferenceCard(current:HostedPreferences,loading
     var promotions by rememberSaveable(current.consentedAt){mutableStateOf(current.promotionalMessages)}
     var inApp by rememberSaveable(current.consentedAt){mutableStateOf(current.inAppMessages)}
     var language by rememberSaveable(current.consentedAt){mutableStateOf(current.preferredLanguage)}
+    var push by rememberSaveable(current.consentedAt){mutableStateOf(current.pushNotifications)}
     Card(colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surfaceVariant)){Column(Modifier.padding(16.dp),verticalArrangement=Arrangement.spacedBy(10.dp)){
         Text("Communication preferences",style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.Bold)
         PreferenceSwitch("Appointment and service updates",appointmentUpdates){appointmentUpdates=it}
@@ -274,8 +275,10 @@ private fun PatientCommunicationPreferenceCard(current:HostedPreferences,loading
         PreferenceSwitch("DO-LO promotional messages",promotions){promotions=it}
         PreferenceSwitch("In-app messages",inApp){inApp=it}
         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){FilterChip(language=="en",{language="en"},{Text("English")});FilterChip(language=="hi",{language="hi"},{Text("Hindi")})}
+        PreferenceSwitch("Push notifications",push){push=it}
+        Text("Push consent is saved now. Android system delivery remains unavailable until a Push provider is securely connected.",style=MaterialTheme.typography.bodySmall)
         Text("SMS is reserved only for OTP authentication and is never used for promotions.",style=MaterialTheme.typography.bodySmall,fontWeight=FontWeight.SemiBold)
-        Button({onSave(current.copy(appointmentServiceUpdates=appointmentUpdates,healthInformation=healthInformation,promotionalMessages=promotions,inAppMessages=inApp,preferredLanguage=language))},enabled=!loading,modifier=Modifier.fillMaxWidth()){Text("Save preferences")}
+        Button({onSave(current.copy(appointmentServiceUpdates=appointmentUpdates,healthInformation=healthInformation,promotionalMessages=promotions,inAppMessages=inApp,pushNotifications=push,preferredLanguage=language))},enabled=!loading,modifier=Modifier.fillMaxWidth()){Text("Save preferences")}
     }}
 }
 @Composable

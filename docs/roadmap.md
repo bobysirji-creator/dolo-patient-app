@@ -506,7 +506,7 @@ Real payment processing remains deferred behind every production Stage 59 provid
 - [x] add parser and API-free navigation URL tests
 - [x] stable version increment to 0.41.0-stage60a (version code 59)
 - [ ] GitHub Actions lint, unit tests and stable APK
-- [ ] stable in-place upgrade and Stage 60A physical-device acceptance
+- [x] stable in-place upgrade and Stage 60A physical-device acceptance
 
 The App requests no background location and performs no location tracking. Road distance, traffic and embedded turn-by-turn navigation are not claimed.
 
@@ -515,3 +515,14 @@ The App requests no background location and performs no location tracking. Road 
 - [x] preserve the ordinary authoritative hosted-clinic catalog separately from nearby results
 - [x] show a specific no-clinics-within-50-km state
 - [x] provide Show all hosted clinics so navigation remains testable outside Mumbai
+## Stage 60B - Patient Push consent UI
+
+- [x] add an independent Push notifications switch to hosted communication preferences
+- [x] persist and reload explicit Push consent through the authoritative API
+- [x] clearly label provider delivery as unavailable
+- [x] keep SMS OTP-only and preserve existing in-app notifications
+- [x] version 0.42.0-stage60b (version code 61)
+- [ ] GitHub Actions stable APK verification
+- [ ] in-place upgrade and Stage 60B physical-device acceptance
+
+No Firebase/Push SDK, Android notification permission, device token or provider credential is added in this provider-disabled foundation.

@@ -471,3 +471,8 @@ The implementation uses Android coarse foreground location only. There is no Map
 ## Stage 60A nearby fallback correction
 
 Patient App 0.41.1-stage60a (version code 60) keeps the complete hosted clinic catalog separate from the latest nearby result. An empty 50 km search now offers Show all hosted clinics, restoring the seeded clinic and its external navigation action without mislabelling that distant clinic as nearby.
+## Stage 60B implementation checkpoint
+
+Patient App 0.42.0-stage60b (version code 61) adds explicit Push consent to hosted Communication preferences and preserves it through Platform API 0.54.0-stage60b. The UI states that Android system delivery remains unavailable until a provider is securely connected. No Push SDK, notification permission, device token or provider credential is present.
+
+GitHub Actions is the Android compile/lint/test/APK authority because this lightweight checkout has no Gradle wrapper. Install the stable APK over the existing app and follow docs/stage60b-device-test.md.
