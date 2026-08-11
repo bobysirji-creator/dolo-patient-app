@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
@@ -35,6 +36,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dolo.patient.R
 import com.dolo.patient.data.HostedSyncUiState
 import com.dolo.patient.data.PatientUiState
+import com.dolo.patient.data.PatientGender
 import com.dolo.patient.data.ReleaseReadiness
 import com.dolo.patient.ui.components.BrandLogo
 import com.dolo.patient.ui.components.PrimaryButton
@@ -162,7 +164,7 @@ fun PatientHomeScreen(
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 18.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            item { PatientGreetingHeader(uiState.patientName, uiState.patientCity, darkModeEnabled) }
+            item { PatientGreetingHeader(uiState.patientName, uiState.patientCity, uiState.patientGender) }
             item {
                 DoctorSearchRow(
                     onSearch = { onEvent(PatientHomeUiEvent.SearchDoctors) },
@@ -203,7 +205,7 @@ fun PatientHomeScreen(
 
 @Composable
 fun DoloTopAppBar(notificationCount: Int, onMenu: () -> Unit, onNotifications: () -> Unit) {
-    Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 3.dp) {
+    Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = referenceCardElevation()) {
         Row(
             Modifier.fillMaxWidth().statusBarsPadding().heightIn(min = 64.dp).padding(horizontal = 12.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -227,32 +229,18 @@ fun DoloTopAppBar(notificationCount: Int, onMenu: () -> Unit, onNotifications: (
 }
 
 @Composable
-fun PatientGreetingHeader(patientName: String, patientCity: String, darkModeEnabled: Boolean) {
-    Surface(shape = RoundedCornerShape(22.dp), color = MaterialTheme.colorScheme.surface, shadowElevation = 2.dp) {
-        Box(Modifier.fillMaxWidth().height(112.dp)) {
-            Image(
-                painterResource(R.drawable.patient_home_hero),
-                contentDescription = "Patient comfortably using a smartphone at home",
-                modifier = Modifier.fillMaxSize().align(Alignment.CenterEnd),
-                contentScale = ContentScale.Crop,
-                alignment = Alignment.CenterEnd,
-                alpha = 1f
-            )
-            Box(
-                Modifier.matchParentSize().background(
-                    androidx.compose.ui.graphics.Brush.horizontalGradient(
-                        colorStops = arrayOf(
-                            0f to MaterialTheme.colorScheme.surface,
-                            .54f to MaterialTheme.colorScheme.surface.copy(alpha = .90f),
-                            1f to MaterialTheme.colorScheme.surface.copy(alpha = if (darkModeEnabled) .08f else 0f)
-                        )
-                    )
-                )
-            )
-            Column(
-                Modifier.align(Alignment.TopStart).fillMaxWidth(.74f).padding(start = 15.dp, top = 12.dp, end = 6.dp),
-                verticalArrangement = Arrangement.spacedBy(1.dp)
-            ) {
+fun PatientGreetingHeader(patientName: String, patientCity: String, patientGender: PatientGender) {
+    Surface(
+        shape = RoundedCornerShape(22.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = referenceCardBorder(),
+        shadowElevation = referenceCardElevation()
+    ) {
+        Row(
+            Modifier.fillMaxWidth().heightIn(min = 96.dp).padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text("Welcome,", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
                 Text(
                     patientName,
@@ -272,9 +260,32 @@ fun PatientGreetingHeader(patientName: String, patientCity: String, darkModeEnab
                     }
                 }
             }
+            Spacer(Modifier.width(12.dp))
+            Surface(
+                modifier = Modifier.size(70.dp).semantics {
+                    contentDescription = if (patientGender == PatientGender.FEMALE) "Female patient avatar" else "Male patient avatar"
+                },
+                shape = CircleShape,
+                color = Color.White
+            ) {
+                Image(
+                    painter = painterResource(if (patientGender == PatientGender.FEMALE) R.drawable.doctor_anjali else R.drawable.doctor_arjun),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize().padding(3.dp).clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            }
         }
     }
 }
+
+@Composable
+private fun referenceCardBorder(): BorderStroke? =
+    if (MaterialTheme.colorScheme.background.luminance() < 0.5f) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant) else null
+
+@Composable
+private fun referenceCardElevation() =
+    if (MaterialTheme.colorScheme.background.luminance() < 0.5f) 2.dp else 0.dp
 @Composable
 fun DoctorSearchRow(onSearch: () -> Unit, onNearMe: () -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -282,8 +293,8 @@ fun DoctorSearchRow(onSearch: () -> Unit, onNearMe: () -> Unit) {
             modifier = Modifier.weight(3f).heightIn(min = 56.dp).semantics { contentDescription = "Search doctors, clinics and specialties" }.clickable(role = Role.Button, onClick = onSearch),
             shape = RoundedCornerShape(18.dp),
             color = MaterialTheme.colorScheme.surface,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-            shadowElevation = 3.dp
+            border = referenceCardBorder(),
+            shadowElevation = referenceCardElevation()
         ) {
             Row(Modifier.padding(horizontal = 13.dp, vertical = 15.dp), verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Outlined.Search, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -413,7 +424,7 @@ fun CurrentTokenCard(queue: QueueSummaryUiModel, onOpen: (String) -> Unit, modif
 
 @Composable
 private fun HomeStatusCard(modifier: Modifier, eyebrow: String, accent: Color, content: @Composable ColumnScope.() -> Unit) {
-    Surface(modifier = modifier, shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), shadowElevation = 4.dp) {
+    Surface(modifier = modifier, shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface, border = referenceCardBorder(), shadowElevation = referenceCardElevation()) {
         Column(Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Text(eyebrow, color = accent, fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
             content()
@@ -425,7 +436,7 @@ private fun HomeStatusCard(modifier: Modifier, eyebrow: String, accent: Color, c
 private fun QueueLoadingCards() {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         repeat(2) {
-            Surface(Modifier.weight(1f).height(176.dp), shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+            Surface(Modifier.weight(1f).height(176.dp), shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface, border = referenceCardBorder()) {
                 Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     repeat(4) { index -> Surface(Modifier.fillMaxWidth(if (index == 1) .45f else .8f).height(if (index == 1) 32.dp else 12.dp), RoundedCornerShape(50), MaterialTheme.colorScheme.outlineVariant.copy(alpha = .65f)) {} }
                 }
@@ -436,7 +447,7 @@ private fun QueueLoadingCards() {
 
 @Composable
 private fun NoActiveQueueCard(onBook: () -> Unit) {
-    Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceVariant, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+    Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surfaceVariant, border = referenceCardBorder()) {
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Surface(shape = CircleShape, color = MaterialTheme.colorScheme.surface, modifier = Modifier.size(48.dp)) {
                 Icon(Icons.Outlined.EventAvailable, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(11.dp))
@@ -461,7 +472,7 @@ fun AdminBroadcastCarousel(
         when {
             loading -> BroadcastLoadingCard()
             broadcasts.isEmpty() -> {
-                Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface, border = referenceCardBorder()) {
                     Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Outlined.Campaign, null, tint = MaterialTheme.colorScheme.primary)
                         Spacer(Modifier.width(10.dp))
@@ -491,7 +502,7 @@ fun AdminBroadcastCarousel(
 
 @Composable
 fun BroadcastCard(broadcast: BroadcastUiModel, onDismiss: (String) -> Unit, onAction: (BroadcastUiModel) -> Unit) {
-    Surface(shape = RoundedCornerShape(22.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), shadowElevation = 3.dp) {
+    Surface(shape = RoundedCornerShape(22.dp), color = MaterialTheme.colorScheme.surface, border = referenceCardBorder(), shadowElevation = referenceCardElevation()) {
         Box(Modifier.fillMaxWidth().heightIn(min = 190.dp)) {
             Row(Modifier.fillMaxWidth().padding(16.dp)) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(7.dp)) {
@@ -527,7 +538,7 @@ fun BroadcastCard(broadcast: BroadcastUiModel, onDismiss: (String) -> Unit, onAc
 
 @Composable
 private fun BroadcastLoadingCard() {
-    Surface(Modifier.fillMaxWidth().height(190.dp), shape = RoundedCornerShape(22.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+    Surface(Modifier.fillMaxWidth().height(190.dp), shape = RoundedCornerShape(22.dp), color = MaterialTheme.colorScheme.surface, border = referenceCardBorder()) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
             repeat(4) { index ->
                 Surface(Modifier.fillMaxWidth(if (index == 1) .65f else if (index == 3) .3f else .9f).height(if (index == 1) 22.dp else 12.dp), RoundedCornerShape(50), MaterialTheme.colorScheme.outlineVariant.copy(alpha = .65f)) {}
@@ -549,7 +560,7 @@ fun FavoriteDoctorsSection(
             TextButton(onClick = onViewAll) { Text("View all") }
         }
         if (doctors.isEmpty()) {
-            Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+            Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface, border = referenceCardBorder()) {
                 Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Outlined.FavoriteBorder, null, tint = MaterialTheme.colorScheme.primary)
                     Spacer(Modifier.width(10.dp))
@@ -576,8 +587,8 @@ fun FavoriteDoctorCard(doctor: FavoriteDoctorUiModel, onOpen: () -> Unit, onBook
         modifier = Modifier.width(182.dp).semantics(mergeDescendants = true) { contentDescription = "${doctor.name}, ${doctor.specialty}" }.clickable(role = Role.Button, onClick = onOpen),
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        shadowElevation = 3.dp
+        border = referenceCardBorder(),
+        shadowElevation = referenceCardElevation()
     ) {
         Column(Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Box(Modifier.fillMaxWidth()) {
@@ -605,6 +616,10 @@ fun FavoriteDoctorCard(doctor: FavoriteDoctorUiModel, onOpen: () -> Unit, onBook
                 onClick = onBookAgain,
                 modifier = Modifier.fillMaxWidth().heightIn(min = 42.dp).semantics { contentDescription = "Book again with ${doctor.name}" },
                 shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
                 contentPadding = PaddingValues(horizontal = 8.dp)
             ) {
                 Icon(Icons.Outlined.CalendarMonth, null, modifier = Modifier.size(17.dp))
@@ -714,7 +729,7 @@ fun AllQueuesScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 2.dp) {
+            Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = referenceCardElevation()) {
                 Row(Modifier.fillMaxWidth().statusBarsPadding().heightIn(min = 62.dp).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = onBack) { Icon(Icons.Outlined.ArrowBack, "Back") }
                     Text("All active queues", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurface)
@@ -731,8 +746,8 @@ fun AllQueuesScreen(
                         modifier = Modifier.fillMaxWidth().clickable { onQueue(queue.appointmentId) },
                         shape = RoundedCornerShape(20.dp),
                         color = MaterialTheme.colorScheme.surface,
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                        shadowElevation = 3.dp
+                        border = referenceCardBorder(),
+                        shadowElevation = referenceCardElevation()
                     ) {
                         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
                             Row {

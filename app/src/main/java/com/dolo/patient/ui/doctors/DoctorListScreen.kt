@@ -546,7 +546,7 @@ fun DoctorListItem(
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        shadowElevation = 1.dp
+        shadowElevation = 0.dp
     ) {
         BoxWithConstraints(Modifier.fillMaxWidth().padding(12.dp)) {
             if (maxWidth < 330.dp) {

@@ -361,3 +361,12 @@ Status: implemented in `0.47.0-stage62d` (version code 68); GitHub Actions passe
 - Night: deep navy layered surfaces, luminous blue/cyan accents and high-contrast cool-white text.
 - The palette is centralized in `DoloTheme`; screenshots are not embedded as UI.
 - Home, Book and Appointments now use one shared Material 3 navigation component, including the Appointments screen.
+## Stage 62E - avatar, details navigation and theme cleanup
+
+Status: implemented in `0.48.0-stage62e` (version code 69); GitHub Actions and physical-device acceptance pending.
+
+- Home hero image removed; saved Male/Female avatar shown in a white circular frame.
+- Doctor Details and hosted Doctor Profile share the standard bottom navigation.
+- Favourite Doctor actions and Appointments filters use blue selected/action colors.
+- Doctor page titles use explicit theme-aware text contrast.
+- Day cards/fields are flat and borderless; the primary action blue is lighter while retaining readable white text.

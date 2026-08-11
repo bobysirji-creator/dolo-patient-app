@@ -1,6 +1,7 @@
 package com.dolo.patient.ui.home
 
 import androidx.annotation.DrawableRes
+import com.dolo.patient.data.PatientGender
 
 enum class QueueStatus { ACTIVE, UPCOMING, PAUSED, COMPLETED }
 
@@ -44,6 +45,7 @@ data class FavoriteDoctorUiModel(
 data class PatientHomeUiState(
     val patientName: String = "",
     val patientCity: String = "",
+    val patientGender: PatientGender = PatientGender.MALE,
     val queues: List<QueueSummaryUiModel> = emptyList(),
     val broadcasts: List<BroadcastUiModel> = emptyList(),
     val favoriteDoctors: List<FavoriteDoctorUiModel> = emptyList(),

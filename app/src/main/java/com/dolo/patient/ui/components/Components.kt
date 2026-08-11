@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -21,6 +22,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dolo.patient.ui.theme.*
 
+@Composable
+private fun themedBorder(): androidx.compose.foundation.BorderStroke? =
+    if (MaterialTheme.colorScheme.background.luminance() < 0.5f) androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant) else null
+
+@Composable
+private fun themedElevation() =
+    if (MaterialTheme.colorScheme.background.luminance() < 0.5f) 2.dp else 0.dp
 @Composable
 fun BrandLogo(modifier: Modifier = Modifier, compact: Boolean = false) {
     val size = if (compact) 22.sp else 29.sp
@@ -47,14 +55,14 @@ fun ScreenTitle(title: String, onBack: (() -> Unit)? = null) {
                 modifier = Modifier.size(44.dp),
                 shape = RoundedCornerShape(14.dp),
                 color = MaterialTheme.colorScheme.surface,
-                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                shadowElevation = 2.dp
+                border = themedBorder(),
+                shadowElevation = themedElevation()
             ) {
                 IconButton(onClick = onBack) { Icon(Icons.Outlined.ArrowBack, "Back", tint = MaterialTheme.colorScheme.onSurface) }
             }
             Spacer(Modifier.width(12.dp))
         }
-        Text(title, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(title, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
         BrandLogo(compact = true)
     }
 }
@@ -73,8 +81,8 @@ fun SearchBar(text: String = "Search doctors, clinics, specialties...", onClick:
         modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp).semantics { contentDescription = "Search doctors, clinics and specialties" }.clickable(role = Role.Button, onClick = onClick),
         shape = RoundedCornerShape(18.dp),
         color = MaterialTheme.colorScheme.surface,
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        shadowElevation = 3.dp
+        border = themedBorder(),
+        shadowElevation = themedElevation()
     ) {
         Row(Modifier.padding(horizontal = 16.dp, vertical = 15.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Outlined.Search, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
@@ -91,8 +99,8 @@ fun MetricCard(label: String, value: String, modifier: Modifier = Modifier, acce
         modifier = modifier.semantics(mergeDescendants = true) { contentDescription = "$label: $value" },
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surface,
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        shadowElevation = 3.dp
+        border = themedBorder(),
+        shadowElevation = themedElevation()
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(label.uppercase(), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelMedium)
@@ -139,7 +147,7 @@ fun SecondaryButton(label: String, onClick: () -> Unit, enabled: Boolean = true,
         enabled = enabled,
         modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
         shape = RoundedCornerShape(17.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        border = themedBorder()
     ) {
         if (icon != null) { Icon(icon, null, modifier = Modifier.size(19.dp)); Spacer(Modifier.width(8.dp)) }
         Text(label, style = MaterialTheme.typography.labelLarge)
@@ -152,8 +160,8 @@ fun DoloCard(modifier: Modifier = Modifier, containerColor: Color = Color.Unspec
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         color = if (containerColor == Color.Unspecified) MaterialTheme.colorScheme.surface else containerColor,
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        shadowElevation = 3.dp
+        border = themedBorder(),
+        shadowElevation = themedElevation()
     ) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp), content = content) }
 }
 
@@ -163,8 +171,8 @@ fun QuickAction(label: String, icon: ImageVector, onClick: () -> Unit, modifier:
         modifier = modifier.heightIn(min = 84.dp).clickable(role = Role.Button, onClick = onClick),
         shape = RoundedCornerShape(18.dp),
         color = MaterialTheme.colorScheme.surface,
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        shadowElevation = 2.dp
+        border = themedBorder(),
+        shadowElevation = themedElevation()
     ) {
         Column(Modifier.padding(13.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Surface(shape = RoundedCornerShape(11.dp), color = MaterialTheme.colorScheme.surfaceVariant, modifier = Modifier.size(36.dp)) {

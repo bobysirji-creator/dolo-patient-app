@@ -588,3 +588,18 @@ Stage 62C changes presentation and navigation only. Login, booking, token alloca
 - [ ] stable APK in-place upgrade and Stage 62D physical-device acceptance
 
 The supplied JPEGs are visual references only and are not embedded in the APK. No API, authentication, appointment, queue, persistence or provider contract changed.
+## Stage 62E - Patient visual consistency corrections
+
+- [x] remove the Home hero illustration and replace it with a white circular, gender-aware Patient avatar
+- [x] add backward-compatible persisted Male/Female avatar selection under Profile & family
+- [x] add the shared Home, Book and Appointments navigation to local and hosted Doctor detail pages
+- [x] make Doctor Details headings explicitly visible against the active page background
+- [x] use blue primary-container styling for Favourite Doctor actions and Appointments filters
+- [x] remove daylight card/field outlines and decorative elevation while retaining layered Night surfaces
+- [x] lighten the daylight primary blue while preserving 4.5:1 white-text contrast
+- [x] preserve existing login, profile, family, appointment, queue and hosted data
+- [x] version 0.48.0-stage62e (version code 69)
+- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [ ] stable APK in-place upgrade and Stage 62E physical-device acceptance
+
+Existing profiles without a stored avatar gender load safely as Male and can be changed in Profile & family. No hosted schema or Patient data upload was added.

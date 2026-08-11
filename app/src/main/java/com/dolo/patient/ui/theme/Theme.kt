@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 
-val DoloBlue = Color(0xFF0066F5)
+val DoloBlue = Color(0xFF1D73E8)
 val DoloNavy = Color(0xFF061A3A)
 val DoloTeal = Color(0xFF008DBA)
 val DoloMint = Color(0xFF38C6E8)
@@ -46,8 +46,8 @@ private val colors = lightColorScheme(
     onSurface = DoloNavy,
     surfaceVariant = DoloSurfaceAlt,
     onSurfaceVariant = DoloMuted,
-    outline = DoloBorder,
-    outlineVariant = Color(0xFFE8EFF9),
+    outline = Color.Transparent,
+    outlineVariant = Color.Transparent,
     error = Color(0xFFBA1A1A),
     errorContainer = Color(0xFFFFDAD6),
     onErrorContainer = Color(0xFF410002)

@@ -177,44 +177,58 @@ fun HostedDoctorDetailsScreen(
     announcements: List<HostedCommunication>,
     onBack: () -> Unit,
     onRefresh: () -> Unit,
-    onBook: () -> Unit
+    onBook: () -> Unit,
+    onHome: () -> Unit,
+    onAppointments: () -> Unit,
+    onBrowse: () -> Unit
 ) {
-    LazyColumn(pageModifier().padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        item { ScreenTitle("Doctor Profile", onBack) }
-        if (clinic == null) {
-            item { EmptyCard("This approved hosted Doctor profile is unavailable. Refresh discovery and try again.") }
-            item { PrimaryButton("Refresh hosted doctors", onRefresh) }
-        } else {
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth().shadow(10.dp, RoundedCornerShape(24.dp)),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-                    shape = RoundedCornerShape(24.dp)
-                ) {
-                    Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Surface(shape = CircleShape, color = MaterialTheme.colorScheme.surface, shadowElevation = 6.dp, modifier = Modifier.size(88.dp)) {
-                            Icon(Icons.Outlined.MedicalServices, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(22.dp))
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        bottomBar = { DoloBottomBar(PatientBottomDestination.BOOK, onHome, onAppointments, onBrowse) }
+    ) { padding ->
+        LazyColumn(
+            Modifier.padding(padding).fillMaxSize().statusBarsPadding(),
+            contentPadding = PaddingValues(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item { ScreenTitle("Doctor Profile", onBack) }
+            if (clinic == null) {
+                item { EmptyCard("This approved hosted Doctor profile is unavailable. Refresh discovery and try again.") }
+                item { PrimaryButton("Refresh hosted doctors", onRefresh) }
+            } else {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                        shape = RoundedCornerShape(24.dp)
+                    ) {
+                        Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Surface(shape = CircleShape, color = MaterialTheme.colorScheme.surface, modifier = Modifier.size(88.dp)) {
+                                Icon(Icons.Outlined.MedicalServices, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(22.dp))
+                            }
+                            Spacer(Modifier.height(12.dp))
+                            Text(clinic.doctorName, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onPrimaryContainer, textAlign = TextAlign.Center)
+                            Text(clinic.specialty, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                            Text("Verified DO-LO profile", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                         }
-                        Spacer(Modifier.height(12.dp))
-                        Text(clinic.doctorName, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Center)
-                        Text(clinic.specialty, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                        Text("Verified DO-LO profile", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
+                item { InfoCard("Qualification and experience", listOfNotNull(clinic.qualification.takeIf { it.isNotBlank() }, clinic.experienceYears.takeIf { it > 0 }?.let { "$it years of experience" }).ifEmpty { listOf("Approved details not provided") }.joinToString("\n")) }
+                item { InfoCard("Registration", clinic.registrationNumber.ifBlank { "Approved registration detail not provided" }) }
+                item { InfoCard("About", clinic.about.ifBlank { "Approved profile description not provided" }) }
+                item { InfoCard("Clinic", "${clinic.name}\n${clinic.city}\nConsultation fee paid at clinic: INR ${clinic.consultationFeeMinor / 100}") }
+                item { Text("Doctor announcements", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground) }
+                if (announcements.isEmpty()) item { InfoCard("Current update", "No active announcement from this Doctor.") }
+                else items(announcements, key = { "doctor-announcement-${it.id}" }) { announcement ->
+                    InfoCard(announcement.title, announcement.message + "\nActive ${announcement.startsOn} to ${announcement.endsOn}")
+                }
+                item { InfoCard("Published Patient reviews", if (clinic.publishedReviewCount > 0) "★ ${"%.1f".format(clinic.publishedRatingAverage ?: 0.0)} / 5\n${clinic.publishedReviewCount} review${if (clinic.publishedReviewCount == 1) "" else "s"} published after Admin moderation" else "No published Patient reviews yet") }
+                item { Text("Profile information is reviewed before it becomes visible to Patients.", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp) }
+                item { PrimaryButton("Book appointment", onBook) }
             }
-            item { InfoCard("Qualification and experience", listOfNotNull(clinic.qualification.takeIf { it.isNotBlank() }, clinic.experienceYears.takeIf { it > 0 }?.let { "$it years of experience" }).ifEmpty { listOf("Approved details not provided") }.joinToString("\n")) }
-            item { InfoCard("Registration", clinic.registrationNumber.ifBlank { "Approved registration detail not provided" }) }
-            item { InfoCard("About", clinic.about.ifBlank { "Approved profile description not provided" }) }
-            item { InfoCard("Clinic", "${clinic.name}\n${clinic.city}\nConsultation fee paid at clinic: INR ${clinic.consultationFeeMinor / 100}") }
-            item { Text("Doctor announcements", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
-            if(announcements.isEmpty()) item { InfoCard("Current update", "No active announcement from this Doctor.") } else items(announcements,key={"doctor-announcement-${it.id}"}){announcement->InfoCard(announcement.title,announcement.message+"\nActive ${announcement.startsOn} to ${announcement.endsOn}")}
-            item { InfoCard("Published Patient reviews", if(clinic.publishedReviewCount>0) "★ ${"%.1f".format(clinic.publishedRatingAverage ?: 0.0)} / 5" + System.lineSeparator() + "${clinic.publishedReviewCount} review${if(clinic.publishedReviewCount==1)"" else "s"} published after Admin moderation" else "No published Patient reviews yet") }
-            item { Text("Profile information is reviewed before it becomes visible to Patients.", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp) }
-            item { PrimaryButton("Book appointment", onBook) }
         }
     }
 }
-
 @Composable
 fun DoctorCard(d:Doctor,favourite:Boolean,onOpen:()->Unit,onFavourite:()->Unit){
  DoloCard(Modifier.clickable(onClick=onOpen)){
@@ -228,7 +242,37 @@ fun DoctorCard(d:Doctor,favourite:Boolean,onOpen:()->Unit,onFavourite:()->Unit){
   Row(verticalAlignment=Alignment.CenterVertically){Icon(Icons.Outlined.Star,null,tint=DoloWarning,modifier=Modifier.size(18.dp));Text(" ${d.rating}",fontWeight=FontWeight.Bold);Text("  •  ${d.experienceYears}+ years",style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant);Spacer(Modifier.weight(1f));Text("₹${d.consultationFee}",fontWeight=FontWeight.ExtraBold,color=MaterialTheme.colorScheme.onSurface);Spacer(Modifier.width(10.dp));Icon(Icons.Outlined.ArrowForward,"Open profile",tint=MaterialTheme.colorScheme.primary)}
  }
 }
-@Composable fun DoctorDetailsScreen(id:String,favourite:Boolean,reviews:List<DoctorReview>,onBack:()->Unit,onFavourite:()->Unit,onBook:()->Unit){val d=DummyData.doctors.firstOrNull{it.id==id}?:DummyData.doctors.first();LazyColumn(pageModifier().padding(20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)){item{ScreenTitle("Doctor Details",onBack)};item{DoctorCard(d,favourite,{},onFavourite)};item{InfoCard("About","Experienced "+d.specialty.lowercase()+" focused on clear guidance and patient-friendly care.")};item{InfoCard("Clinic",d.clinic+"\nWalk-in sessions: Morning and Evening")};item{InfoCard("Patient reviews","★ "+d.rating+" / 5\n"+reviews.count{it.doctorId==d.id}+" verified DO-LO reviews")};item{PrimaryButton("Book Walk-in Appointment",onBook)}}}
+@Composable
+fun DoctorDetailsScreen(
+    id: String,
+    favourite: Boolean,
+    reviews: List<DoctorReview>,
+    onBack: () -> Unit,
+    onFavourite: () -> Unit,
+    onBook: () -> Unit,
+    onHome: () -> Unit,
+    onAppointments: () -> Unit,
+    onBrowse: () -> Unit
+) {
+    val doctor = DummyData.doctors.firstOrNull { it.id == id } ?: DummyData.doctors.first()
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        bottomBar = { DoloBottomBar(PatientBottomDestination.BOOK, onHome, onAppointments, onBrowse) }
+    ) { padding ->
+        LazyColumn(
+            Modifier.padding(padding).fillMaxSize().statusBarsPadding(),
+            contentPadding = PaddingValues(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item { ScreenTitle("Doctor Details", onBack) }
+            item { DoctorCard(doctor, favourite, {}, onFavourite) }
+            item { InfoCard("About", "Experienced ${doctor.specialty.lowercase()} focused on clear guidance and patient-friendly care.") }
+            item { InfoCard("Clinic", doctor.clinic + "\nWalk-in sessions: Morning and Evening") }
+            item { InfoCard("Patient reviews", "★ ${doctor.rating} / 5\n${reviews.count { it.doctorId == doctor.id }} verified DO-LO reviews") }
+            item { PrimaryButton("Book Walk-in Appointment", onBook) }
+        }
+    }
+}
 @Composable fun FavouritesScreen(state:PatientUiState,onBack:()->Unit,onDoctor:(String)->Unit,onFavourite:(String)->Unit){val ds=DummyData.doctors.filter{it.id in state.favouriteIds};LazyColumn(pageModifier().padding(20.dp),verticalArrangement=Arrangement.spacedBy(14.dp)){item{ScreenTitle("Favourite Doctors",onBack)};if(ds.isEmpty())item{EmptyCard("You have not saved any doctors yet.")}else items(ds){DoctorCard(it,true,{onDoctor(it.id)},{onFavourite(it.id)})}}}
 @Composable
 fun AppointmentHistoryScreen(list:List<Appointment>,onBack:()->Unit,onQueue:(String)->Unit,onReschedule:(String)->Unit,onReview:(String,String)->Unit,canReschedule:(Appointment)->Boolean,canReview:(Appointment)->Boolean,onHome:()->Unit,onBook:()->Unit){
@@ -237,7 +281,7 @@ fun AppointmentHistoryScreen(list:List<Appointment>,onBack:()->Unit,onQueue:(Str
  Scaffold(containerColor=MaterialTheme.colorScheme.background,bottomBar={DoloBottomBar(PatientBottomDestination.APPOINTMENTS,onHome,{},onBook)}){padding->
   LazyColumn(Modifier.padding(padding).fillMaxSize(),contentPadding=PaddingValues(horizontal=18.dp,vertical=12.dp),verticalArrangement=Arrangement.spacedBy(12.dp)){
    item{ScreenTitle("Appointments",onBack)}
-   item{Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){listOf("UPCOMING" to "Upcoming","PAST" to "Past","ALL" to "All").forEach{(value,label)->FilterChip(filter==value,{filter=value},{Text(label)},modifier=Modifier.weight(1f))}}}
+   item{Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)){listOf("UPCOMING" to "Upcoming","PAST" to "Past","ALL" to "All").forEach{(value,label)->FilterChip(selected=filter==value,onClick={filter=value},label={Text(label)},modifier=Modifier.weight(1f),colors=FilterChipDefaults.filterChipColors(selectedContainerColor=MaterialTheme.colorScheme.primaryContainer,selectedLabelColor=MaterialTheme.colorScheme.onPrimaryContainer,selectedLeadingIconColor=MaterialTheme.colorScheme.primary))}}}
    if(visible.isEmpty())item{DoloCard(containerColor=MaterialTheme.colorScheme.surfaceVariant){Icon(Icons.Outlined.EventNote,null,tint=MaterialTheme.colorScheme.primary,modifier=Modifier.align(Alignment.CenterHorizontally).size(38.dp));Text(if(filter=="UPCOMING")"No upcoming appointments" else "No appointments in this section",style=MaterialTheme.typography.titleMedium,modifier=Modifier.align(Alignment.CenterHorizontally));if(filter=="UPCOMING")PrimaryButton("Book an appointment",onBook)}}
    else items(visible,key={it.id}){appointment->
     DoloCard{
@@ -443,12 +487,13 @@ fun ProfileScreen(
     identityMessage: String,
     onRefreshIdentity: () -> Unit,
     onBack: () -> Unit,
-    onSave: (String, String, String) -> Unit,
+    onSave: (String, String, String, PatientGender) -> Unit,
     onAddFamily: (String, String, Int) -> Unit
 ) {
     var name by remember { mutableStateOf(state.profile.name) }
     var phone by remember { mutableStateOf(state.profile.phone) }
     var city by remember { mutableStateOf(state.profile.city) }
+    var gender by remember { mutableStateOf(state.profile.gender) }
     var familyName by remember { mutableStateOf("") }
     var relation by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
@@ -495,7 +540,28 @@ fun ProfileScreen(
                 label = { Text("City") }
             )
         }
-        item { PrimaryButton("Save changes", { onSave(name, phone, city) }) }
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("Patient avatar", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onSurface)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    PatientGender.entries.forEach { option ->
+                        FilterChip(
+                            selected = gender == option,
+                            onClick = { gender = option },
+                            label = { Text(option.name.lowercase().replaceFirstChar(Char::uppercase)) },
+                            leadingIcon = { Icon(if (option == PatientGender.FEMALE) Icons.Outlined.Woman else Icons.Outlined.Man, null) },
+                            modifier = Modifier.weight(1f),
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                selectedLeadingIconColor = MaterialTheme.colorScheme.primary
+                            )
+                        )
+                    }
+                }
+            }
+        }
+        item { PrimaryButton("Save changes", { onSave(name, phone, city, gender) }) }
         item { Text("Family members", style = MaterialTheme.typography.titleLarge) }
         if (state.family.isEmpty()) {
             item { EmptyCard("Add a family member to book appointments for them.") }

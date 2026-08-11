@@ -273,7 +273,7 @@ fun WalkInSessionCard(session: WalkInSessionUiModel, selected: Boolean, onClick:
 @Composable
 fun SelectedPatientDetailsCard(visitor: AppointmentVisitorUiModel?, onChange: () -> Unit) {
     SectionTitle(Icons.Outlined.Badge, "4  Patient Details"); Spacer(Modifier.height(10.dp))
-    Surface(shape = RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), shadowElevation = 1.dp) {
+    Surface(shape = RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), shadowElevation = 0.dp) {
         Row(Modifier.fillMaxWidth().padding(15.dp), verticalAlignment = Alignment.CenterVertically) {
             Surface(Modifier.size(46.dp), CircleShape, color = MaterialTheme.colorScheme.primaryContainer) { Box(contentAlignment = Alignment.Center) { Text(visitor?.initials ?: "--", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer) } }
             Spacer(Modifier.width(12.dp)); Column(Modifier.weight(1f)) {

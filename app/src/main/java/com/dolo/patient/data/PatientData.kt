@@ -33,7 +33,11 @@ data class QueueSnapshot(
  val currentTokenStartedAt:Long
 )
 object SyncStatus{const val FRESH="FRESH";const val STALE="STALE";const val OFFLINE="OFFLINE";const val SYNCING="SYNCING"}
-data class PatientProfile(val name:String="Rahul Sharma",val phone:String="9876543210",val city:String="New Delhi")
+enum class PatientGender {
+ MALE, FEMALE;
+ companion object { fun fromStored(value:String?):PatientGender=entries.firstOrNull{it.name==value}?:MALE }
+}
+data class PatientProfile(val name:String="Rahul Sharma",val phone:String="9876543210",val city:String="New Delhi",val gender:PatientGender=PatientGender.MALE)
 data class FamilyMember(val id:String,val name:String,val relation:String,val age:Int)
 data class DoctorReview(val id:String,val doctorId:String,val appointmentId:String,val rating:Int,val comment:String,val createdAt:Long)
 data class AppNotification(val id:String,val title:String,val message:String,val createdAt:Long,val isRead:Boolean=false)
@@ -126,8 +130,8 @@ class LocalPatientRepository(private val preferences:SharedPreferences):PatientR
  override fun reschedule(appointmentId:String):Appointment?{val a=appointments().firstOrNull{it.id==appointmentId}?:return null;if(!canReschedule(a))return null;val date=LocalDate.now().plusDays(1).toString();val updated=a.copy(date=date,token=TokenGenerator.forBooking(a.doctorId,date,appointments().size),status=AppointmentStatus.BOOKED,rescheduleUsed=true);preferences.edit().remove(queueKey(appointmentId)).remove(queueStartedKey(appointmentId)).apply();save(updated);notify("Appointment rescheduled",a.doctorName+" on "+date);return updated}
  override fun refreshQueue(appointmentId:String,online:Boolean):QueueSnapshot?{if(!online)return queue(appointmentId);preferences.edit().putLong(refreshKey(appointmentId),System.currentTimeMillis()).apply();return queue(appointmentId)}
  override fun completeAppointment(appointmentId:String):Appointment?{val a=appointments().firstOrNull{it.id==appointmentId}?:return null;val updated=a.copy(status=AppointmentStatus.COMPLETED);save(updated);notify("Consultation completed","You can now review "+a.doctorName);return updated}
- override fun profile():PatientProfile=PatientProfile(preferences.getString(KEY_PROFILE_NAME,"Rahul Sharma")!!,preferences.getString(KEY_PROFILE_PHONE,"9876543210")!!,preferences.getString(KEY_PROFILE_CITY,"New Delhi")!!)
- override fun updateProfile(profile:PatientProfile):PatientProfile{preferences.edit().putString(KEY_PROFILE_NAME,safe(profile.name)).putString(KEY_PROFILE_PHONE,safe(profile.phone)).putString(KEY_PROFILE_CITY,safe(profile.city)).apply();return profile}
+ override fun profile():PatientProfile=PatientProfile(preferences.getString(KEY_PROFILE_NAME,"Rahul Sharma")!!,preferences.getString(KEY_PROFILE_PHONE,"9876543210")!!,preferences.getString(KEY_PROFILE_CITY,"New Delhi")!!,PatientGender.fromStored(preferences.getString(KEY_PROFILE_GENDER,PatientGender.MALE.name)))
+ override fun updateProfile(profile:PatientProfile):PatientProfile{preferences.edit().putString(KEY_PROFILE_NAME,safe(profile.name)).putString(KEY_PROFILE_PHONE,safe(profile.phone)).putString(KEY_PROFILE_CITY,safe(profile.city)).putString(KEY_PROFILE_GENDER,profile.gender.name).apply();return profile}
  override fun familyMembers():List<FamilyMember> =preferences.getStringSet(KEY_FAMILY,emptySet()).orEmpty().mapNotNull{v->val p=v.split("|");if(p.size!=4)null else p[3].toIntOrNull()?.let{FamilyMember(p[0],p[1],p[2],it)}}.sortedBy{it.name}
  override fun addFamilyMember(name:String,relation:String,age:Int):FamilyMember{val m=FamilyMember(System.currentTimeMillis().toString(),safe(name),safe(relation),age.coerceIn(0,120));val values=preferences.getStringSet(KEY_FAMILY,emptySet()).orEmpty().toMutableSet().apply{add(listOf(m.id,m.name,m.relation,m.age).joinToString("|"))};preferences.edit().putStringSet(KEY_FAMILY,values).apply();return m}
  override fun reviews():List<DoctorReview> =preferences.getStringSet(KEY_REVIEWS,emptySet()).orEmpty().mapNotNull{v->val p=v.split("|");if(p.size!=6)null else runCatching{DoctorReview(p[0],p[1],p[2],p[3].toInt(),p[4],p[5].toLong())}.getOrNull()}.sortedByDescending{it.createdAt}
@@ -141,7 +145,7 @@ class LocalPatientRepository(private val preferences:SharedPreferences):PatientR
  private fun queueStartedKey(id:String)="queue_started_"+id
  private fun save(a:Appointment){val values=appointments().filterNot{it.id==a.id}.map(AppointmentCodec::encode).toMutableSet().apply{add(AppointmentCodec.encode(a))};preferences.edit().putStringSet(KEY_APPOINTMENTS,values).apply()}
  private fun queueKey(id:String)="queue_current_"+id
- companion object{private const val KEY_APPOINTMENTS="patient_appointments";private const val KEY_FAVOURITES="patient_favourites";private const val KEY_PROFILE_NAME="profile_name";private const val KEY_PROFILE_PHONE="profile_phone";private const val KEY_PROFILE_CITY="profile_city";private const val KEY_FAMILY="family_members";private const val KEY_REVIEWS="doctor_reviews";private const val KEY_NOTIFICATIONS="app_notifications"}
+ companion object{private const val KEY_APPOINTMENTS="patient_appointments";private const val KEY_FAVOURITES="patient_favourites";private const val KEY_PROFILE_NAME="profile_name";private const val KEY_PROFILE_PHONE="profile_phone";private const val KEY_PROFILE_CITY="profile_city";private const val KEY_PROFILE_GENDER="profile_gender";private const val KEY_FAMILY="family_members";private const val KEY_REVIEWS="doctor_reviews";private const val KEY_NOTIFICATIONS="app_notifications"}
 }
 data class PatientUiState(
     val query: String = "",
@@ -217,8 +221,8 @@ class PatientViewModel(private val repository: PatientRepository) : ViewModel() 
         return true
     }
 
-    fun updateProfile(name: String, phone: String, city: String) {
-        val profile = repository.updateProfile(PatientProfile(name, phone, city))
+    fun updateProfile(name: String, phone: String, city: String, gender: PatientGender = uiState.profile.gender) {
+        val profile = repository.updateProfile(PatientProfile(name, phone, city, gender))
         uiState = uiState.copy(profile = profile)
     }
 

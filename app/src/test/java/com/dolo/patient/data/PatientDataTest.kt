@@ -9,6 +9,12 @@ import org.junit.Test
 
 class PatientDataTest {
     @Test
+    fun patientGenderDefaultsSafelyForExistingProfiles() {
+        assertEquals(PatientGender.MALE, PatientGender.fromStored(null))
+        assertEquals(PatientGender.MALE, PatientGender.fromStored("UNKNOWN"))
+        assertEquals(PatientGender.FEMALE, PatientGender.fromStored("FEMALE"))
+    }
+    @Test
     fun tokenIsDeterministicAndAdvances() {
         val first = TokenGenerator.forBooking("1", "2026-07-12", 0)
         assertEquals(first + 1, TokenGenerator.forBooking("1", "2026-07-12", 1))

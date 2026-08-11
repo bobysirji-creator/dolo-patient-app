@@ -210,7 +210,7 @@ private fun ConfirmationSuccessHeader() {
 
 @Composable
 fun TokenCard(token: TokenUiModel) {
-    Card(modifier = Modifier.fillMaxWidth().widthIn(max = 520.dp).semantics { contentDescription = "Your token number is ${token.number}. Keep this number safe." }, shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+    Card(modifier = Modifier.fillMaxWidth().widthIn(max = 520.dp).semantics { contentDescription = "Your token number is ${token.number}. Keep this number safe." }, shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.primary).padding(vertical = 10.dp), contentAlignment = Alignment.Center) {
                 Text("YOUR TOKEN NUMBER", color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
@@ -229,7 +229,7 @@ fun TokenCard(token: TokenUiModel) {
 
 @Composable
 private fun AppointmentDetailsCard(state: BookingConfirmationUiState, onDoctorProfile: (String) -> Unit, onViewMap: () -> Unit) {
-    Card(Modifier.fillMaxWidth().widthIn(max = 520.dp), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)) {
+    Card(Modifier.fillMaxWidth().widthIn(max = 520.dp), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) {
         Column(Modifier.padding(17.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
             ConfirmationDetailRow(Icons.Outlined.CalendarMonth, "Date", state.appointmentDate, trailing = { ConfirmationBadge("Confirmed") })
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)

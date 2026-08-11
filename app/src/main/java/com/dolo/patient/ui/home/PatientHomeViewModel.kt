@@ -33,6 +33,7 @@ class PatientHomeViewModel : ViewModel() {
         return PatientHomeUiState(
             patientName = patientState.profile.name.ifBlank { "Patient" },
             patientCity = patientState.profile.city,
+            patientGender = patientState.profile.gender,
             queues = (hostedQueues + localQueues).sortedBy { it.patientToken.toIntOrNull() ?: Int.MAX_VALUE },
             broadcasts = broadcasts.filterNot { it.id in dismissedBroadcastIds },
             favoriteDoctors = favorites,
