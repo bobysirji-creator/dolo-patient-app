@@ -1,6 +1,10 @@
 package com.dolo.patient.data
 
 import android.content.SharedPreferences
+import com.dolo.patient.authority.AuthorityFreshness
+import com.dolo.patient.authority.AuthorityRehearsalPolicy
+import com.dolo.patient.authority.AuthorityTracker
+import com.dolo.patient.authority.EncryptedAuthorityReadCache
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.runtime.getValue
@@ -124,6 +128,8 @@ object HostedReschedulePolicy {
 }
 
 interface HostedPatientSyncApi {
+    fun authorityFreshness(): AuthorityFreshness
+    fun clearAuthorityCache()
     fun refresh(): HostedResult<HostedSyncSnapshot>
     fun book(sessionId: String, profileId: String): HostedResult<HostedSyncSnapshot>
     fun reschedule(appointmentId: String, targetSessionId: String): HostedResult<HostedSyncSnapshot>
@@ -316,6 +322,7 @@ object HostedBootstrapJson {
     }
 }
 private class HostedRequestException(
+    val status: Int,
     val code: String,
     message: String
 ) : Exception(message)
@@ -326,10 +333,15 @@ class HttpHostedPatientSyncApi(
     private val preferences: SharedPreferences
 ) : HostedPatientSyncApi {
     private val base = baseUrl.trim().trimEnd('/')
+    private val authorityCache = EncryptedAuthorityReadCache(preferences)
+    private val authorityTracker = AuthorityTracker()
 
     init {
         require(URL(base).protocol.equals("https", true)) { "Hosted Patient synchronization requires HTTPS." }
     }
+
+    override fun authorityFreshness(): AuthorityFreshness = authorityTracker.snapshot()
+    override fun clearAuthorityCache() { authorityCache.clearAll(); authorityTracker.beginOperation() }
 
     override fun refresh(): HostedResult<HostedSyncSnapshot> = guarded { load() }
 
@@ -414,26 +426,69 @@ class HttpHostedPatientSyncApi(
         return HostedSyncSnapshot(bootstrap, appointments, live, communications, reviews, supportRequests, notifications, communicationPreferences, targetedCampaigns, prototypeRecoveryCases)
     }
 
-    private fun <T> guarded(block: () -> T): HostedResult<T> = runCatching(block).fold(
-        onSuccess = { HostedResult.Success(it) },
-        onFailure = { error ->
-            when (error) {
-                is java.net.UnknownHostException -> HostedResult.Failure("Offline. Server data was not changed.")
-                is java.net.SocketTimeoutException -> HostedResult.Failure("Hosted prototype is waking up. Retry shortly.")
-                is HostedRequestException -> HostedResult.Failure(
-                    message = error.message?.take(180) ?: "Hosted synchronization failed.",
-                    doctorUnavailable = error.code == "DOCTOR_UNAVAILABLE"
-                )
-                else -> HostedResult.Failure(error.message?.take(180) ?: "Hosted synchronization failed.")
+    private fun <T> guarded(block: () -> T): HostedResult<T> {
+        authorityTracker.beginOperation()
+        return runCatching(block).fold(
+            onSuccess = { HostedResult.Success(it) },
+            onFailure = { error ->
+                when (error) {
+                    is java.net.UnknownHostException -> HostedResult.Failure("Offline. Server data was not changed.")
+                    is java.net.SocketTimeoutException -> HostedResult.Failure("Hosted prototype is waking up. Retry shortly.")
+                    is HostedRequestException -> HostedResult.Failure(
+                        message = AuthorityRehearsalPolicy.conflictMessage(error.status)
+                            ?: error.message?.take(180)
+                            ?: "Hosted synchronization failed.",
+                        doctorUnavailable = error.code == "DOCTOR_UNAVAILABLE"
+                    )
+                    else -> HostedResult.Failure(error.message?.take(180) ?: "Hosted synchronization failed.")
+                }
             }
-        }
-    )
-
+        )
+    }
     private fun request(
         method: String,
         path: String,
         body: String? = null,
         headers: Map<String, String> = emptyMap()
+    ): String {
+        val cacheable = method == "GET" || (method == "POST" && path == "/api/v1/patient/sync/bootstrap")
+        val cacheKey = "$method:$path"
+        var completedAttempts = 0
+        var lastFailure: Throwable? = null
+        while (completedAttempts < AuthorityRehearsalPolicy.MAX_COMMAND_ATTEMPTS) {
+            try {
+                val value = requestOnce(method, path, body, headers)
+                if (cacheable) authorityCache.put(cacheKey, value)
+                authorityTracker.recordLive()
+                return value
+            } catch (error: Throwable) {
+                completedAttempts += 1
+                lastFailure = error
+                val status = (error as? HostedRequestException)?.status
+                if (!AuthorityRehearsalPolicy.canRetry(
+                        method,
+                        headers.keys.any { it.equals("Idempotency-Key", true) },
+                        completedAttempts,
+                        status
+                    )
+                ) break
+            }
+        }
+        val failureStatus = (lastFailure as? HostedRequestException)?.status
+        if (cacheable && AuthorityRehearsalPolicy.canUseCacheAfterFailure(failureStatus)) {
+            authorityCache.read(cacheKey)?.let {
+                authorityTracker.recordCache(it.freshness)
+                return it.body
+            }
+        }
+        throw lastFailure ?: error("Hosted request failed.")
+    }
+
+    private fun requestOnce(
+        method: String,
+        path: String,
+        body: String?,
+        headers: Map<String, String>
     ): String {
         val token = sessionManager.accessToken() ?: error("Hosted session expired. Log out and sign in again while online.")
         val connection = (URL(base + path).openConnection() as HttpURLConnection).apply {
@@ -442,7 +497,7 @@ class HttpHostedPatientSyncApi(
             readTimeout = 25_000
             setRequestProperty("Accept", "application/json")
             setRequestProperty("Authorization", "Bearer $token")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage59CP")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage61BP")
             headers.forEach { (key, value) -> setRequestProperty(key, value) }
             if (body != null) {
                 doOutput = true
@@ -453,19 +508,17 @@ class HttpHostedPatientSyncApi(
         return try {
             if (body != null) connection.outputStream.use { it.write(body.toByteArray()) }
             val status = connection.responseCode
-            val text = (if (status in 200..299) connection.inputStream else connection.errorStream)
+            val responseBody = (if (status in 200..299) connection.inputStream else connection.errorStream)
                 ?.bufferedReader()?.use { it.readText().take(524_288) }.orEmpty()
             if (status !in 200..299) {
-                val serverError = HostedErrorJson.parse(text, status)
-                throw HostedRequestException(serverError.code, serverError.message)
+                val serverError = HostedErrorJson.parse(responseBody, status)
+                throw HostedRequestException(status, serverError.code, serverError.message)
             }
-            text
+            responseBody
         } finally {
             connection.disconnect()
         }
     }
-
-
     private fun parseLive(json: String): List<HostedLiveQueue> {
         val appointments = JSONObject(json).getJSONArray("appointments")
         return buildList {
@@ -506,6 +559,7 @@ class HostedPatientSyncViewModel(private val api: HostedPatientSyncApi) : ViewMo
     private val executor = Executors.newSingleThreadExecutor()
     private val main = Handler(Looper.getMainLooper())
 
+    fun clearAuthorityCache() { api.clearAuthorityCache(); uiState = HostedSyncUiState() }
     fun refresh() { execute { api.refresh() } }
     fun book(sessionId: String, profileId: String) { execute { api.book(sessionId, profileId) } }
     fun reschedule(appointmentId: String, targetSessionId: String) { execute { api.reschedule(appointmentId, targetSessionId) } }
@@ -528,7 +582,7 @@ class HostedPatientSyncViewModel(private val api: HostedPatientSyncApi) : ViewMo
             val result = call()
             main.post {
                 uiState = when (result) {
-                    is HostedResult.Success -> uiState.copy(loading=false,snapshot=result.value,message="Server data is authoritative for this seeded dummy flow.",error=false,doctorUnavailable=false)
+                    is HostedResult.Success -> uiState.copy(loading=false,snapshot=result.value,message=api.authorityFreshness().message(),error=false,doctorUnavailable=false)
                     is HostedResult.Failure -> HostedSyncStateReducer.failure(uiState, result)
                 }
             }

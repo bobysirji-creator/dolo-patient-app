@@ -489,3 +489,8 @@ Patient version 0.44.0-stage60d registers the current Firebase token only after 
 ## Stage 60D device registration correction
 
 Patient App 0.44.1-stage60d distinguishes a configured Push provider from this phone being registered. When hosted preferences already allow Push but the API reports `DEVICE_REGISTRATION_REQUIRED`, opening Hosted Prototype Sync obtains the current Firebase token and re-registers this installation once. Manual Save preferences also records and registers the current token. The screen confirms `DEVICE_REGISTERED` only after the hosted API finds an active endpoint; local Firebase readiness alone is no longer presented as server registration.
+
+
+## Stage 61B-P implementation checkpoint
+
+Version 0.45.0-stage61bp adds the controlled encrypted hosted-read cache, explicit freshness, bounded idempotent retry and refresh-required conflict handling. It does not upload local demo data or activate production. Run GitHub Actions, install over the accepted app and follow docs/stage61bp-device-test.md.

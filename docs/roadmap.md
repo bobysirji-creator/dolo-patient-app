@@ -545,3 +545,15 @@ No Firebase/Push SDK, Android notification permission, device token or provider 
 Render-to-FCM sending remains disabled. The next checkpoint requires a dedicated least-privilege Firebase service account stored only in Render, an authenticated device-endpoint API, encrypted server-side token storage, logout/device revocation and the Stage 60B outbox sender worker.
 
 - Stage 60D: real authenticated FCM endpoint registration and delivery - implementation complete; protected Render activation and physical-device checklist pending.
+
+
+## Stage 61B-P - authoritative cache rehearsal
+
+- [x] Android Keystore-encrypted hosted read cache with 24-hour maximum
+- [x] visible live, cached-fresh and cached-stale status
+- [x] one retry only for transient idempotent commands
+- [x] HTTP 409 refresh-required recovery without overwrite
+- [x] hosted cache purge on logout; Doctor cache also purges on role change
+- [x] local prototype data remains separate and is never uploaded
+- [x] version 0.45.0-stage61bp
+- [ ] GitHub Actions and stable APK physical-device acceptance
