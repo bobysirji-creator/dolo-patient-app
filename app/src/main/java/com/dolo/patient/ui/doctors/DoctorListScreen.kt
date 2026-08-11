@@ -240,9 +240,7 @@ fun DoctorListScreen(
                 selected = PatientBottomItem.BOOK,
                 onHome = onHome,
                 onAppointments = onAppointments,
-                onBook = onBook,
-                onHistory = onHistory,
-                onProfile = onProfile
+                onBook = onBook
             )
         }
     ) { padding ->
