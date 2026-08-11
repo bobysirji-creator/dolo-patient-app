@@ -600,6 +600,10 @@ The supplied JPEGs are visual references only and are not embedded in the APK. N
 - [x] preserve existing login, profile, family, appointment, queue and hosted data
 - [x] version 0.48.0-stage62e (version code 69)
 - [x] GitHub Actions compile, lint, unit tests and stable APK (run 31502904923)
-- [ ] stable APK in-place upgrade and Stage 62E physical-device acceptance
+- [x] stable APK in-place upgrade and Stage 62E physical-device acceptance
 
 Existing profiles without a stored avatar gender load safely as Male and can be changed in Profile & family. No hosted schema or Patient data upload was added.
+
+## Stage 62E physical-device acceptance
+
+On 11 August 2026, Patient App  .48.0-stage62e passed the complete physical-device checklist. The gender-aware avatar, Doctor Details navigation/title, theme-correct Favourite and Appointment controls, flat Day surfaces, lighter primary blue, Night contrast, workflow regressions and local-data safety are accepted.
