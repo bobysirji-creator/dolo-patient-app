@@ -353,3 +353,11 @@ Status: implemented in `0.46.0-stage62c` (version code 67); GitHub Actions passe
 - Material 3 navigation items supply selected-state semantics, readable labels and full-size interactive targets.
 - Screen changes use short fades without horizontal motion.
 - Existing Light/Dark theme colors and safe system navigation insets remain authoritative.
+## Stage 62D - reference-led day/night theme
+
+Status: implemented in `0.47.0-stage62d` (version code 68); GitHub Actions and physical-device acceptance pending.
+
+- Day: white and ice-blue surfaces, cobalt primary actions, cyan secondary accents and navy text.
+- Night: deep navy layered surfaces, luminous blue/cyan accents and high-contrast cool-white text.
+- The palette is centralized in `DoloTheme`; screenshots are not embedded as UI.
+- Home, Book and Appointments now use one shared Material 3 navigation component, including the Appointments screen.

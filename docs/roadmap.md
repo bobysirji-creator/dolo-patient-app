@@ -574,3 +574,17 @@ On 11 August 2026, the complete Stage 61B-P device checklist passed across Patie
 - [ ] stable APK in-place upgrade and Stage 62C physical-device acceptance
 
 Stage 62C changes presentation and navigation only. Login, booking, token allocation, live queue, hosted authority, local persistence, Push, Maps and payment boundaries are unchanged.
+## Stage 62D - Patient reference theme and navigation consistency
+
+- [x] translate `theme_refrence_day.jpeg` into a white/ice-blue, cobalt and cyan Material palette
+- [x] translate `theme_refrence_night.jpeg` into layered deep-navy surfaces with accessible blue/cyan accents
+- [x] apply the palette through shared theme tokens so existing cards, buttons, inputs, badges and text inherit it
+- [x] replace duplicate bottom-navigation rendering with one shared Material 3 component
+- [x] keep Home, Book and Appointments in the same order on every participating screen
+- [x] correct Appointments Home navigation to pop back to the existing Home destination
+- [x] preserve theme persistence, hosted/local data and all verified booking/queue/provider behavior
+- [x] version 0.47.0-stage62d (version code 68)
+- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [ ] stable APK in-place upgrade and Stage 62D physical-device acceptance
+
+The supplied JPEGs are visual references only and are not embedded in the APK. No API, authentication, appointment, queue, persistence or provider contract changed.

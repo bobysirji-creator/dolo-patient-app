@@ -38,6 +38,8 @@ import com.dolo.patient.data.PatientUiState
 import com.dolo.patient.data.ReleaseReadiness
 import com.dolo.patient.ui.components.BrandLogo
 import com.dolo.patient.ui.components.PrimaryButton
+import com.dolo.patient.ui.components.DoloBottomBar
+import com.dolo.patient.ui.components.PatientBottomDestination
 import com.dolo.patient.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -622,30 +624,16 @@ fun DoloPatientBottomNavigation(
     onAppointments: () -> Unit,
     onBook: () -> Unit
 ) {
-    NavigationBar(
-        modifier = Modifier.fillMaxWidth().heightIn(min = 72.dp),
-        containerColor = MaterialTheme.colorScheme.surface,
-        tonalElevation = 3.dp
-    ) {
-        NavigationBarItem(
-            selected = selected == PatientBottomItem.HOME,
-            onClick = onHome,
-            icon = { Icon(Icons.Outlined.Home, contentDescription = "Home") },
-            label = { Text("Home", maxLines = 1) }
-        )
-        NavigationBarItem(
-            selected = selected == PatientBottomItem.BOOK,
-            onClick = onBook,
-            icon = { Icon(Icons.Outlined.Add, contentDescription = "Book appointment") },
-            label = { Text("Book", maxLines = 1) }
-        )
-        NavigationBarItem(
-            selected = selected == PatientBottomItem.APPOINTMENTS,
-            onClick = onAppointments,
-            icon = { Icon(Icons.Outlined.CalendarMonth, contentDescription = "Appointments") },
-            label = { Text("Appointments", maxLines = 1) }
-        )
-    }
+    DoloBottomBar(
+        selected = when (selected) {
+            PatientBottomItem.HOME -> PatientBottomDestination.HOME
+            PatientBottomItem.BOOK -> PatientBottomDestination.BOOK
+            PatientBottomItem.APPOINTMENTS -> PatientBottomDestination.APPOINTMENTS
+        },
+        onHome = onHome,
+        onAppointments = onAppointments,
+        onBook = onBook
+    )
 }
 @Composable
 private fun DoloPatientDrawer(

@@ -500,3 +500,8 @@ Version 0.45.0-stage61bp adds the controlled encrypted hosted-read cache, explic
 Patient App `0.46.0-stage62c` (version code 67) now uses one consistent three-destination primary navigation model: Home, Book and Appointments. History and Profile remain available through their existing secondary entry points and are no longer duplicated in the persistent bottom bar. Material 3 navigation items provide stable selection semantics and accessible touch targets across small and large screens. Directional slide transitions were removed in favor of brief fades to reduce unnecessary motion.
 
 No repository, API, appointment, queue, authentication, persistence or provider behavior changed. GitHub Actions remains the Android build authority; install the stable APK over the accepted Patient App and follow `docs/stage62c-device-test.md`.
+## Stage 62D implementation checkpoint
+
+Patient App `0.47.0-stage62d` (version code 68) adopts the supplied day/night reference direction through the shared Material theme. Day mode uses ice-blue backgrounds, white surfaces, cobalt actions and restrained cyan accents. Night mode uses deep navy background/surface layers with blue/cyan emphasis and high-contrast text. Existing reusable cards, buttons, fields, badges and navigation inherit these tokens without embedding either JPEG.
+
+The Appointments screen now uses the same shared Home, Book and Appointments navigation component as the modern Home, Categories, Doctor List and Booking screens. Its Home action explicitly returns to the existing Home destination. Existing data and business behavior are unchanged. Build through GitHub Actions, upgrade the accepted APK and follow `docs/stage62d-device-test.md`.

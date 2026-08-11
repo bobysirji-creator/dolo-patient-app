@@ -1,7 +1,5 @@
 package com.dolo.patient.ui.components
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -10,7 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -186,41 +183,47 @@ fun StatusBadge(label: String, color: Color = Color.Unspecified) {
     }
 }
 
-enum class PatientBottomDestination { HOME, APPOINTMENTS, BOOK }
+enum class PatientBottomDestination { HOME, BOOK, APPOINTMENTS }
 
 @Composable
-fun DoloBottomBar(selected: PatientBottomDestination, onHome: () -> Unit, onAppointments: () -> Unit, onBook: () -> Unit) {
-    Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 10.dp, tonalElevation = 0.dp) {
-        Row(
-            modifier = Modifier.fillMaxWidth().navigationBarsPadding().heightIn(min = 66.dp).padding(horizontal = 22.dp, vertical = 6.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            BottomItem(Icons.Outlined.Home, "Home", selected == PatientBottomDestination.HOME, onHome, Modifier.weight(1f))
-            Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                Surface(
-                    modifier = Modifier.size(52.dp).semantics { contentDescription = "Book appointment" }.clickable(role = Role.Button, onClick = onBook),
-                    shape = RoundedCornerShape(18.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    shadowElevation = 5.dp
-                ) { Icon(Icons.Outlined.Add, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.padding(13.dp)) }
-                Text("Book", style = MaterialTheme.typography.labelMedium, color = if (selected == PatientBottomDestination.BOOK) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            BottomItem(Icons.Outlined.CalendarMonth, "Appointments", selected == PatientBottomDestination.APPOINTMENTS, onAppointments, Modifier.weight(1f))
-        }
-    }
-}
-
-@Composable
-private fun BottomItem(icon: ImageVector, label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val color by animateColorAsState(if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, label = "bottom-color")
-    val lift by animateDpAsState(if (selected) 2.dp else 0.dp, label = "bottom-lift")
-    Column(
-        modifier = modifier.heightIn(min = 56.dp).padding(bottom = lift).semantics(mergeDescendants = true) { contentDescription = label + if (selected) ", selected" else "" }.clickable(role = Role.Button, onClick = onClick),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+fun DoloBottomBar(
+    selected: PatientBottomDestination,
+    onHome: () -> Unit,
+    onAppointments: () -> Unit,
+    onBook: () -> Unit
+) {
+    val itemColors = NavigationBarItemDefaults.colors(
+        selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        selectedTextColor = MaterialTheme.colorScheme.primary,
+        indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+    NavigationBar(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 72.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 4.dp
     ) {
-        Icon(icon, null, tint = color, modifier = Modifier.size(24.dp))
-        Text(label, style = MaterialTheme.typography.labelMedium, color = color, maxLines = 1)
+        NavigationBarItem(
+            selected = selected == PatientBottomDestination.HOME,
+            onClick = onHome,
+            icon = { Icon(Icons.Outlined.Home, contentDescription = "Home") },
+            label = { Text("Home", maxLines = 1) },
+            colors = itemColors
+        )
+        NavigationBarItem(
+            selected = selected == PatientBottomDestination.BOOK,
+            onClick = onBook,
+            icon = { Icon(Icons.Outlined.Add, contentDescription = "Book appointment") },
+            label = { Text("Book", maxLines = 1) },
+            colors = itemColors
+        )
+        NavigationBarItem(
+            selected = selected == PatientBottomDestination.APPOINTMENTS,
+            onClick = onAppointments,
+            icon = { Icon(Icons.Outlined.CalendarMonth, contentDescription = "Appointments") },
+            label = { Text("Appointments", maxLines = 1) },
+            colors = itemColors
+        )
     }
 }
