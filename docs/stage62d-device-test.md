@@ -4,7 +4,7 @@ Build: Patient App `0.47.0-stage62d` (version code 68)
 
 ## Install and persistence
 
-- [ ] GitHub Actions is green and the stable APK installs over the existing Patient App.
+- [x] GitHub Actions is green; install the stable APK over the existing Patient App.
 - [ ] Existing hosted/local login, profile, family, favourites, appointments and queue data remain present.
 - [ ] The previously selected Light or Dark mode remains selected after upgrade and app restart.
 

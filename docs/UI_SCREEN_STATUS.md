@@ -355,7 +355,7 @@ Status: implemented in `0.46.0-stage62c` (version code 67); GitHub Actions passe
 - Existing Light/Dark theme colors and safe system navigation insets remain authoritative.
 ## Stage 62D - reference-led day/night theme
 
-Status: implemented in `0.47.0-stage62d` (version code 68); GitHub Actions and physical-device acceptance pending.
+Status: implemented in `0.47.0-stage62d` (version code 68); GitHub Actions passed and physical-device acceptance is pending.
 
 - Day: white and ice-blue surfaces, cobalt primary actions, cyan secondary accents and navy text.
 - Night: deep navy layered surfaces, luminous blue/cyan accents and high-contrast cool-white text.

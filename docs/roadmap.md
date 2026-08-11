@@ -584,7 +584,7 @@ Stage 62C changes presentation and navigation only. Login, booking, token alloca
 - [x] correct Appointments Home navigation to pop back to the existing Home destination
 - [x] preserve theme persistence, hosted/local data and all verified booking/queue/provider behavior
 - [x] version 0.47.0-stage62d (version code 68)
-- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [x] GitHub Actions compile, lint, unit tests and stable APK
 - [ ] stable APK in-place upgrade and Stage 62D physical-device acceptance
 
 The supplied JPEGs are visual references only and are not embedded in the APK. No API, authentication, appointment, queue, persistence or provider contract changed.
