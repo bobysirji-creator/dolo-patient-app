@@ -229,7 +229,7 @@ fun TokenCard(token: TokenUiModel) {
 
 @Composable
 private fun AppointmentDetailsCard(state: BookingConfirmationUiState, onDoctorProfile: (String) -> Unit, onViewMap: () -> Unit) {
-    Card(Modifier.fillMaxWidth().widthIn(max = 520.dp), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), elevation = CardDefaults.cardElevation(defaultElevation = 0.dp) {
+    Card(Modifier.fillMaxWidth().widthIn(max = 520.dp), shape = RoundedCornerShape(24.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)) {
         Column(Modifier.padding(17.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
             ConfirmationDetailRow(Icons.Outlined.CalendarMonth, "Date", state.appointmentDate, trailing = { ConfirmationBadge("Confirmed") })
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
