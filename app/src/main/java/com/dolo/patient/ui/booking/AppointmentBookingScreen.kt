@@ -100,7 +100,7 @@ fun AppointmentBookingScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = { BookingTopBar(state.notificationCount, onEvent) },
-        bottomBar = { DoloPatientBottomNavigation(PatientBottomItem.BOOK, onHome, onAppointments, onBook, onHistory, onProfile) }
+        bottomBar = { DoloPatientBottomNavigation(PatientBottomItem.BOOK, onHome, onAppointments, onBook) }
     ) { padding ->
         when {
             state.isLoading -> BookingLoading(Modifier.padding(padding))

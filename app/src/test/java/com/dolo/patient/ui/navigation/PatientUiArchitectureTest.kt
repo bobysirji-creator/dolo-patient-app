@@ -16,5 +16,12 @@ class PatientUiArchitectureTest {
         assertTrue("Profile & family" in destinations)
         assertTrue("Help & support" in destinations)
         assertTrue("App status & diagnostics" in destinations)
+        assertFalse("Profile & family" in PatientUiArchitecture.primaryDestinations)
+        assertFalse("History" in PatientUiArchitecture.primaryDestinations)
+    }
+
+    @Test fun `shared navigation accessibility policy remains bounded`() {
+        assertTrue(PatientUiArchitecture.minimumInteractiveTargetDp >= 48)
+        assertFalse(PatientUiArchitecture.directionalScreenMotionEnabled)
     }
 }

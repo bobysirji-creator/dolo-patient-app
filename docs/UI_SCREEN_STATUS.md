@@ -343,3 +343,13 @@ The Login/Create an Account notice now verifies the authoritative Stage 51A cata
 ## Stage 52B-P - test legal-document viewer
 
 The Login account-creation notice now lists three hosted test drafts. Each opens in a full-screen responsive Compose dialog with a prominent not-approved banner, version/language metadata, scrollable sections, a screen-reader heading and a labelled close action. The simulated acknowledgement is visibly described as a UI test, remains only in ViewModel memory and is not consent.
+
+## Stage 62C - primary navigation accessibility
+
+Status: implemented in `0.46.0-stage62c` (version code 67); GitHub Actions and physical-device acceptance pending.
+
+- Bottom navigation is now exactly Home, Book and Appointments, with Book centered.
+- History and Profile remain accessible from the existing account/menu and appointment flows rather than occupying permanent bottom-bar space.
+- Material 3 navigation items supply selected-state semantics, readable labels and full-size interactive targets.
+- Screen changes use short fades without horizontal motion.
+- Existing Light/Dark theme colors and safe system navigation insets remain authoritative.

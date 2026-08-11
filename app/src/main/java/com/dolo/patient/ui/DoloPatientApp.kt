@@ -4,8 +4,6 @@ import android.net.Uri
 
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -42,10 +40,10 @@ object Routes{const val Splash="splash";const val Login="login";const val Home="
  NavHost(
   nav,
   startDestination=Routes.Splash,
-  enterTransition={fadeIn(tween(180))+slideInHorizontally(tween(180)){it/14}},
+  enterTransition={fadeIn(tween(140))},
   exitTransition={fadeOut(tween(120))},
   popEnterTransition={fadeIn(tween(160))},
-  popExitTransition={fadeOut(tween(120))+slideOutHorizontally(tween(140)){it/14}}
+  popExitTransition={fadeOut(tween(120))}
  ){
   composable(Routes.Splash){SplashScreen{nav.navigate(if(auth.uiState.step==AuthStep.AUTHENTICATED)Routes.Home else Routes.Login){popUpTo(Routes.Splash){inclusive=true}}}}
   composable(Routes.Login){

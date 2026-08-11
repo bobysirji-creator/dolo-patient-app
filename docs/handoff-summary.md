@@ -494,3 +494,9 @@ Patient App 0.44.1-stage60d distinguishes a configured Push provider from this p
 ## Stage 61B-P implementation checkpoint
 
 Version 0.45.0-stage61bp adds the controlled encrypted hosted-read cache, explicit freshness, bounded idempotent retry and refresh-required conflict handling. It does not upload local demo data or activate production. Run GitHub Actions, install over the accepted app and follow docs/stage61bp-device-test.md.
+
+## Stage 62C implementation checkpoint
+
+Patient App `0.46.0-stage62c` (version code 67) now uses one consistent three-destination primary navigation model: Home, Book and Appointments. History and Profile remain available through their existing secondary entry points and are no longer duplicated in the persistent bottom bar. Material 3 navigation items provide stable selection semantics and accessible touch targets across small and large screens. Directional slide transitions were removed in favor of brief fades to reduce unnecessary motion.
+
+No repository, API, appointment, queue, authentication, persistence or provider behavior changed. GitHub Actions remains the Android build authority; install the stable APK over the accepted Patient App and follow `docs/stage62c-device-test.md`.

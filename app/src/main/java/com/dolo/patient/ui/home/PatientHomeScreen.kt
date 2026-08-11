@@ -151,9 +151,7 @@ fun PatientHomeScreen(
                 selected = PatientBottomItem.HOME,
                 onHome = {},
                 onAppointments = { onEvent(PatientHomeUiEvent.OpenAppointments) },
-                onBook = { onEvent(PatientHomeUiEvent.OpenBook) },
-                onHistory = { onEvent(PatientHomeUiEvent.OpenHistory) },
-                onProfile = { onEvent(PatientHomeUiEvent.OpenProfile) }
+                onBook = { onEvent(PatientHomeUiEvent.OpenBook) }
             )
         }
     ) { padding ->
@@ -615,49 +613,38 @@ fun FavoriteDoctorCard(doctor: FavoriteDoctorUiModel, onOpen: () -> Unit, onBook
     }
 }
 
-enum class PatientBottomItem { HOME, APPOINTMENTS, BOOK, HISTORY, PROFILE }
+enum class PatientBottomItem { HOME, BOOK, APPOINTMENTS }
 
 @Composable
 fun DoloPatientBottomNavigation(
     selected: PatientBottomItem,
     onHome: () -> Unit,
     onAppointments: () -> Unit,
-    onBook: () -> Unit,
-    onHistory: () -> Unit,
-    onProfile: () -> Unit
+    onBook: () -> Unit
 ) {
-    Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 10.dp) {
-        Row(
-            Modifier.fillMaxWidth().navigationBarsPadding().heightIn(min = 72.dp).padding(horizontal = 4.dp, vertical = 5.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            PatientBottomNavItem(Icons.Outlined.Home, "Home", selected == PatientBottomItem.HOME, onHome, Modifier.weight(1f))
-            PatientBottomNavItem(Icons.Outlined.CalendarMonth, "Appointments", selected == PatientBottomItem.APPOINTMENTS, onAppointments, Modifier.weight(1f))
-            Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                Surface(
-                    modifier = Modifier.size(50.dp).semantics { contentDescription = "Book appointment" }.clickable(role = Role.Button, onClick = onBook),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primary,
-                    shadowElevation = 6.dp
-                ) { Icon(Icons.Outlined.Add, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.padding(12.dp)) }
-                Text("Book", fontSize = 10.sp, color = if (selected == PatientBottomItem.BOOK) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            PatientBottomNavItem(Icons.Outlined.History, "History", selected == PatientBottomItem.HISTORY, onHistory, Modifier.weight(1f))
-            PatientBottomNavItem(Icons.Outlined.PersonOutline, "Profile", selected == PatientBottomItem.PROFILE, onProfile, Modifier.weight(1f))
-        }
-    }
-}
-
-@Composable
-private fun PatientBottomNavItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier) {
-    val color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-    Column(
-        modifier.heightIn(min = 58.dp).semantics(mergeDescendants = true) { contentDescription = label + if (selected) ", selected" else "" }.clickable(role = Role.Button, onClick = onClick),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    NavigationBar(
+        modifier = Modifier.fillMaxWidth().heightIn(min = 72.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 3.dp
     ) {
-        Icon(icon, null, tint = color, modifier = Modifier.size(23.dp))
-        Text(label, fontSize = 9.sp, color = color, maxLines = 1)
+        NavigationBarItem(
+            selected = selected == PatientBottomItem.HOME,
+            onClick = onHome,
+            icon = { Icon(Icons.Outlined.Home, contentDescription = "Home") },
+            label = { Text("Home", maxLines = 1) }
+        )
+        NavigationBarItem(
+            selected = selected == PatientBottomItem.BOOK,
+            onClick = onBook,
+            icon = { Icon(Icons.Outlined.Add, contentDescription = "Book appointment") },
+            label = { Text("Book", maxLines = 1) }
+        )
+        NavigationBarItem(
+            selected = selected == PatientBottomItem.APPOINTMENTS,
+            onClick = onAppointments,
+            icon = { Icon(Icons.Outlined.CalendarMonth, contentDescription = "Appointments") },
+            label = { Text("Appointments", maxLines = 1) }
+        )
     }
 }
 @Composable

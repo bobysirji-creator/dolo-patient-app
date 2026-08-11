@@ -9,4 +9,6 @@ object PatientUiArchitecture {
         PatientFeatureGroup("Help", listOf("Help & support", "App status & diagnostics"))
     )
     const val prototypeControlsOnPrimaryNavigation = false
+    const val minimumInteractiveTargetDp = 48
+    const val directionalScreenMotionEnabled = false
 }
