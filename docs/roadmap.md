@@ -570,7 +570,7 @@ On 11 August 2026, the complete Stage 61B-P device checklist passed across Patie
 - [x] preserve dark theme, safe system-bar handling and all verified Patient data/hosted workflows
 - [x] add pure navigation and accessibility-policy regression coverage
 - [x] version 0.46.0-stage62c (version code 67)
-- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [x] GitHub Actions compile, lint, unit tests and stable APK
 - [ ] stable APK in-place upgrade and Stage 62C physical-device acceptance
 
 Stage 62C changes presentation and navigation only. Login, booking, token allocation, live queue, hosted authority, local persistence, Push, Maps and payment boundaries are unchanged.

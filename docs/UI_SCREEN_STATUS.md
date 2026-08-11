@@ -346,7 +346,7 @@ The Login account-creation notice now lists three hosted test drafts. Each opens
 
 ## Stage 62C - primary navigation accessibility
 
-Status: implemented in `0.46.0-stage62c` (version code 67); GitHub Actions and physical-device acceptance pending.
+Status: implemented in `0.46.0-stage62c` (version code 67); GitHub Actions passed and physical-device acceptance is pending.
 
 - Bottom navigation is now exactly Home, Book and Appointments, with Book centered.
 - History and Profile remain accessible from the existing account/menu and appointment flows rather than occupying permanent bottom-bar space.

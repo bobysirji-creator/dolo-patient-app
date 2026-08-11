@@ -4,7 +4,7 @@ Build: Patient App `0.46.0-stage62c` (version code 67)
 
 ## Install and data safety
 
-- [ ] GitHub Actions is green and the stable debug APK is downloaded from that run.
+- [x] GitHub Actions is green; download the stable debug APK from that run.
 - [ ] Install the APK over the accepted Patient App without uninstalling it.
 - [ ] Existing login/session, profile, family members, favourites, appointment history and dark-mode choice remain present.
 
