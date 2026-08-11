@@ -363,7 +363,7 @@ Status: implemented in `0.47.0-stage62d` (version code 68); GitHub Actions passe
 - Home, Book and Appointments now use one shared Material 3 navigation component, including the Appointments screen.
 ## Stage 62E - avatar, details navigation and theme cleanup
 
-Status: implemented in `0.48.0-stage62e` (version code 69); GitHub Actions and physical-device acceptance pending.
+Status: implemented in `0.48.0-stage62e` (version code 69); GitHub Actions passed in run 31502904923 and physical-device acceptance is pending.
 
 - Home hero image removed; saved Male/Female avatar shown in a white circular frame.
 - Doctor Details and hosted Doctor Profile share the standard bottom navigation.

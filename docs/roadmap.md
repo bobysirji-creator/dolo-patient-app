@@ -599,7 +599,7 @@ The supplied JPEGs are visual references only and are not embedded in the APK. N
 - [x] lighten the daylight primary blue while preserving 4.5:1 white-text contrast
 - [x] preserve existing login, profile, family, appointment, queue and hosted data
 - [x] version 0.48.0-stage62e (version code 69)
-- [ ] GitHub Actions compile, lint, unit tests and stable APK
+- [x] GitHub Actions compile, lint, unit tests and stable APK (run 31502904923)
 - [ ] stable APK in-place upgrade and Stage 62E physical-device acceptance
 
 Existing profiles without a stored avatar gender load safely as Male and can be changed in Profile & family. No hosted schema or Patient data upload was added.

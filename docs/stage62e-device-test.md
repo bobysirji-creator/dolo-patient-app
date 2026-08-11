@@ -4,7 +4,8 @@ Build: Patient App `0.48.0-stage62e` (version code 69)
 
 ## Upgrade and data safety
 
-- [ ] GitHub Actions is green and the stable APK installs over the existing Patient App.
+- [x] GitHub Actions is green and the stable APK artifact was produced.
+- [ ] The stable APK installs over the existing Patient App.
 - [ ] Existing login/session, profile, family, favourites, appointments, queue data and theme choice remain present.
 
 ## Home avatar
