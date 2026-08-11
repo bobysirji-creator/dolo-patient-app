@@ -557,3 +557,7 @@ Render-to-FCM sending remains disabled. The next checkpoint requires a dedicated
 - [x] local prototype data remains separate and is never uploaded
 - [x] version 0.45.0-stage61bp
 - [ ] GitHub Actions and stable APK physical-device acceptance
+
+## Stage 61B-P physical-device acceptance
+
+On 11 August 2026, the complete Stage 61B-P device checklist passed across Patient, Doctor and Admin apps. Encrypted hosted-cache fallback, freshness labels, one bounded retry, conflict refresh, logout/role cache isolation and local-data separation are accepted for the controlled prototype.
