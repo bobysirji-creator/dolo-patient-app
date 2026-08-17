@@ -29,6 +29,9 @@ class PrototypeSessionManagerTest {
     }
     private class FakeApi(private val result: PrototypeAuthResult<PrototypeTokenBundle>) : PrototypeAuthApi {
         var refreshToken: String? = null
+        override fun pilotReadiness(): PrototypeAuthResult<PilotReadiness> = PrototypeAuthResult.Failure("Not used")
+        override fun pilotLogin(doloId: String, credential: String): PrototypeAuthResult<PilotSessionResult> = PrototypeAuthResult.Failure("Not used")
+        override fun activatePilot(inviteCode: String, credential: String): PrototypeAuthResult<PilotSessionResult> = PrototypeAuthResult.Failure("Not used")
         override fun enrollmentReadiness() = PrototypeAuthResult.Success(stage49aPatientEnrollmentReadiness())
         override fun enrollmentActivationRequirements() =
             PrototypeAuthResult.Success(stage50aPatientEnrollmentActivationRequirements())
