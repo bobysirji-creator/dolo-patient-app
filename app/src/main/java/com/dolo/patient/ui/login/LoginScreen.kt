@@ -66,7 +66,8 @@ import com.dolo.patient.ui.theme.DoloTheme
 @Composable
 fun LoginRoute(
     viewModel: LoginViewModel,
-    onOtpRequested: (String) -> Unit
+    onOtpRequested: (String) -> Unit,
+    onPilotAccess: () -> Unit = {}
 ) {
     val state = viewModel.uiState
 
@@ -82,6 +83,7 @@ fun LoginRoute(
         onPhoneNumberChange = viewModel::updatePhoneNumber,
         onSendOtp = viewModel::sendOtp,
         onCreateAccount = viewModel::showAccountCreationNotice,
+        onPilotAccess = onPilotAccess,
         onOpenLegalDocument = viewModel::openLegalDocument,
         onCloseLegalDocument = viewModel::closeLegalDocument,
         onAcknowledgeLegalDocument = viewModel::simulateLegalAcknowledgement
@@ -94,6 +96,7 @@ fun LoginScreen(
     onPhoneNumberChange: (String) -> Unit,
     onSendOtp: () -> Unit,
     onCreateAccount: () -> Unit,
+    onPilotAccess: () -> Unit = {},
     onOpenLegalDocument: (String) -> Unit = {},
     onCloseLegalDocument: () -> Unit = {},
     onAcknowledgeLegalDocument: (String) -> Unit = {},
@@ -244,6 +247,10 @@ fun LoginScreen(
                                 fontWeight = FontWeight.Bold
                             )
                         }
+                    }
+
+                    TextButton(onClick=onPilotAccess,modifier=Modifier.align(Alignment.CenterHorizontally)) {
+                        Text("Use controlled pilot invitation",fontWeight=FontWeight.Bold)
                     }
 
                     if (uiState.accountCreationNoticeVisible) {

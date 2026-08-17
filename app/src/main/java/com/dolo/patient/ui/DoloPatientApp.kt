@@ -27,6 +27,7 @@ import com.dolo.patient.ui.doctors.DoctorListRoute
 import com.dolo.patient.ui.login.LoginRoute
 import com.dolo.patient.ui.login.LoginViewModel
 import com.dolo.patient.ui.login.LoginViewModelFactory
+import com.dolo.patient.ui.login.PilotAccessDialog
 import com.dolo.patient.ui.otp.AuthOtpRepository
 import com.dolo.patient.ui.otp.OtpVerificationRoute
 import com.dolo.patient.ui.otp.OtpVerificationViewModel
@@ -48,7 +49,10 @@ object Routes{const val Splash="splash";const val Login="login";const val Home="
   composable(Routes.Splash){SplashScreen{nav.navigate(if(auth.uiState.step==AuthStep.AUTHENTICATED)Routes.Home else Routes.Login){popUpTo(Routes.Splash){inclusive=true}}}}
   composable(Routes.Login){
    when(auth.uiState.step){
-    AuthStep.PHONE->LoginRoute(login,auth::beginOtp)
+    AuthStep.PHONE->{
+     LoginRoute(login,auth::beginOtp){auth.openPilot(false)}
+     if(auth.uiState.pilotDialog)PilotAccessDialog(auth.uiState,{auth.openPilot(it)},auth::updatePilotDoloId,auth::updatePilotInviteCode,auth::updatePilotCredential,auth::submitPilot,auth::closePilot)
+    }
     AuthStep.OTP->OtpVerificationRoute(
      viewModel=otp,
      phoneNumber=auth.uiState.phone,
@@ -62,7 +66,7 @@ object Routes{const val Splash="splash";const val Login="login";const val Home="
    }
   }
   composable(Routes.Home){
-   val hostedMode=auth.uiState.session?.mode==PatientAuthMode.HOSTED_PROTOTYPE
+   val hostedMode=auth.uiState.session?.mode in setOf(PatientAuthMode.HOSTED_PROTOTYPE,PatientAuthMode.CONTROLLED_PILOT)
    androidx.compose.runtime.LaunchedEffect(initialNotificationDestination){
     initialNotificationDestination?.let{destination->
      nav.navigate(destination){launchSingleTop=true}
@@ -72,7 +76,7 @@ object Routes{const val Splash="splash";const val Login="login";const val Home="
    androidx.compose.runtime.LaunchedEffect(hostedMode){if(hostedMode){while(true){hosted.refresh();delay(15_000)}}}
    PatientHomeRoute(patientState=patient.uiState,hostedState=if(hostedMode)hosted.uiState else null,darkModeEnabled=darkModeEnabled,onDarkModeChange=onDarkModeChange,onSearchDoctors={patient.search("");nav.navigate("doctors/All")},onNearMe={patient.search("");nav.navigate("doctors/All")},onAllQueues={nav.navigate(Routes.AllQueues)},onQueue={nav.navigate("queue/"+it)},onNotifications={nav.navigate(Routes.Notifications)},onFavorites={nav.navigate(Routes.Favourites)},onDoctor={nav.navigate("doctor/"+it)},onBookDoctor={nav.navigate("booking/"+it)},onAppointments={nav.navigate(Routes.History)},onBook={nav.navigate(Routes.Categories)},onHistory={nav.navigate(Routes.History)},onProfile={nav.navigate(Routes.Profile)},onSupport={nav.navigate(Routes.Support)},onLogout={hosted.clearAuthorityCache();auth.logout();nav.navigate(Routes.Login){popUpTo(Routes.Home){inclusive=true}}},onRefreshQueues=patient::refreshAllQueues,onRefreshHosted=hosted::refresh,onHostedSync={nav.navigate(Routes.HostedSync)})
   }
-  composable(Routes.AllQueues){AllQueuesScreen(patientState=patient.uiState,hostedState=if(auth.uiState.session?.mode==PatientAuthMode.HOSTED_PROTOTYPE)hosted.uiState else null,onBack=nav::popBackStack,onQueue={nav.navigate("queue/"+it)})}
+  composable(Routes.AllQueues){AllQueuesScreen(patientState=patient.uiState,hostedState=if(auth.uiState.session?.mode in setOf(PatientAuthMode.HOSTED_PROTOTYPE,PatientAuthMode.CONTROLLED_PILOT))hosted.uiState else null,onBack=nav::popBackStack,onQueue={nav.navigate("queue/"+it)})}
   composable(Routes.Categories){DoctorCategoriesRoute(notificationCount=patient.uiState.notifications.count{!it.isRead},onBack=nav::popBackStack,onNotifications={nav.navigate(Routes.Notifications)},onCategorySelected={category->nav.navigate("doctors/${Uri.encode(category.id)}/${Uri.encode(category.name)}")},onHome={nav.returnToHome()},onAppointments={nav.openPrimary(Routes.History)},onBook={},onHistory={nav.openPrimary(Routes.History)},onProfile={nav.openPrimary(Routes.Profile)})}
   composable(Routes.Doctors,arguments=listOf(navArgument("category"){type=NavType.StringType})){e->val c=e.arguments?.getString("category").orEmpty();DoctorListRoute(c,c,patient.uiState,platform.uiState,nav::popBackStack,{nav.navigate(Routes.Notifications)},{nav.navigate("doctor/"+it)},{nav.navigate("hosted-doctor/"+it)},{nav.navigate("booking/"+it)},platform::refresh,platform::findNearby,patient::toggleFavourite,{nav.returnToHome()},{nav.openPrimary(Routes.History)},{nav.openPrimary(Routes.Categories)},{nav.openPrimary(Routes.History)},{nav.openPrimary(Routes.Profile)})}
   composable(Routes.CategoryDoctors,arguments=listOf(navArgument("categoryId"){type=NavType.StringType},navArgument("categoryName"){type=NavType.StringType})){e->val id=e.arguments?.getString("categoryId").orEmpty();val name=e.arguments?.getString("categoryName").orEmpty();DoctorListRoute(id,name,patient.uiState,platform.uiState,nav::popBackStack,{nav.navigate(Routes.Notifications)},{nav.navigate("doctor/"+it)},{nav.navigate("hosted-doctor/"+it)},{nav.navigate("booking/"+it)},platform::refresh,platform::findNearby,patient::toggleFavourite,{nav.returnToHome()},{nav.openPrimary(Routes.History)},{nav.openPrimary(Routes.Categories)},{nav.openPrimary(Routes.History)},{nav.openPrimary(Routes.Profile)})}
@@ -82,7 +86,7 @@ object Routes{const val Splash="splash";const val Login="login";const val Home="
   composable(Routes.History){AppointmentHistoryScreen(patient.uiState.appointments,nav::popBackStack,{nav.navigate("queue/"+it)},{patient.reschedule(it)},{doctorId,appointmentId->nav.navigate("review/"+doctorId+"/"+appointmentId)},patient::canReschedule,patient::canReview,{nav.returnToHome()},{nav.openPrimary(Routes.Categories)})}
   composable(Routes.Queue,arguments=listOf(navArgument("appointmentId"){type=NavType.StringType})){e->val id=e.arguments?.getString("appointmentId").orEmpty();LiveQueueScreen(patient.uiState,id,nav::popBackStack,{patient.refreshQueue(id)},{patient.refreshQueue(id,false)},{patient.advanceQueue(id)},{patient.markMissed(id)},{patient.completeAppointment(id)},{patient.reschedule(id)},patient::canReschedule)}
   composable(Routes.Profile){ProfileScreen(patient.uiState,auth.uiState.identityCard,auth.uiState.identityMessage,auth::refreshIdentityCard,nav::popBackStack,{name,phone,city,gender->patient.updateProfile(name,phone,city,gender)},{name,relation,age->patient.addFamilyMember(name,relation,age)})}
-  composable(Routes.Notifications){NotificationsScreen(patient.uiState,if(auth.uiState.session?.mode==PatientAuthMode.HOSTED_PROTOTYPE)hosted.uiState else null,nav::popBackStack,patient::markNotificationsRead,hosted::markHostedNotificationsRead)}
+  composable(Routes.Notifications){NotificationsScreen(patient.uiState,if(auth.uiState.session?.mode in setOf(PatientAuthMode.HOSTED_PROTOTYPE,PatientAuthMode.CONTROLLED_PILOT))hosted.uiState else null,nav::popBackStack,patient::markNotificationsRead,hosted::markHostedNotificationsRead)}
   composable(Routes.Support){SupportScreen(nav::popBackStack,{nav.navigate(Routes.Integrations)},hosted.uiState,hosted::refresh,hosted::submitSupportRequest)}
   composable(Routes.Integrations){IntegrationStatusScreen(nav::popBackStack,platform.uiState,platform::refresh){nav.navigate(Routes.HostedSync)}}
   composable(Routes.HostedSync){HostedSyncScreen(nav::popBackStack,hosted)}

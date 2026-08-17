@@ -73,6 +73,7 @@ jobs:
           chmod 600 "$RUNNER_TEMP/dolo-patient-prototype.p12"
       - name: Lint, test and build debug APK
         env:
+          DOLO_API_BASE_URL: ${{ vars.DOLO_API_BASE_URL }}
           DOLO_SIGNING_STORE_FILE: ${{ runner.temp }}/dolo-patient-prototype.p12
           DOLO_SIGNING_STORE_PASSWORD: ${{ secrets.DOLO_SIGNING_STORE_PASSWORD }}
           DOLO_SIGNING_KEY_ALIAS: ${{ secrets.DOLO_SIGNING_KEY_ALIAS }}
@@ -82,6 +83,7 @@ jobs:
         if: github.event_name != 'pull_request'
         shell: bash
         env:
+          DOLO_API_BASE_URL: ${{ vars.DOLO_API_BASE_URL }}
           DOLO_SIGNING_STORE_FILE: ${{ runner.temp }}/dolo-patient-prototype.p12
           DOLO_SIGNING_STORE_PASSWORD: ${{ secrets.DOLO_SIGNING_STORE_PASSWORD }}
           DOLO_SIGNING_KEY_ALIAS: ${{ secrets.DOLO_SIGNING_KEY_ALIAS }}

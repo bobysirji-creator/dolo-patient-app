@@ -514,3 +514,11 @@ Both local Doctor Details and hosted Doctor Profile now include the shared Home,
 ## Stage 62E physical-device acceptance
 
 The full Stage 62E checklist passed on 11 August 2026. Patient App  .48.0-stage62e is the accepted visual baseline for future DO-LO Doctor and Admin modernization. Avatar persistence, shared Doctor Details navigation, Day/Night contrast and all regression/data-safety checks passed.
+
+## Stage 63P-B implementation checkpoint
+
+Platform API `0.59.0-stage63pb` and the three Android apps now implement role-scoped controlled-pilot activation and sign-in. Android endpoints are selected at build time through the public `DOLO_API_BASE_URL` repository variable, while an unset variable preserves the existing prototype target. Tokens are retained only in existing encrypted stores. Migration 060 prevents the wrong Android role from consuming an invitation. Ordinary hosted routes authorize the authenticated role instead of fixed seeded UUIDs.
+
+A newly activated Patient receives an owner-scoped SELF profile and can enter the existing authoritative Patient boundary. A newly activated Doctor is intentionally stopped at a clear clinic-setup-required screen; no seeded Doctor, clinic, appointment, queue, or local demo record is assigned. Stage 63P-C must implement Doctor profile/clinic onboarding before the real multi-role workflow pilot begins.
+
+Local API validation passes 241 tests. Android compilation, lint, unit tests, stable signing, pilot deployment, and physical-device acceptance remain GitHub/device checkpoints because this low-resource PC has no local Android SDK/Gradle runtime.

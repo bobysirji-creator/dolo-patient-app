@@ -5,6 +5,7 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+val doloApiBaseUrl = providers.environmentVariable("DOLO_API_BASE_URL").map { it.trim().ifEmpty { "https://dolo-platform-api-prototype.onrender.com" } }.orElse("https://dolo-platform-api-prototype.onrender.com").get()
 val prototypeSigningStore = providers.environmentVariable("DOLO_SIGNING_STORE_FILE").orNull
 val prototypeSigningStorePassword = providers.environmentVariable("DOLO_SIGNING_STORE_PASSWORD").orNull
 val prototypeSigningKeyAlias = providers.environmentVariable("DOLO_SIGNING_KEY_ALIAS").orNull
@@ -24,12 +25,12 @@ android {
         applicationId = "com.dolo.patient"
         minSdk = 26
         targetSdk = 35
-        versionCode = 69
-        versionName = "0.48.0-stage62e"
+        versionCode = 70
+        versionName = "0.49.0-stage63pb"
         buildConfigField(
             "String",
             "DOLO_API_BASE_URL",
-            "\"https://dolo-platform-api-prototype.onrender.com\""
+            "\"${doloApiBaseUrl}\""
         )
     }
 

@@ -15,6 +15,9 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 data class PublicIdentityCard(val doloId:String,val displayName:String,val role:String,val prototype:Boolean)
+data class PilotReadiness(val enabled:Boolean,val bootstrapRequired:Boolean,val activeAccounts:Int)
+data class PilotIdentity(val doloId:String,val displayName:String,val role:String)
+data class PilotSessionResult(val tokens:PrototypeTokenBundle,val identity:PilotIdentity)
 
 data class PatientPublicIdPolicy(
     val format: String,
@@ -231,6 +234,9 @@ class PrototypeSessionManager(private val store: SecureTokenStore, private val a
 }
 
 interface PrototypeAuthApi {
+    fun pilotReadiness():PrototypeAuthResult<PilotReadiness>
+    fun pilotLogin(doloId:String,credential:String):PrototypeAuthResult<PilotSessionResult>
+    fun activatePilot(inviteCode:String,credential:String):PrototypeAuthResult<PilotSessionResult>
     fun enrollmentReadiness(): PrototypeAuthResult<PatientEnrollmentReadiness>
     fun enrollmentActivationRequirements(): PrototypeAuthResult<PatientEnrollmentActivationRequirements>
     fun enrollmentConsentCatalog(): PrototypeAuthResult<PatientEnrollmentConsentCatalog>
@@ -248,6 +254,10 @@ class HttpPrototypeAuthApi(
 ) : PrototypeAuthApi {
     private val baseUrl = baseUrl.trim().trimEnd('/')
     init { require(URL(this.baseUrl).protocol.equals("https", true)) { "Prototype auth requires HTTPS." } }
+
+    override fun pilotReadiness():PrototypeAuthResult<PilotReadiness> = runCatching { PrototypeAuthJson.parsePilotReadiness(get("/api/v1/auth/pilot/readiness")) }.fold({PrototypeAuthResult.Success(it)},{PrototypeAuthResult.Failure("Controlled pilot is temporarily unavailable.")})
+    override fun pilotLogin(doloId:String,credential:String)=pilotCall("/api/v1/auth/pilot/sessions",JSONObject().put("doloId",doloId.trim().uppercase()).put("credential",credential).put("deviceLabel","DO-LO Patient Android").toString())
+    override fun activatePilot(inviteCode:String,credential:String)=pilotCall("/api/v1/auth/pilot/activate",JSONObject().put("inviteCode",inviteCode.trim()).put("expectedRole","PATIENT").put("credential",credential).put("deviceLabel","DO-LO Patient Android").toString())
 
     override fun enrollmentReadiness():PrototypeAuthResult<PatientEnrollmentReadiness> = runCatching { PrototypeAuthJson.parseEnrollmentReadiness(get("/api/v1/auth/patient-enrollment/readiness")) }.fold({PrototypeAuthResult.Success(it)},{PrototypeAuthResult.Failure("Production registration status is temporarily unavailable.")})
 
@@ -282,6 +292,11 @@ class HttpPrototypeAuthApi(
 
     override fun logout(accessToken: String) { runCatching { post("/api/v1/auth/logout", "{}", accessToken) } }
 
+    private fun pilotCall(path:String,body:String):PrototypeAuthResult<PilotSessionResult> = runCatching { PrototypeAuthJson.parsePilotSessionResponse(post(path,body)) }.fold(
+        {PrototypeAuthResult.Success(it)},
+        {PrototypeAuthResult.Failure(when(it){is java.net.SocketTimeoutException->"Pilot service timed out.";is java.net.UnknownHostException->"No network connection.";else->it.message?.take(160)?:"Pilot sign-in failed."})}
+    )
+
     private fun call(path: String, body: String): PrototypeAuthResult<PrototypeTokenBundle> = runCatching {
         PrototypeAuthJson.parseTokenResponse(post(path, body))
     }.fold(
@@ -294,7 +309,7 @@ class HttpPrototypeAuthApi(
     )
 
     private fun get(path:String,bearer:String?=null):String{
-        val connection=(URL(baseUrl+path).openConnection() as HttpURLConnection).apply{requestMethod="GET";connectTimeout=connectTimeoutMillis;readTimeout=readTimeoutMillis;setRequestProperty("Accept","application/json");setRequestProperty("User-Agent","DO-LO-Patient-Android/Stage52BP");bearer?.let{setRequestProperty("Authorization","Bearer $it")};useCaches=false}
+        val connection=(URL(baseUrl+path).openConnection() as HttpURLConnection).apply{requestMethod="GET";connectTimeout=connectTimeoutMillis;readTimeout=readTimeoutMillis;setRequestProperty("Accept","application/json");setRequestProperty("User-Agent","DO-LO-Patient-Android/Stage63PB");bearer?.let{setRequestProperty("Authorization","Bearer $it")};useCaches=false}
         return try{val status=connection.responseCode;val response=(if(status in 200..299)connection.inputStream else connection.errorStream)?.bufferedReader(Charsets.UTF_8)?.use(::readBounded).orEmpty();if(status !in 200..299)error("Enrollment readiness returned HTTP $status");response}finally{connection.disconnect()}
     }
 
@@ -302,7 +317,7 @@ class HttpPrototypeAuthApi(
         val connection = (URL(baseUrl + path).openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"; doOutput = true; connectTimeout = connectTimeoutMillis; readTimeout = readTimeoutMillis
             setRequestProperty("Content-Type", "application/json"); setRequestProperty("Accept", "application/json")
-            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage52BP")
+            setRequestProperty("User-Agent", "DO-LO-Patient-Android/Stage63PB")
             bearer?.let { setRequestProperty("Authorization", "Bearer $it") }
             useCaches = false
         }
@@ -329,6 +344,8 @@ class HttpPrototypeAuthApi(
 }
 
 object PrototypeAuthJson {
+    fun parsePilotReadiness(json:String):PilotReadiness { val root=JSONObject(json);require(root.getString("mode")=="INVITATION_ONLY"&&!root.getBoolean("openRegistration")&&root.getBoolean("prototypeIsolation"));return PilotReadiness(root.getBoolean("enabled"),root.getBoolean("bootstrapRequired"),root.getInt("activeAccounts")) }
+    fun parsePilotSessionResponse(json:String):PilotSessionResult { val root=JSONObject(json);val item=root.getJSONObject("identity");require(item.optBoolean("controlledPilot")&&!item.optBoolean("seededDummy"));val identity=PilotIdentity(item.getString("doloId"),item.getString("displayName"),item.getString("role"));require(identity.doloId.matches(Regex("^DLO-(PAT|DOC|ADM)-[0-9]{6}$"))&&identity.displayName.isNotBlank());return PilotSessionResult(bundle(root),identity) }
     fun parseLegalDocumentPreview(json:String):PatientLegalDocumentPreview = parsePatientLegalDocumentPreview(json)
 
     fun parseIdentityCard(json:String):PublicIdentityCard{val root=JSONObject(json);require(root.optBoolean("authoritative")&&root.getString("privacy")=="SELF_ONLY_NO_PHONE"&&root.getString("productionEnrollment")=="DISABLED");val item=root.getJSONObject("identity");val result=PublicIdentityCard(item.getString("doloId"),item.getString("displayName"),item.getString("role"),item.getBoolean("prototype"));require(result.doloId.matches(Regex("^DLO-(PAT|DOC|AST|ADM)-[0-9]{6}$"))&&result.displayName.isNotBlank()&&result.displayName.length<=120&&result.role in setOf("PATIENT","DOCTOR","ASSISTANT","ADMIN"));return result}
