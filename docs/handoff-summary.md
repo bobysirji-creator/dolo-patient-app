@@ -522,3 +522,6 @@ Platform API `0.59.0-stage63pb` and the three Android apps now implement role-sc
 A newly activated Patient receives an owner-scoped SELF profile and can enter the existing authoritative Patient boundary. A newly activated Doctor is intentionally stopped at a clear clinic-setup-required screen; no seeded Doctor, clinic, appointment, queue, or local demo record is assigned. Stage 63P-C must implement Doctor profile/clinic onboarding before the real multi-role workflow pilot begins.
 
 Local API validation passes 241 tests. Android compilation, lint, unit tests, stable signing, pilot deployment, and physical-device acceptance remain GitHub/device checkpoints because this low-resource PC has no local Android SDK/Gradle runtime.
+## Stage 63P-C hosted clinic booking correction
+
+Patient App `0.49.1-stage63pc` routes the selected hosted Doctor profile to a dedicated clinic-specific booking screen. It requests authoritative Patient/family profiles and available sessions for that clinic, books through the existing idempotent hosted appointment command, and no longer exposes prototype recovery/payment controls from **Book Appointment**. Deploy Platform API `0.60.1-stage63pc` first, then complete `docs/stage63pc-patient-booking-hotfix.md`.

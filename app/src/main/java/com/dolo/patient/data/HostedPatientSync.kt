@@ -130,8 +130,8 @@ object HostedReschedulePolicy {
 interface HostedPatientSyncApi {
     fun authorityFreshness(): AuthorityFreshness
     fun clearAuthorityCache()
-    fun refresh(): HostedResult<HostedSyncSnapshot>
-    fun book(sessionId: String, profileId: String): HostedResult<HostedSyncSnapshot>
+    fun refresh(clinicId: String? = null): HostedResult<HostedSyncSnapshot>
+    fun book(sessionId: String, profileId: String, clinicId: String? = null): HostedResult<HostedSyncSnapshot>
     fun reschedule(appointmentId: String, targetSessionId: String): HostedResult<HostedSyncSnapshot>
     fun submitReview(appointmentId: String, rating: Int, comment: String): HostedResult<HostedSyncSnapshot>
     fun submitSupportRequest(category:String,subject:String,message:String):HostedResult<HostedSyncSnapshot>
@@ -343,9 +343,9 @@ class HttpHostedPatientSyncApi(
     override fun authorityFreshness(): AuthorityFreshness = authorityTracker.snapshot()
     override fun clearAuthorityCache() { authorityCache.clearAll(); authorityTracker.beginOperation() }
 
-    override fun refresh(): HostedResult<HostedSyncSnapshot> = guarded { load() }
+    override fun refresh(clinicId: String?): HostedResult<HostedSyncSnapshot> = guarded { load(clinicId) }
 
-    override fun book(sessionId: String, profileId: String): HostedResult<HostedSyncSnapshot> = guarded {
+    override fun book(sessionId: String, profileId: String, clinicId: String?): HostedResult<HostedSyncSnapshot> = guarded {
         val keyName = HostedBookingKeys.preferenceKey(sessionId, profileId)
         val legacy = if (profileId == HostedBookingKeys.SEEDED_PRIMARY_PROFILE_ID) {
             preferences.getString(HostedBookingKeys.legacyPreferenceKey(sessionId), null)
@@ -359,7 +359,7 @@ class HttpHostedPatientSyncApi(
             JSONObject().put("clinicSessionId", sessionId).put("patientProfileId", profileId).toString(),
             mapOf("Idempotency-Key" to idempotency)
         )
-        load()
+        load(clinicId)
     }
 
     override fun reschedule(appointmentId: String, targetSessionId: String): HostedResult<HostedSyncSnapshot> = guarded {
@@ -412,8 +412,9 @@ class HttpHostedPatientSyncApi(
         require(readThroughCursor.matches(Regex("^(0|[1-9][0-9]{0,18})$"))){"Invalid notification cursor."}
         request("PUT","/api/v1/patient/notifications",JSONObject().put("readThroughCursor",readThroughCursor).toString());load()
     }
-    private fun load(): HostedSyncSnapshot {
-        val bootstrap = HostedBootstrapJson.parse(request("POST", "/api/v1/patient/sync/bootstrap", "{}"))
+    private fun load(clinicId: String? = null): HostedSyncSnapshot {
+        val bootstrapBody = JSONObject().apply { clinicId?.let { put("clinicId", it) } }.toString()
+        val bootstrap = HostedBootstrapJson.parse(request("POST", "/api/v1/patient/sync/bootstrap", bootstrapBody))
         val appointments = HostedAppointmentJson.parse(request("GET", "/api/v1/appointments"))
         val live = parseLive(request("GET", "/api/v1/patient/live-appointments"))
         val communications = HostedCommunicationJson.parse(request("GET", "/api/v1/patient/communications?clinicId=${bootstrap.clinic.id}"))
@@ -561,7 +562,9 @@ class HostedPatientSyncViewModel(private val api: HostedPatientSyncApi) : ViewMo
 
     fun clearAuthorityCache() { api.clearAuthorityCache(); uiState = HostedSyncUiState() }
     fun refresh() { execute { api.refresh() } }
+    fun refresh(clinicId: String) { execute { api.refresh(clinicId) } }
     fun book(sessionId: String, profileId: String) { execute { api.book(sessionId, profileId) } }
+    fun book(sessionId: String, profileId: String, clinicId: String) { execute { api.book(sessionId, profileId, clinicId) } }
     fun reschedule(appointmentId: String, targetSessionId: String) { execute { api.reschedule(appointmentId, targetSessionId) } }
     fun submitReview(appointmentId: String, rating: Int, comment: String) { execute { api.submitReview(appointmentId, rating, comment) } }
     fun submitSupportRequest(category:String,subject:String,message:String){execute{api.submitSupportRequest(category,subject,message)}}
