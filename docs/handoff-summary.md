@@ -525,3 +525,6 @@ Local API validation passes 241 tests. Android compilation, lint, unit tests, st
 ## Stage 63P-C hosted clinic booking correction
 
 Patient App `0.49.1-stage63pc` routes the selected hosted Doctor profile to a dedicated clinic-specific booking screen. It requests authoritative Patient/family profiles and available sessions for that clinic, books through the existing idempotent hosted appointment command, and no longer exposes prototype recovery/payment controls from **Book Appointment**. Deploy Platform API `0.60.1-stage63pc` first, then complete `docs/stage63pc-patient-booking-hotfix.md`.
+## Stage 63P-C controlled-pilot booking refresh correction
+
+Patient App `0.49.2-stage63pc` treats the disabled prototype recovery-simulation endpoint as optional when refreshing authoritative Patient data. A controlled-pilot clinic booking therefore continues to fail closed for clinic, profile, session, appointment and queue errors, but it is no longer blocked by a deliberately disabled prototype-only recovery tool.

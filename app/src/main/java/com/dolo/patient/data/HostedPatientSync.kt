@@ -423,7 +423,11 @@ class HttpHostedPatientSyncApi(
         val notifications = HostedNotificationJson.parse(request("GET", "/api/v1/patient/notifications?after=0&limit=100"))
         val communicationPreferences = HostedPreferencesJson.parse(request("GET", "/api/v1/patient/preferences"))
         val targetedCampaigns = HostedTargetedCampaignJson.parse(request("GET", "/api/v1/patient/campaigns"))
-        val prototypeRecoveryCases = HostedPrototypeRecoveryJson.parse(request("GET", "/api/v1/patient/prototype-recovery-cases"))
+        val prototypeRecoveryCases = try {
+            HostedPrototypeRecoveryJson.parse(request("GET", "/api/v1/patient/prototype-recovery-cases"))
+        } catch (error: HostedRequestException) {
+            if (error.code == "PROTOTYPE_RECOVERY_DISABLED") emptyList() else throw error
+        }
         return HostedSyncSnapshot(bootstrap, appointments, live, communications, reviews, supportRequests, notifications, communicationPreferences, targetedCampaigns, prototypeRecoveryCases)
     }
 
