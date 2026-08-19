@@ -15,11 +15,11 @@ class PrototypeSessionManagerTest {
         assertEquals(expired.refreshToken, api.refreshToken)
     }
 
-    @Test fun `clears tokens when refresh fails`() {
+    @Test fun `retains refresh token when a transient refresh fails`() {
         val expired = PrototypeTokenBundle("a".repeat(43), "2020-01-01T00:00:00Z", "r".repeat(43), "2099-01-01T00:00:00Z")
         val store = MemoryTokenStore(expired)
         assertNull(PrototypeSessionManager(store, FakeApi(PrototypeAuthResult.Failure("offline"))).accessToken())
-        assertNull(store.tokens)
+        assertEquals(expired, store.tokens)
     }
 
     private class MemoryTokenStore(var tokens: PrototypeTokenBundle?) : SecureTokenStore {

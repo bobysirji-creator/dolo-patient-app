@@ -141,9 +141,10 @@ class HostedPatientSyncTest {
     @Test
     fun parsesClinicReceiptFieldsFromHostedHistory() {
         val appointment = HostedAppointmentJson.parse(
-            """{"appointments":[{"id":"appointment-1","clinicSessionId":"session-1","clinicName":"Prototype Clinic","patientName":"Prototype Patient","serviceDate":"2026-07-22","session":"MORNING","tokenNumber":4,"status":"COMPLETED","clinicFeeStatus":"PAID","clinicFeeAmountMinor":50000,"receiptNumber":"DLO-20260722-0004","rescheduleUsed":false,"rescheduledFromAppointmentId":null}]}"""
+            """{"appointments":[{"id":"appointment-1","clinicSessionId":"session-1","clinicName":"Prototype Clinic","doctorName":"Dr Pilot","patientName":"Prototype Patient","serviceDate":"2026-07-22","session":"MORNING","tokenNumber":4,"status":"COMPLETED","clinicFeeStatus":"PAID","clinicFeeAmountMinor":50000,"receiptNumber":"DLO-20260722-0004","rescheduleUsed":false,"rescheduledFromAppointmentId":null}]}"""
         ).single()
 
+        assertEquals("Dr Pilot", appointment.doctorName)
         assertEquals("PAID", appointment.clinicFeeStatus)
         assertEquals(50000, appointment.clinicFeeAmountMinor)
         assertEquals("DLO-20260722-0004", appointment.receiptNumber)

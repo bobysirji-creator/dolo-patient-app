@@ -31,7 +31,7 @@ class PatientHomeViewModel : ViewModel() {
             FavoriteDoctorUiModel(doctor.id, doctor.name, doctor.specialty, doctor.rating, 98 + index * 22, 2.3 + index * 0.5, doctorPlaceholder(index))
         }
         return PatientHomeUiState(
-            patientName = patientState.profile.name.ifBlank { "Patient" },
+            patientName = hostedState?.snapshot?.bootstrap?.profile?.name?.takeIf { it.isNotBlank() } ?: patientState.profile.name.ifBlank { "Patient" },
             patientCity = patientState.profile.city,
             patientGender = patientState.profile.gender,
             queues = (hostedQueues + localQueues).sortedBy { it.patientToken.toIntOrNull() ?: Int.MAX_VALUE },

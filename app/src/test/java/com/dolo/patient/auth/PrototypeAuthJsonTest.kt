@@ -191,6 +191,13 @@ class PrototypeAuthJsonTest {
         assertTrue(PrototypeAuthJson.hasUsableRefresh(tokens, Instant.parse("2026-07-21T00:00:00Z")))
         assertFalse(PrototypeAuthJson.hasUsableRefresh(tokens, Instant.parse("2026-09-01T00:00:00Z")))
     }
+    @Test fun refreshTokenResponseDoesNotRequireSeededIdentityMetadata() {
+        val refreshJson = """{"accessToken":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","accessExpiresAt":"2026-07-20T08:30:00Z","refreshToken":"rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr","refreshExpiresAt":"2026-08-20T08:15:00Z"}"""
+        val tokens = PrototypeAuthJson.parseRefreshTokenResponse(refreshJson)
+        assertEquals(43, tokens.accessToken.length)
+        assertEquals(43, tokens.refreshToken.length)
+    }
+
     @Test fun storedTokenRoundTripPreservesOpaqueValues() {
         val original = PrototypeAuthJson.parseTokenResponse(json)
         assertEquals(original, PrototypeAuthJson.parseStoredTokens(PrototypeAuthJson.encodeStoredTokens(original)))

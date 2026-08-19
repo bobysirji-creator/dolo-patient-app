@@ -30,8 +30,9 @@ class MainActivity : ComponentActivity() {
         val storage=getSharedPreferences("dolo_session",MODE_PRIVATE)
         val tokenStore=AndroidKeystoreTokenStore(storage)
         val authApi=HttpPrototypeAuthApi(BuildConfig.DOLO_API_BASE_URL)
-        val authRepository=PrototypeAuthRepository(storage,tokenStore,authApi)
-        val hostedSyncApi=HttpHostedPatientSyncApi(BuildConfig.DOLO_API_BASE_URL,PrototypeSessionManager(tokenStore,authApi),storage)
+        val sessionManager=PrototypeSessionManager(tokenStore,authApi)
+        val authRepository=PrototypeAuthRepository(storage,tokenStore,authApi,sessionManager)
+        val hostedSyncApi=HttpHostedPatientSyncApi(BuildConfig.DOLO_API_BASE_URL,sessionManager,storage)
         val patientRepository=LocalPatientRepository(storage)
         val platformApi=HttpPlatformApi(BuildConfig.DOLO_API_BASE_URL)
         setContent {

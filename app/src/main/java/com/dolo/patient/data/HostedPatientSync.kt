@@ -267,7 +267,7 @@ object HostedAppointmentJson {
                 fun nullableString(key: String): String? = if (item.isNull(key) || !item.has(key)) null else item.getString(key)
                 add(
                     HostedAppointment(
-                        item.getString("id"), item.getString("clinicSessionId"), "Dr. Ananya Mehta",
+                        item.getString("id"), item.getString("clinicSessionId"), item.getString("doctorName"),
                         item.getString("clinicName"), item.getString("patientName"), item.getString("serviceDate"),
                         item.getString("session"), item.getInt("tokenNumber"), item.getString("status"),
                         item.optString("clinicFeeStatus", "PENDING"), item.optInt("clinicFeeAmountMinor"),
@@ -495,7 +495,7 @@ class HttpHostedPatientSyncApi(
         body: String?,
         headers: Map<String, String>
     ): String {
-        val token = sessionManager.accessToken() ?: error("Hosted session expired. Log out and sign in again while online.")
+        val token = sessionManager.accessToken() ?: error("Hosted session could not be refreshed. Retry while online; your saved session and local data are unchanged.")
         val connection = (URL(base + path).openConnection() as HttpURLConnection).apply {
             requestMethod = method
             connectTimeout = 15_000

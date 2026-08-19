@@ -60,7 +60,8 @@ class FakeAuthRepository(private val preferences: SharedPreferences) : AuthRepos
 class PrototypeAuthRepository(
     private val preferences: SharedPreferences,
     private val tokenStore: SecureTokenStore,
-    private val api: PrototypeAuthApi
+    private val api: PrototypeAuthApi,
+    private val sessionManager: PrototypeSessionManager = PrototypeSessionManager(tokenStore, api)
 ) : AuthRepository {
     override fun currentSession(): PatientSession? {
         val tokens=tokenStore.read()
@@ -94,7 +95,7 @@ class PrototypeAuthRepository(
             is PrototypeAuthResult.Failure -> Result.failure(IllegalStateException(result.message))
         }
     override fun legalDocumentPreview():Result<PatientLegalDocumentPreview> = when(val result=api.legalDocumentPreview()){is PrototypeAuthResult.Success->Result.success(result.value);is PrototypeAuthResult.Failure->Result.failure(IllegalStateException(result.message))}
-    override fun identityCard():Result<PublicIdentityCard>{val token=PrototypeSessionManager(tokenStore,api).accessToken()?:return Result.failure(IllegalStateException("Hosted session unavailable."));return when(val result=api.identityCard(token)){is PrototypeAuthResult.Success->Result.success(result.value);is PrototypeAuthResult.Failure->Result.failure(IllegalStateException(result.message))}}
+    override fun identityCard():Result<PublicIdentityCard>{val token=sessionManager.accessToken()?:return Result.failure(IllegalStateException("Hosted session unavailable."));return when(val result=api.identityCard(token)){is PrototypeAuthResult.Success->Result.success(result.value);is PrototypeAuthResult.Failure->Result.failure(IllegalStateException(result.message))}}
     override fun requestOtp(phone: String): Result<Unit> = if (PhoneValidator.isValid(phone)) Result.success(Unit) else Result.failure(IllegalArgumentException("Enter a valid 10-digit mobile number"))
     override fun verifyOtp(phone: String, otp: String): Result<PatientSession> {
         if (otp != FakeAuthRepository.DEMO_OTP) return Result.failure(IllegalArgumentException("Incorrect OTP. Use 123456 for this demo."))

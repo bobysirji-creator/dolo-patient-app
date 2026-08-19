@@ -228,7 +228,7 @@ class PrototypeSessionManager(private val store: SecureTokenStore, private val a
         if (!PrototypeAuthJson.hasUsableRefresh(current)) { store.clear(); return null }
         return when (val refreshed = api.refresh(current.refreshToken)) {
             is PrototypeAuthResult.Success -> { store.save(refreshed.value); refreshed.value.accessToken }
-            is PrototypeAuthResult.Failure -> { store.clear(); null }
+            is PrototypeAuthResult.Failure -> null
         }
     }
 }
@@ -285,9 +285,13 @@ class HttpPrototypeAuthApi(
         JSONObject().put("identity", "patient-demo").put("otp", FakeAuthRepository.DEMO_OTP).put("deviceLabel", "DO-LO Patient Android").toString()
     )
 
-    override fun refresh(refreshToken: String) = call(
-        "/api/v1/auth/refresh",
-        JSONObject().put("refreshToken", refreshToken).toString()
+    override fun refresh(refreshToken: String): PrototypeAuthResult<PrototypeTokenBundle> = runCatching {
+        PrototypeAuthJson.parseRefreshTokenResponse(
+            post("/api/v1/auth/refresh", JSONObject().put("refreshToken", refreshToken).toString())
+        )
+    }.fold(
+        { PrototypeAuthResult.Success(it) },
+        { PrototypeAuthResult.Failure("Hosted session refresh is temporarily unavailable.") }
     )
 
     override fun logout(accessToken: String) { runCatching { post("/api/v1/auth/logout", "{}", accessToken) } }
@@ -468,6 +472,7 @@ object PrototypeAuthJson {
         .put("accessToken", tokens.accessToken).put("accessExpiresAt", tokens.accessExpiresAt)
         .put("refreshToken", tokens.refreshToken).put("refreshExpiresAt", tokens.refreshExpiresAt).toString()
     fun parseStoredTokens(json: String): PrototypeTokenBundle = bundle(JSONObject(json))
+    fun parseRefreshTokenResponse(json: String): PrototypeTokenBundle = bundle(JSONObject(json))
     fun hasUsableAccess(tokens: PrototypeTokenBundle, now: Instant = Instant.now()): Boolean =
         runCatching { Instant.parse(tokens.accessExpiresAt).isAfter(now) }.getOrDefault(false)
     fun hasUsableRefresh(tokens: PrototypeTokenBundle, now: Instant = Instant.now()): Boolean =

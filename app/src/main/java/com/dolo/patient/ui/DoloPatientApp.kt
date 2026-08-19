@@ -84,8 +84,17 @@ object Routes{const val Splash="splash";const val Login="login";const val Home="
   composable(Routes.HostedBooking,arguments=listOf(navArgument("clinicId"){type=NavType.StringType})){e->val id=e.arguments?.getString("clinicId").orEmpty();HostedBookingScreen(id,hosted,nav::popBackStack){nav.openPrimary(Routes.History)}}
   composable(Routes.DoctorDetails,arguments=listOf(navArgument("doctorId"){type=NavType.StringType})){e->val id=e.arguments?.getString("doctorId").orEmpty();DoctorDetailsScreen(id,patient.uiState.favouriteIds.contains(id),patient.uiState.reviews,nav::popBackStack,{patient.toggleFavourite(id)},{nav.navigate("booking/"+id)},{nav.returnToHome()},{nav.openPrimary(Routes.History)},{nav.openPrimary(Routes.Categories)})}
   composable(Routes.Favourites){FavouritesScreen(patient.uiState,nav::popBackStack,{nav.navigate("doctor/"+it)},patient::toggleFavourite)}
-  composable(Routes.History){AppointmentHistoryScreen(patient.uiState.appointments,nav::popBackStack,{nav.navigate("queue/"+it)},{patient.reschedule(it)},{doctorId,appointmentId->nav.navigate("review/"+doctorId+"/"+appointmentId)},patient::canReschedule,patient::canReview,{nav.returnToHome()},{nav.openPrimary(Routes.Categories)})}
-  composable(Routes.Queue,arguments=listOf(navArgument("appointmentId"){type=NavType.StringType})){e->val id=e.arguments?.getString("appointmentId").orEmpty();LiveQueueScreen(patient.uiState,id,nav::popBackStack,{patient.refreshQueue(id)},{patient.refreshQueue(id,false)},{patient.advanceQueue(id)},{patient.markMissed(id)},{patient.completeAppointment(id)},{patient.reschedule(id)},patient::canReschedule)}
+  composable(Routes.History){
+   val hostedMode=auth.uiState.session?.mode in setOf(PatientAuthMode.HOSTED_PROTOTYPE,PatientAuthMode.CONTROLLED_PILOT)
+   if(hostedMode) HostedAppointmentHistoryScreen(hosted.uiState,nav::popBackStack,{nav.navigate("queue/"+it)},hosted::refresh,{nav.returnToHome()},{nav.openPrimary(Routes.Categories)})
+   else AppointmentHistoryScreen(patient.uiState.appointments,nav::popBackStack,{nav.navigate("queue/"+it)},{patient.reschedule(it)},{doctorId,appointmentId->nav.navigate("review/"+doctorId+"/"+appointmentId)},patient::canReschedule,patient::canReview,{nav.returnToHome()},{nav.openPrimary(Routes.Categories)})
+  }
+  composable(Routes.Queue,arguments=listOf(navArgument("appointmentId"){type=NavType.StringType})){e->
+   val id=e.arguments?.getString("appointmentId").orEmpty()
+   val hostedMode=auth.uiState.session?.mode in setOf(PatientAuthMode.HOSTED_PROTOTYPE,PatientAuthMode.CONTROLLED_PILOT)
+   if(hostedMode && hosted.uiState.snapshot?.appointments?.any{it.id==id}==true) HostedLiveQueueScreen(hosted.uiState,id,nav::popBackStack,hosted::refresh)
+   else LiveQueueScreen(patient.uiState,id,nav::popBackStack,{patient.refreshQueue(id)},{patient.refreshQueue(id,false)},{patient.advanceQueue(id)},{patient.markMissed(id)},{patient.completeAppointment(id)},{patient.reschedule(id)},patient::canReschedule)
+  }
   composable(Routes.Profile){ProfileScreen(patient.uiState,auth.uiState.identityCard,auth.uiState.identityMessage,auth::refreshIdentityCard,nav::popBackStack,{name,phone,city,gender->patient.updateProfile(name,phone,city,gender)},{name,relation,age->patient.addFamilyMember(name,relation,age)})}
   composable(Routes.Notifications){NotificationsScreen(patient.uiState,if(auth.uiState.session?.mode in setOf(PatientAuthMode.HOSTED_PROTOTYPE,PatientAuthMode.CONTROLLED_PILOT))hosted.uiState else null,nav::popBackStack,patient::markNotificationsRead,hosted::markHostedNotificationsRead)}
   composable(Routes.Support){SupportScreen(nav::popBackStack,{nav.navigate(Routes.Integrations)},hosted.uiState,hosted::refresh,hosted::submitSupportRequest)}

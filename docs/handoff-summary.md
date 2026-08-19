@@ -528,3 +528,7 @@ Patient App `0.49.1-stage63pc` routes the selected hosted Doctor profile to a de
 ## Stage 63P-C controlled-pilot booking refresh correction
 
 Patient App `0.49.2-stage63pc` treats the disabled prototype recovery-simulation endpoint as optional when refreshing authoritative Patient data. A controlled-pilot clinic booking therefore continues to fail closed for clinic, profile, session, appointment and queue errors, but it is no longer blocked by a deliberately disabled prototype-only recovery tool.
+
+## Stage 63P-C hosted workflow synchronization correction
+
+Patient App 0.49.3-stage63pc now uses registered controlled-pilot names in the Home, Appointments, and Live Queue journeys. Hosted appointments are displayed from server-authoritative data rather than the local prototype repository. Access-token renewal uses the API refresh response contract, shares one synchronized session manager across identity and appointment requests, and retains a still-valid refresh token across transient network failures.
