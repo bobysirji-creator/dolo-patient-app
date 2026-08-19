@@ -1,4 +1,5 @@
 # DO-LO Android Ecosystem Roadmap
+- Stage 63P-D: hosted family-member creation implemented; device verification pending.
 
 ## Current scope
 

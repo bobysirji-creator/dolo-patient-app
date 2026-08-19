@@ -1,4 +1,5 @@
 # Stage 1 Handoff
+Stage 63P-D Patient UI can create server-authoritative family profiles directly from hosted booking. Version 0.50.0-stage63pd; verify with `stage63pd-device-test.md` after API migration 062 is live.
 
 ## Completed
 

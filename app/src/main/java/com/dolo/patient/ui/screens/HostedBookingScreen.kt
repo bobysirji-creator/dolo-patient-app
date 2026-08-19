@@ -11,6 +11,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -38,10 +40,20 @@ fun HostedBookingScreen(
     val snapshot = state.snapshot?.takeIf { it.bootstrap.clinic.id == clinicId }
     var selectedProfileId by rememberSaveable(clinicId) { mutableStateOf<String?>(null) }
 
+    var addingFamily by rememberSaveable(clinicId) { mutableStateOf(false) }
+    var familyName by rememberSaveable(clinicId) { mutableStateOf("") }
+    var familyRelationship by rememberSaveable(clinicId) { mutableStateOf("CHILD") }
     LaunchedEffect(clinicId) { viewModel.refresh(clinicId) }
     LaunchedEffect(snapshot?.bootstrap?.profiles) {
         val profiles = snapshot?.bootstrap?.profiles.orEmpty()
         if (profiles.none { it.id == selectedProfileId }) selectedProfileId = profiles.firstOrNull()?.id
+
+        val created=profiles.lastOrNull{addingFamily&&familyName.isNotBlank()&&it.name.equals(familyName.trim(),ignoreCase=true)&&it.relationship==familyRelationship}
+        if(created!=null){
+            selectedProfileId=created.id
+            addingFamily=false
+            familyName=""
+        }
     }
 
     LazyColumn(
@@ -85,6 +97,26 @@ fun HostedBookingScreen(
                     label = { Text("${profile.name} (${profile.relationship.lowercase()})") },
                     modifier = Modifier.fillMaxWidth()
                 )
+            }
+            item {
+                OutlinedButton(onClick={addingFamily=!addingFamily},modifier=Modifier.fillMaxWidth()){
+                    Text(if(addingFamily)"Cancel family member" else "Add family member")
+                }
+            }
+            if(addingFamily)item{
+                Card(colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surfaceVariant)){
+                    Column(Modifier.fillMaxWidth().padding(14.dp),verticalArrangement=Arrangement.spacedBy(8.dp)){
+                        Text("New family member",fontWeight=FontWeight.Bold)
+                        OutlinedTextField(familyName,{familyName=it.take(80)},label={Text("Full name")},singleLine=true,modifier=Modifier.fillMaxWidth())
+                        Column(verticalArrangement=Arrangement.spacedBy(6.dp)){
+                            listOf("SPOUSE" to "Spouse","CHILD" to "Child","PARENT" to "Parent","OTHER" to "Other").forEach{(value,label)->
+                                FilterChip(selected=familyRelationship==value,onClick={familyRelationship=value},label={Text(label)},modifier=Modifier.fillMaxWidth())
+                            }
+                        }
+                        Button(onClick={viewModel.createFamilyProfile(familyName,familyRelationship,clinicId)},enabled=familyName.trim().length>=2&&!state.loading,modifier=Modifier.fillMaxWidth()){Text("Save family member")}
+                        Text("This creates a server-authoritative pilot profile. Existing local demo family data is not uploaded.",style=MaterialTheme.typography.bodySmall)
+                    }
+                }
             }
             item { Text("Available sessions", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
             if (snapshot.bootstrap.sessions.isEmpty()) {

@@ -131,6 +131,7 @@ interface HostedPatientSyncApi {
     fun authorityFreshness(): AuthorityFreshness
     fun clearAuthorityCache()
     fun refresh(clinicId: String? = null): HostedResult<HostedSyncSnapshot>
+    fun createFamilyProfile(displayName:String,relationship:String,clinicId:String):HostedResult<HostedSyncSnapshot>
     fun book(sessionId: String, profileId: String, clinicId: String? = null): HostedResult<HostedSyncSnapshot>
     fun reschedule(appointmentId: String, targetSessionId: String): HostedResult<HostedSyncSnapshot>
     fun submitReview(appointmentId: String, rating: Int, comment: String): HostedResult<HostedSyncSnapshot>
@@ -344,6 +345,13 @@ class HttpHostedPatientSyncApi(
     override fun clearAuthorityCache() { authorityCache.clearAll(); authorityTracker.beginOperation() }
 
     override fun refresh(clinicId: String?): HostedResult<HostedSyncSnapshot> = guarded { load(clinicId) }
+
+    override fun createFamilyProfile(displayName:String,relationship:String,clinicId:String):HostedResult<HostedSyncSnapshot> = guarded {
+        require(displayName.trim().length in 2..80){"Enter the family member's full name."}
+        require(relationship in setOf("SPOUSE","CHILD","PARENT","OTHER")){"Choose a relationship."}
+        request("POST","/api/v1/patient/profiles",JSONObject().put("displayName",displayName.trim()).put("relationship",relationship).toString())
+        load(clinicId)
+    }
 
     override fun book(sessionId: String, profileId: String, clinicId: String?): HostedResult<HostedSyncSnapshot> = guarded {
         val keyName = HostedBookingKeys.preferenceKey(sessionId, profileId)
@@ -568,6 +576,7 @@ class HostedPatientSyncViewModel(private val api: HostedPatientSyncApi) : ViewMo
     fun refresh() { execute { api.refresh() } }
     fun refresh(clinicId: String) { execute { api.refresh(clinicId) } }
     fun book(sessionId: String, profileId: String) { execute { api.book(sessionId, profileId) } }
+    fun createFamilyProfile(displayName:String,relationship:String,clinicId:String){execute{api.createFamilyProfile(displayName,relationship,clinicId)}}
     fun book(sessionId: String, profileId: String, clinicId: String) { execute { api.book(sessionId, profileId, clinicId) } }
     fun reschedule(appointmentId: String, targetSessionId: String) { execute { api.reschedule(appointmentId, targetSessionId) } }
     fun submitReview(appointmentId: String, rating: Int, comment: String) { execute { api.submitReview(appointmentId, rating, comment) } }
